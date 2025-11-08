@@ -66,6 +66,18 @@ class UserModelTest(TestCase):
         result = user.following_ratings("asd")
         self.assertIn("error", result)
 
+    def test_add_movie_watchlist(self):
+        user = User.objects.create(username="ali")
+        user.add_movie_watchlist(856)
+        movie = fetch_movie_data(856)
+        self.assertIn(movie, user.movie_watchlists)
+    
+    def test_add_show_watchlist(self):
+        user = User.objects.create(username="ali")
+        user.add_show_watchlist(66732)
+        show = fetch_show_data(66732)
+        self.assertIn(show, user.show_watchlists)
+
 class MessageModelTest(TestCase):
     def test_message_creation(self):
         user1 = User.objects.create(username="ali")

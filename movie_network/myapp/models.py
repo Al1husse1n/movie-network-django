@@ -5,6 +5,8 @@ from django.core.exceptions import ValidationError, PermissionDenied
 
 def default_top_5():
     return [None for i in range(0, 5)]
+def list_for_watchlist():
+    return []
 
 """fetch api"""
 def fetch_movie_data(movie_id):
@@ -48,6 +50,8 @@ class User(AbstractUser):
     followers = models.ManyToManyField('self', symmetrical=False, related_name='following_users', blank=True)
     bio = models.TextField(null=True, blank=True)
     joined_in = models.DateTimeField(auto_now_add=True)
+    show_watchlists = models.JSONField(default=list_for_watchlist)
+    movie_watchlists = models.JSONField(default=list_for_watchlist)
 
     def follow(self, user):
         user.followers.add(self)
@@ -137,6 +141,31 @@ class User(AbstractUser):
             
         except Exception as e:
             return {'error': f"Failed to fetch ratings: {str(e)}"}
+    
+    def add_movie_watchlist(self, movieid):
+        movie = fetch_movie_data(movieid)
+        if 'error' in movie:
+            return 'Error fetching movie data'
+        movie_id = movie.get('id')
+        for m in self.movie_watchlists:
+            if m.get('id') == movie_id:
+                return f"{movie.get('title')} is already in your watchlist"
+
+        self.movie_watchlists.append(movie)
+        self.save()
+        return f"{movie.get('title')} added to watchlist"
+    
+    def add_show_watchlist(self, show_id):
+        show = fetch_show_data(show_id)
+        if 'error' in show:
+            return 'Error fetching movie data'
+        show_id = show.get("id")
+        for s in self.show_watchlists:
+            if s.get('id') == show_id:
+                return f"{show.get('name')} is already in your watchlist"
+        self.show_watchlists.append(show)
+        self.save()
+        return f"{show.get('name')} added to watchlist"
 
 
 
@@ -246,6 +275,7 @@ class CommunityPost(models.Model):
     community = models.ForeignKey(Community, on_delete=models.CASCADE, related_name="posts")
     content = models.TextField()
     timestamp = models.DateTimeField(auto_now_add=True) 
+    spoiler = models.BooleanField(default=False)
 
     def __str__(self):
         return f"{self.poster.username}  {self.content}"
@@ -276,7 +306,8 @@ class CommunityPost(models.Model):
 
 class UserRating(models.Model):  #you can view your followings rating
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="ratings")
-    movie = models.JSONField()  # api
+    movie = models.JSONField(null=True, blank=True) 
+    show = models.JSONField(null=True, blank=True)
     rating = models.DecimalField(max_digits=2, decimal_places=1) #users rating
     timestamp = models.DateTimeField(auto_now=True)
 

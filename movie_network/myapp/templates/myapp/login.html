@@ -2,7 +2,7 @@
 <html>
 <head><title></title></head>
 <body>
-   {%block body%}
+   {% block body %}
 <div id="login-form"  align="center">
     <form method="post">
         {% csrf_token %}
@@ -10,9 +10,9 @@
         <button type="submit">Login</button>
     </form>
     <br>
-    <a href="{%url 'myapp:signup'%}">Sign Up</a>
+    <a href="{% url 'myapp:signup' %}">Sign Up</a>
 </div>
 
-{%endblock%} 
+{% endblock %} 
 </body>
 </html>

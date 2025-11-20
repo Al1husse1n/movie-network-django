@@ -1,0 +1,116 @@
+{%load static%}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>GreenBird — Microfeed</title>
+  <link rel="stylesheet" href="{%static 'myapp/home.css'%}" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <svg viewBox="0 0 24 24" class="logo" aria-hidden>
+        <circle cx="12" cy="12" r="10" />
+        <path d="M8 12c1.5-2 4-3 6-3-1 2-3 3-6 6v-3z" fill="#000" />
+      </svg>
+      <span>GreenBird</span>
+    </div>
+    <nav class="top-actions">
+      <input class="search" placeholder="Search GreenBird" />
+      <button id="composeBtn" class="btn small">Compose</button>
+    </nav>
+  </header>
+
+  <main class="container">
+    <aside class="left">
+      <ul class="menu">
+        <li class="active">Home</li>
+        <li>Explore</li>
+        <li>Notifications</li>
+        <li>Messages</li>
+      </ul>
+      <div class="profile-card">
+        <div class="avatar">AH</div>
+        <div>
+          <div class="name">Ali Hussein</div>
+          <div class="handle">@alih</div>
+        </div>
+      </div>
+    </aside>
+
+    <section class="feed">
+      <div class="composer card" id="composer">
+        <textarea id="tweetInput" maxlength="280" placeholder="What's happening?" rows="3"></textarea>
+        <div class="composer-row">
+          <div class="composer-actions">
+            <span id="charCount">280</span>
+          </div>
+          <div>
+            <button id="postBtn" class="btn">Post</button>
+          </div>
+        </div>
+      </div>
+      <div>
+        <form action="#" method="post">
+            <select name="communities" id="community-select">
+              {%for community in communities%}
+                <option value="{{community.id}}">{{community}}</option>
+              {%endfor%}
+            </select>
+        </form>
+      </div>
+      <div id="timeline">
+        <!-- Sample tweets inserted by JS -->
+      </div>
+
+    </section>
+
+    <aside class="right">
+      <div class="trends card">
+        <h3>Trends for you</h3>
+        <ul>
+          <li>#GreenAI</li>
+          <li>#OpenSource</li>
+          <li>#Design</li>
+        </ul>
+      </div>
+
+      <div class="suggestions card">
+        <h3>Who to follow</h3>
+        <div class="follow">
+          <div class="f-avatar">GB</div>
+          <div class="f-info">
+            <div>GreenBot</div>
+            <div class="handle small">@greenbot</div>
+          </div>
+          <button class="btn small outline">Follow</button>
+        </div>
+      </div>
+    </aside>
+  </main>
+
+  <template id="tweetTemplate">
+    <article class="tweet card">
+      <div class="tweet-left">
+        <div class="t-avatar">AH</div>
+      </div>
+      <div class="tweet-body">
+        <div class="tweet-head">
+          <span class="t-name">Ali Hussein</span>
+          <span class="t-handle">@alih</span>
+          <span class="t-time">· now</span>
+        </div>
+        <div class="t-text"></div>
+        <div class="t-actions">
+          <button class="icon like">❤ <span class="count">0</span></button>
+          <button class="icon retweet">🔁 <span class="count">0</span></button>
+          <button class="icon reply">💬 <span class="count">0</span></button>
+        </div>
+      </div>
+    </article>
+  </template>
+
+  <script src="{%static 'myapp/home.js'%}"></script>
+</body>
+</html>

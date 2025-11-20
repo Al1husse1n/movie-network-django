@@ -42,6 +42,7 @@ def fetch_show_data(show_id):
 
 
 class User(AbstractUser):
+    email = models.EmailField(unique=True, blank= False)
     follower_amount = models.IntegerField(default=0)
     rating = models.FloatField(default=0)
     top_5_movies = models.JSONField(default=default_top_5)
@@ -200,6 +201,9 @@ class Community(models.Model):
     member_amount = models.IntegerField(default=0)
     moderator_amount = models.IntegerField(default=0)
     visibility = models.CharField(choices=VISIBILITY_CHOICES, default="public", blank=True, max_length=100)
+
+    def __str__(self):
+        return self.name
 
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)

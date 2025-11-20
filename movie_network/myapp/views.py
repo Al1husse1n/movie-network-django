@@ -5,13 +5,13 @@ from .models import *
 from .Forms import *
 def login_view(request):
     if request.method == 'POST':
-        login_form = LoginForm(request,data=request.POST)
+        login_form = LoginForm(request=request,data=request.POST)
         if login_form.is_valid():
             user = login_form.get_user()
             login(request,user)
-            return redirect('home')
+            return redirect('myapp:home')
     else:
-        login_form = LoginForm(request)
+        login_form = LoginForm(request=request)
 
     return render(request, 'myapp/login.html', {"form":login_form})
 
@@ -21,7 +21,19 @@ def signUp_view(request):
         if signup_form.is_valid():
             user = signup_form.save()
             login(request, user)
-            return redirect('home')
+            return redirect('myapp:home')
     else:
         signup_form = SignUpForm()
     return render(request, 'myapp/signup.html', {"form":signup_form})
+
+@login_required
+def home_view(request):
+    current_user = request.user
+    communities = current_user.communities.all()
+    if request.method == "POST":
+        if "communities" in request.POST:
+            community_id = request.POST["communities"]
+            community = Community.objects.get(id=community_id)
+            posts = community.posts.all()
+            return render(request,'myapp/home.html',{"communities":communities, "posts":posts})
+    return render(request,'myapp/home.html',{"communities":communities})

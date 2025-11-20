@@ -1,32 +1,32 @@
 <!DOCTYPE html>
 <html>
-    <head><title></title></head>
-    <body>
-        {%block body%}
-        <div id="signup-form" align="center">
-            <form method="POST">
-                {%csrf_token%}
-                <div id="signup-username">
-                    {{ form.username.label_tag }}
-                    {{ form.username}}
-                </div>
-                <div id="signup-email">
-                    {{form.email.label_tag}}
-                    {{form.email}}
-                </div>
-                <div id="signup-password1">
-                    {{form.password1.label_tag}}
-                    {{form.password1}}
-                </div>
-                <div id="signup-password2">
-                    {{form.password2.label_tag}}
-                    {{form.password2}}
-                </div>
-                <button type="submit">Sign-Up</button>
-            </form>
-            <br>
-            <a href="{%url 'myapp:login'%}">Already Have an account?</a>
+  <head><title>Sign Up</title></head>
+  <body>
+    {% block body %}
+    <div id="signup-form" align="center">
+      <form method="POST">
+        {% csrf_token %}
+        <div id="signup-username">
+          {{ form.username.label_tag }}
+          {{ form.username }}
         </div>
-        {%endblock%}
-    </body>
+        <div id="signup-email">
+          {{ form.email.label_tag }}
+          {{ form.email }}
+        </div>
+        <div id="signup-password1">
+          {{ form.password1.label_tag }}
+          {{ form.password1 }}
+        </div>
+        <div id="signup-password2">
+          {{ form.password2.label_tag }}
+          {{ form.password2 }}
+        </div>
+        <button type="submit">Sign-Up</button>
+      </form>
+      <br>
+      <a href="{% url 'myapp:login' %}">Already have an account?</a>
+    </div>
+    {% endblock %}
+  </body>
 </html>

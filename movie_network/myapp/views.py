@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect
-from django.contrib.auth import login
+from django.contrib.auth import login,logout
 from django.contrib.auth.decorators import login_required
 from .models import *
 from .Forms import *
@@ -37,3 +37,7 @@ def home_view(request):
             posts = community.posts.all()
             return render(request,'myapp/home.html',{"communities":communities, "posts":posts})
     return render(request,'myapp/home.html',{"communities":communities})
+
+def logout_view(request):
+    logout(request)
+    return redirect('myapp:login')

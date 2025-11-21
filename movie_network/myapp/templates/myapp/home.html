@@ -19,6 +19,7 @@
     <nav class="top-actions">
       <input class="search" placeholder="Search GreenBird" />
       <button id="composeBtn" class="btn small">Compose</button>
+      <a href="{% url 'myapp:logout' %}" class="btn small" style="margin-left:8px">Logout</a> <!-- changed: added logout button -->
     </nav>
   </header>
 
@@ -53,17 +54,51 @@
       </div>
       <div>
         <form action="#" method="post">
-            <select name="communities" id="community-select">
-              {%for community in communities%}
-                <option value="{{community.id}}">{{community}}</option>
-              {%endfor%}
+            {% csrf_token %} <!-- changed: add CSRF token so POST from the select isn't rejected -->
+            <!-- changed: show a placeholder option if no communities -->
+            <select name="communities" id="community-select" onchange="this.form.submit()">
+               {% if communities %}
+                 {% for community in communities %}
+                   <option value="{{ community.id }}">{{ community }}</option>
+                 {% endfor %}
+               {% else %}
+                 <option disabled selected>No communities</option>
+               {% endif %}
             </select>
         </form>
       </div>
       <div id="timeline">
-        <!-- Sample tweets inserted by JS -->
+        <!-- changed: render posts passed from the view; show friendly message when empty -->
+        {% if posts %}
+          {% for post in posts %}
+            <article class="tweet card">
+              <div class="tweet-left">
+                <div class="t-avatar">{{ post.poster.username|slice:":2"|upper }}</div>
+              </div>
+              <div class="tweet-body">
+                <div class="tweet-head">
+                  <span class="t-name">{{ post.poster.get_full_name|default:post.poster.username }}</span>
+                  <span class="t-handle">@{{ post.poster.username }}</span>
+                  <span class="t-time">· {{ post.created_at|timesince }} ago</span>
+                </div>
+                <div class="t-text">{{ post.content|default:post }}</div>
+                <div class="t-actions">
+                  <button class="icon like">❤ <span class="count">0</span></button>
+                  <button class="icon retweet">🔁 <span class="count">0</span></button>
+                  <button class="icon reply">💬 <span class="count">0</span></button>
+                </div>
+              </div>
+            </article>
+          {% endfor %}
+        {% else %}
+          <!-- changed: display when there are no posts to show -->
+          <div class="card">
+            <p style="margin:0;color:var(--muted)">No posts in this community.</p>
+          </div>
+        {% endif %}
+        <!-- If no server posts, JS will insert initial tweets -->
       </div>
-
+      
     </section>
 
     <aside class="right">

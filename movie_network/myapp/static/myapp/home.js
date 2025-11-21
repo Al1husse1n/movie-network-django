@@ -1,4 +1,3 @@
-
 // Simple front-end logic for posting and interacting with tweets
 const timeline = document.getElementById('timeline');
 const template = document.getElementById('tweetTemplate');
@@ -8,10 +7,7 @@ const charCount = document.getElementById('charCount');
 const composeBtn = document.getElementById('composeBtn');
 
 // initial sample tweets
-const initialTweets = [
-  {text: 'Welcome to GreenBird — a minimal microfeed UI in green & black!', likes: 3, rts: 1, replies: 0},
-  {text: 'This UI uses separate HTML, CSS and JS files. Tweak it and make it yours ✨', likes: 1, rts: 0, replies: 0}
-];
+// changed: removed automatic insertion of initial sample tweets so nothing is injected on load
 
 function renderTweet(data){
   const el = template.content.cloneNode(true);
@@ -41,7 +37,8 @@ function renderTweet(data){
   timeline.prepend(el);
 }
 
-initialTweets.forEach(renderTweet);
+// changed: do not inject any initial tweets here
+// if server rendered posts exist they will show; otherwise timeline stays empty
 
 postBtn.addEventListener('click', () => {
   const text = input.value.trim();
@@ -77,7 +74,7 @@ window.addEventListener('beforeunload', () => {
 window.addEventListener('load', () => {
   const data = JSON.parse(localStorage.getItem('greenbird_tweets') || 'null');
   if(data && data.length){
-    // remove initial tweets
+    // remove any placeholder content then render persisted tweets
     timeline.innerHTML = '';
     data.forEach(d => renderTweet({text:d.text, likes:0,rts:0,replies:0}));
   }

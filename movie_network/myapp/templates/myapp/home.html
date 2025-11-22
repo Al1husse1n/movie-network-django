@@ -1,151 +1,105 @@
-{%load static%}
-<!doctype html>
+{% load static %}
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>GreenBird — Microfeed</title>
-  <link rel="stylesheet" href="{%static 'myapp/home.css'%}" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GreenBird Home</title>
+    <link rel="stylesheet" href="{% static 'myapp/home.css' %}">
 </head>
 <body>
-  <header class="topbar">
-    <div class="brand">
-      <svg viewBox="0 0 24 24" class="logo" aria-hidden>
-        <circle cx="12" cy="12" r="10" />
-        <path d="M8 12c1.5-2 4-3 6-3-1 2-3 3-6 6v-3z" fill="#000" />
-      </svg>
-      <span>GreenBird</span>
-    </div>
-    <nav class="top-actions">
-      <input class="search" placeholder="Search GreenBird" />
-      <button id="composeBtn" class="btn small">Compose</button>
-      <a href="{% url 'myapp:logout' %}" class="btn small" style="margin-left:8px">Logout</a> <!-- changed: added logout button -->
-    </nav>
-  </header>
+    <!-- Top bar -->
+    <header class="topbar">
+        <div class="brand">GreenBird</div>
+        <nav class="top-actions">
+            <form method="POST" action="{% url 'myapp:logout' %}">
+                {% csrf_token %}
+                <button type="submit" class="btn small">Logout</button>
+            </form>
+        </nav>
+    </header>
 
-  <main class="container">
-    <aside class="left">
-      <ul class="menu">
-        <li class="active">Home</li>
-        <li>Explore</li>
-        <li>Notifications</li>
-        <li>Messages</li>
-      </ul>
-      <div class="profile-card">
-        <div class="avatar">AH</div>
-        <div>
-          <div class="name">Ali Hussein</div>
-          <div class="handle">@alih</div>
-        </div>
-      </div>
-    </aside>
+    <main class="container">
+        <!-- Left menu -->
+        <aside class="left">
+            <ul class="menu">
+                <li class="active">Home</li>
+                <li>Explore</li>
+                <li>Notifications</li>
+                <li>Messages</li>
+            </ul>
+        </aside>
 
-    <section class="feed">
-      <div class="composer card" id="composer">
-        <textarea id="tweetInput" maxlength="280" placeholder="What's happening?" rows="3"></textarea>
-        <div class="composer-row">
-          <div class="composer-actions">
-            <span id="charCount">280</span>
+        <!-- Feed -->
+        <section class="feed">
+
+            <!-- Composer -->
+            <div class="composer card">
+                <form id="composeForm" method="POST">
+                    {% csrf_token %}
+                    <textarea id="composeInput" name="compose-post" maxlength="280" placeholder="What's happening?" rows="3"></textarea>
+                    <div class="composer-row">
+                        <div class="composer-actions">
+                            <span id="charCount">280</span>
+                        </div>
+                        <div>
+                            <button type="submit" name="submit" value="post" class="btn">Post</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <div class="community-dropdown card">
+            <form method="POST" id="communityForm">
+                {% csrf_token %}
+                <input type="hidden" name="submit" value="select-community">
+                <select name="community" id="communitySelect">
+                    <option value="" disabled selected>Select a community</option>
+                    {% for community in communities %}
+                        <option value="{{ community.id }}">{{ community.name }}</option>
+                    {% endfor %}
+                </select>
+                <button name="submit" value="select-community">Select</button>
+            </form>
           </div>
-          <div>
-            <button id="postBtn" class="btn">Post</button>
-          </div>
-        </div>
-      </div>
-      <div>
-        <form action="#" method="post">
-            {% csrf_token %} <!-- changed: add CSRF token so POST from the select isn't rejected -->
-            <!-- changed: show a placeholder option if no communities -->
-            <select name="communities" id="community-select" onchange="this.form.submit()">
-               {% if communities %}
-                 {% for community in communities %}
-                   <option value="{{ community.id }}">{{ community }}</option>
-                 {% endfor %}
-               {% else %}
-                 <option disabled selected>No communities</option>
-               {% endif %}
-            </select>
-        </form>
-      </div>
-      <div id="timeline">
-        <!-- changed: render posts passed from the view; show friendly message when empty -->
-        {% if posts %}
-          {% for post in posts %}
-            <article class="tweet card">
-              <div class="tweet-left">
-                <div class="t-avatar">{{ post.poster.username|slice:":2"|upper }}</div>
-              </div>
-              <div class="tweet-body">
-                <div class="tweet-head">
-                  <span class="t-name">{{ post.poster.get_full_name|default:post.poster.username }}</span>
-                  <span class="t-handle">@{{ post.poster.username }}</span>
-                  <span class="t-time">· {{ post.created_at|timesince }} ago</span>
-                </div>
-                <div class="t-text">{{ post.content|default:post }}</div>
-                <div class="t-actions">
-                  <button class="icon like">❤ <span class="count">0</span></button>
-                  <button class="icon retweet">🔁 <span class="count">0</span></button>
-                  <button class="icon reply">💬 <span class="count">0</span></button>
-                </div>
-              </div>
-            </article>
-          {% endfor %}
-        {% else %}
-          <!-- changed: display when there are no posts to show -->
-          <div class="card">
-            <p style="margin:0;color:var(--muted)">No posts in this community.</p>
-          </div>
-        {% endif %}
-        <!-- If no server posts, JS will insert initial tweets -->
-      </div>
-      
-    </section>
 
-    <aside class="right">
-      <div class="trends card">
-        <h3>Trends for you</h3>
-        <ul>
-          <li>#GreenAI</li>
-          <li>#OpenSource</li>
-          <li>#Design</li>
-        </ul>
-      </div>
+            <!-- Timeline --> 
+            <div id="timeline">
+                {% if posts %}
+                    {% for post in posts %}
+                        <article class="tweet card">
+                            <div class="tweet-left">
+                                <div class="t-avatar">{{ post.poster.username|slice:":2"|upper }}</div>
+                            </div>
+                            <div class="tweet-body">
+                                <div class="tweet-head">
+                                    <span class="t-name">{{ post.poster.username }}</span>
+                                    <span class="t-handle">@{{ post.poster.username }}</span>
+                                    <span class="t-time">· {{ post.created_at|timesince }} ago</span>
+                                </div>
+                                <div class="t-text">{{ post.content }}</div>
+                            </div>
+                        </article>
+                    {% endfor %}
+                {% else %}
+                    <p class="muted">No posts yet. Select a community or compose one above!</p>
+                {% endif %}
+            </div>
+        </section>
 
-      <div class="suggestions card">
-        <h3>Who to follow</h3>
-        <div class="follow">
-          <div class="f-avatar">GB</div>
-          <div class="f-info">
-            <div>GreenBot</div>
-            <div class="handle small">@greenbot</div>
-          </div>
-          <button class="btn small outline">Follow</button>
-        </div>
-      </div>
-    </aside>
-  </main>
+        <!-- Right sidebar -->
+        <aside class="right">
+            <div class="trends card">
+                <h3>Trends for you</h3>
+                <ul>
+                    <li>#GreenAI</li>
+                    <li>#OpenSource</li>
+                    <li>#Design</li>
+                </ul>
+            </div>
+        </aside>
+    </main>
 
-  <template id="tweetTemplate">
-    <article class="tweet card">
-      <div class="tweet-left">
-        <div class="t-avatar">AH</div>
-      </div>
-      <div class="tweet-body">
-        <div class="tweet-head">
-          <span class="t-name">Ali Hussein</span>
-          <span class="t-handle">@alih</span>
-          <span class="t-time">· now</span>
-        </div>
-        <div class="t-text"></div>
-        <div class="t-actions">
-          <button class="icon like">❤ <span class="count">0</span></button>
-          <button class="icon retweet">🔁 <span class="count">0</span></button>
-          <button class="icon reply">💬 <span class="count">0</span></button>
-        </div>
-      </div>
-    </article>
-  </template>
-
-  <script src="{%static 'myapp/home.js'%}"></script>
+    <script src="{% static 'myapp/home.js' %}"></script>
 </body>
 </html>

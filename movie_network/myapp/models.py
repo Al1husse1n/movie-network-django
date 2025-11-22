@@ -103,7 +103,7 @@ class User(AbstractUser):
         elif rank < 1 or rank > 5:
             return "Please enter your ranking correctly"
         else:
-            show = {
+            show = {                            
                 "rank":rank,
                 "tmdb_id":show_data.get("id"),
                 "name": show_data.get("name"),
@@ -160,7 +160,7 @@ class User(AbstractUser):
         show = fetch_show_data(show_id)
         if 'error' in show:
             return 'Error fetching movie data'
-        show_id = show.get("id")
+        show_id = show.get("id")     
         for s in self.show_watchlists:
             if s.get('id') == show_id:
                 return f"{show.get('name')} is already in your watchlist"
@@ -280,6 +280,8 @@ class CommunityPost(models.Model):
     content = models.TextField()
     timestamp = models.DateTimeField(auto_now_add=True) 
     spoiler = models.BooleanField(default=False)
+    class Meta:
+        ordering = ['-timestamp']
 
     def __str__(self):
         return f"{self.poster.username}  {self.content}"

@@ -31,9 +31,16 @@ def home_view(request):
     current_user = request.user
     communities = current_user.communities.all()
     if request.method == "POST":
-        if "communities" in request.POST:
-            community_id = request.POST["communities"]
-            community = Community.objects.get(id=community_id)
+         if request.POST.get("submit") == "post":
+             content = request.POST.get("compose-post")
+             post = CommunityPost.objects.create(
+                 poster = current_user,
+                 content = content,
+                 community = Community.objects.get(name="5 star")
+             )
+         elif request.POST.get("submit") == "select-community":
+            community_id = request.POST.get("community")
+            community = Community.objects.get(id=community_id)  
             posts = community.posts.all()
             return render(request,'myapp/home.html',{"communities":communities, "posts":posts})
     return render(request,'myapp/home.html',{"communities":communities})

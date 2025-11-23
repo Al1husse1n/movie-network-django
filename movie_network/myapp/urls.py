@@ -7,5 +7,7 @@ urlpatterns = [
     path("login/", views.login_view, name='login'),
     path("signup/", views.signUp_view, name="signup"),
     path('home/',views.home_view, name="home"),
-    path('logout/',views.logout_view,name="logout")
+    path('logout/',views.logout_view,name="logout"),
+    path('<int:communityId>/get',views.get_community,name='getCommunity'),
+    path('compose/',views.compose_post, name='compose')
 ]

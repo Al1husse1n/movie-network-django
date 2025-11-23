@@ -10,7 +10,7 @@
 <body>
     <!-- Top bar -->
     <header class="topbar">
-        <div class="brand">GreenBird</div>
+        <div class="brand">GreenBird</div>                                                                                         
         <nav class="top-actions">
             <form method="POST" action="{% url 'myapp:logout' %}">
                 {% csrf_token %}
@@ -43,47 +43,26 @@
                             <span id="charCount">280</span>
                         </div>
                         <div>
-                            <button type="submit" name="submit" value="post" class="btn">Post</button>
+                            <button type="submit" name="submit" value="post" class="btn" id="post-btn">Post</button>
                         </div>
                     </div>
                 </form>
             </div>
 
-            <div class="community-dropdown card">
+            <div class="community-dropdown card">                                                                                                           
             <form method="POST" id="communityForm">
                 {% csrf_token %}
-                <input type="hidden" name="submit" value="select-community">
                 <select name="community" id="communitySelect">
                     <option value="" disabled selected>Select a community</option>
                     {% for community in communities %}
                         <option value="{{ community.id }}">{{ community.name }}</option>
                     {% endfor %}
                 </select>
-                <button name="submit" value="select-community">Select</button>
+             
             </form>
           </div>
-
             <!-- Timeline --> 
             <div id="timeline">
-                {% if posts %}
-                    {% for post in posts %}
-                        <article class="tweet card">
-                            <div class="tweet-left">
-                                <div class="t-avatar">{{ post.poster.username|slice:":2"|upper }}</div>
-                            </div>
-                            <div class="tweet-body">
-                                <div class="tweet-head">
-                                    <span class="t-name">{{ post.poster.username }}</span>
-                                    <span class="t-handle">@{{ post.poster.username }}</span>
-                                    <span class="t-time">· {{ post.created_at|timesince }} ago</span>
-                                </div>
-                                <div class="t-text">{{ post.content }}</div>
-                            </div>
-                        </article>
-                    {% endfor %}
-                {% else %}
-                    <p class="muted">No posts yet. Select a community or compose one above!</p>
-                {% endif %}
             </div>
         </section>
 

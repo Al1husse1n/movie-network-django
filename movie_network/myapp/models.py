@@ -2,6 +2,8 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 import requests
 from django.core.exceptions import ValidationError, PermissionDenied
+from django.utils import timezone
+from datetime import timedelta
 
 def default_top_5():
     return [None for i in range(0, 5)]
@@ -167,6 +169,9 @@ class User(AbstractUser):
         self.show_watchlists.append(show)
         self.save()
         return f"{show.get('name')} added to watchlist"
+    
+    def __str__(self):
+        return self.username
 
 
 
@@ -299,7 +304,53 @@ class CommunityPost(models.Model):
         else:
             self.delete()
             return "Post Deleted successfully"
-       
+    
+
+    def post_time(self):
+        time_elapsed = timezone.now() - self.timestamp
+
+        total_seconds = time_elapsed.total_seconds()
+        total_minutes = total_seconds / 60
+        total_hours = total_seconds / 3600
+        total_days = total_seconds / 86400
+        total_weeks = total_days / 7
+        total_months = total_days / 30.44  
+        total_years = total_days / 365.25  
+        
+        if total_years >= 1:
+            years = int(total_years)
+            return f'{years} year{"s" if years > 1 else ""} ago'
+        elif total_months >= 1:
+            months = int(total_months)
+            return f'{months} month{"s" if months > 1 else ""} ago'
+        elif total_weeks >= 1:
+            weeks = int(total_weeks)
+            return f'{weeks} week{"s" if weeks > 1 else ""} ago'
+        elif total_days >= 1:
+            days = int(total_days)
+            return f'{days} day{"s" if days > 1 else ""} ago'
+        elif total_hours >= 1:
+            hours = int(total_hours)
+            return f'{hours} hour{"s" if hours > 1 else ""} ago'
+        elif total_minutes >= 1:
+            minutes = int(total_minutes)
+            return f'{minutes} minute{"s" if minutes > 1 else ""} ago'
+        else:
+            seconds = int(total_seconds)
+            return f'{seconds} second{"s" if seconds > 1 else ""} ago'
+    
+    def serialize(self):
+        return{
+            "id":self.id,
+            "poster_username":self.poster.username,
+            "poster_id": self.poster.id,   
+            "community_name": self.community.name,
+            "community_id": self.community.id, 
+            "content":self.content,
+            "post_time":self.post_time(),
+            "spoiler": self.spoiler,
+        }
+        
             
     def save(self, *args, **kwargs):
         # Only validate for NEW posts (not when updating existing ones)

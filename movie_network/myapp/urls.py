@@ -1,6 +1,6 @@
 from django.urls import path
 from . import views
-
+from django.views.generic import RedirectView
 app_name = 'myapp'
 
 urlpatterns = [
@@ -9,5 +9,6 @@ urlpatterns = [
     path('home/',views.home_view, name="home"),
     path('logout/',views.logout_view,name="logout"),
     path('<int:communityId>/get',views.get_community,name='getCommunity'),
-    path('compose/',views.compose_post, name='compose')
+    path('compose/',views.compose_post, name='compose'),
+     path('', RedirectView.as_view(url='/home/', permanent=True)),
 ]

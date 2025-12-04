@@ -43,12 +43,14 @@ dropdown.addEventListener('blur', () => {
 document.getElementById('composeForm').addEventListener('submit', function(e) {
     const content = composeInput.value.trim();
     const communityId = document.getElementById("communitySelect").value;
+    const selectElement = document.getElementById('communitySelect');
     if (content.length === 0) {
         e.preventDefault();
         composeInput.style.borderColor = '#ff4444';
         setTimeout(() => {
             composeInput.style.borderColor = 'rgba(255,255,255,0.03)';
         }, 2000);
+        return;
     }
     else{
         e.preventDefault(); 
@@ -66,67 +68,71 @@ document.getElementById('composeForm').addEventListener('submit', function(e) {
             if(result.error){
                 console.log(result.error)
             }
+            else{
+                 loadCommunityPosts(communityId);
+            }
             
         })
     }
 });
 
-    document.getElementById('communitySelect').addEventListener('change',function(event){
-        const communityId = this.value;
-        timeline.innerHTML = '<div class="loading">Loading posts...</div>';
-        fetch(`/${communityId}/get`)
-        .then(response => {
+function loadCommunityPosts(communityId) {
+    const timeline = document.getElementById('timeline');
+    timeline.innerHTML = '<div class="loading">Loading posts...</div>';
+    
+    fetch(`/${communityId}/get`)
+    .then(response => {
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
         return response.json();
     })
-        .then(posts =>{
-            timeline.innerHTML = ''; 
-            if(posts && Object.keys(posts).length > 0){
-                for(let postId in posts){
-                    const post = posts[postId];
-                    timeline.innerHTML += `
-                        <article class="tweet card">
-                                <div class="tweet-left">
-                                    <div class="t-avatar">${post.poster_username}</div>
-                                </div>
-                                <div class="tweet-body">
-                                    <div class="tweet-head">
-                                        <span class="t-name">${ post.poster_username }</span>
-                                        <span class="t-handle">@${ post.poster_username}</span>
-                                        <span class="t-time">· ${ post.post_time }</span>
-                                    </div>
-                                    <div class="t-text">${ post.content }</div>
-                                </div>
-                            </article>
-                    `
+    .then(posts => {
+        timeline.innerHTML = ''; 
+        if(posts && Object.keys(posts).length > 0){
+            for(let postId in posts){
+                const post = posts[postId];
+                timeline.innerHTML += `
+                    <article class="tweet card">
+                        <div class="tweet-left">
+                            <div class="t-avatar">${post.poster_username}</div>
+                        </div>
+                        <div class="tweet-body">
+                            <div class="tweet-head">
+                                <span class="t-name">${ post.poster_username }</span>
+                                <span class="t-handle">@${ post.poster_username}</span>
+                                <span class="t-time">· ${ post.post_time }</span>
+                            </div>
+                            <div class="t-text">${ post.content }</div>
+                        </div>
+                    </article>
+                `;
             }
-            }
-            else{
-                timeline.innerHTML = `
-                    <p class="muted">No posts yet. Select another community or compose one above!</p>
-                `
-            }
-        })
-        .catch(error=>{
-             if (error.message.includes('404')) {
+        }
+        else{
+            timeline.innerHTML = `
+                <p class="muted">No posts yet. Select another community or compose one above!</p>
+            `;
+        }
+    })
+    .catch(error => {
+        if (error.message.includes('404')) {
             timeline.innerHTML = `
                 <div class="alert alert-error">
                     <strong>Community Not Found</strong>
                     <p>The selected community could not be found.</p>
                 </div>
             `;
-            } 
-             else if (error.message.includes('500')) {
+        } 
+        else if (error.message.includes('500')) {
             timeline.innerHTML = `
                 <div class="alert alert-error">
                     <strong>Server Error</strong>
                     <p>Something went wrong on our end. Please try again later.</p>
                 </div>
             `;
-            }
-            else {
+        }
+        else {
             timeline.innerHTML = `
                 <div class="alert alert-error">
                     <strong>Error Loading Posts</strong>
@@ -134,6 +140,12 @@ document.getElementById('composeForm').addEventListener('submit', function(e) {
                 </div>
             `;
         }
-        });
     });
+}
+
+
+document.getElementById('communitySelect').addEventListener('change', function(event) {
+    const communityId = this.value;
+    loadCommunityPosts(communityId);
+});
 

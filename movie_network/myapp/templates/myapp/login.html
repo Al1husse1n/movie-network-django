@@ -1,18 +1,22 @@
+{% load static %}
 <!DOCTYPE html>
-<html>
-<head><title></title></head>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{%static 'myapp/login.css'%}">
+    <title>Login</title>
+</head>
 <body>
-   {% block body %}
-<div id="login-form"  align="center">
+    {%block body%}
+    <header class="sign-up">
+        <a href="{%url 'myapp:signup'%}">Sign up</a>
+    </header>
     <form method="post">
-        {% csrf_token %}
-        {{ form.as_p }} 
-        <button type="submit">Login</button>
+        {%csrf_token%}
+        {{form}}
+        <input type="submit" name="" id="">
     </form>
-    <br>
-    <a href="{% url 'myapp:signup' %}">Sign Up</a>
-</div>
-
-{% endblock %} 
+    {%endblock%}
 </body>
 </html>

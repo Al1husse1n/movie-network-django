@@ -3,11 +3,27 @@ from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.forms import AuthenticationForm
 
-class SignUpForm(UserCreationForm):
-    email = forms.EmailField()
+class SignUpForm(forms.ModelForm):
     class Meta: 
         model = User
-        fields = ['username', 'email','password1', 'password2']
+        fields = ['username', 'email','password']
+        widgets = {
+            'username': forms.TextInput(attrs={
+                'class': 'form-control',
+                'id': 'username-input',
+                'placeholder': '',
+
+            }),
+            'email': forms.EmailInput(attrs={
+                'class': 'form-control',
+                'placeholder': ''
+            }),
+            'password': forms.PasswordInput(attrs={
+                'class': 'form-control',
+                'placeholder': ''
+            }),
+            
+        }
     
     def clean_email(self):
         email = self.cleaned_data.get('email')
@@ -17,26 +33,25 @@ class SignUpForm(UserCreationForm):
     def save(self, commit=True):
         user = super().save(commit=False)
         user.email = self.cleaned_data['email']
-       
-        
+        raw_password = self.cleaned_data.get('password')
+        if raw_password:
+            user.set_password(raw_password)
         if commit:
             user.save()
         return user
     
 class LoginForm(AuthenticationForm):
     username = forms.CharField(
-        label='',
         widget=forms.TextInput(attrs={
             'class': 'form-control',
             'placeholder': 'Username'
-        })
+        }),
     )
     password = forms.CharField(
-        label='',
         widget=forms.PasswordInput(attrs={
             'class': 'form-control', 
             'placeholder': 'Password'
-        })
+        }),
     )
 
 class PostForm(forms.ModelForm):
@@ -145,4 +160,4 @@ class PickOfTheWeekForm(forms.Form):    #check if it is show or movie in view
             'placeholder':"Your Pick of the Week..."
         })
     )
-    
+

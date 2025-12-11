@@ -5,11 +5,12 @@
 }
 
 body{
-    background-color: #0b0f0b;
+    background-color: #0b0f0b; 
 } 
 header{
     margin-top: 30px;
-    position: relative;
+    position: relative; 
+    background-color: aqua;
 }
 header a{
     position: absolute;
@@ -20,8 +21,8 @@ header a{
     font-weight: 600px;
     border-radius: 60px;
     padding: 15px 20px 15px;   
-    right: -15px;
-    top: -270px;
+    right: 15px;
+    top:-130px;
 }
 
 #container{
@@ -61,7 +62,16 @@ input{
     color: white;
     text-align: center;
     margin-top: 150px;
-    font-size: 30px;
-    font-weight: bolder;
+    font-size: 2.5rem;
+    font-weight: 700;
+    font-family: 'Raleway', sans-serif;
 }
 
+@media(min-width:969px){
+    #container{
+        position: absolute;
+        right: 68vh;
+        width: 50vh;
+        bottom: 10vh;
+    }
+}

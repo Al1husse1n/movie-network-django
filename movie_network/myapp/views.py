@@ -51,7 +51,7 @@ def get_community(request,communityId):
             return JsonResponse(data)
     except Community.DoesNotExist:
         return JsonResponse({"error": "Community not found."}, status=404)
-    except Exception as e:
+    except Exception as e:      
         return JsonResponse({"error": str(e)}, status=500)
     
 @csrf_exempt
@@ -66,7 +66,8 @@ def compose_post(request):
         CommunityPost.objects.create(
             poster=current_user,
             content=data.get('content'),
-            community=community
+            community=community,
+            spoiler = bool(data.get('spoiler'))
         )
         return JsonResponse({"message":f"You posted on {community.name}"}, status=201)
     except Exception as e:

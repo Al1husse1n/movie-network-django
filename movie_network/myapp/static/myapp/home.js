@@ -41,11 +41,13 @@ dropdown.addEventListener('blur', () => {
 
 // Form submission enhancement
 document.getElementById('composeForm').addEventListener('submit', function(e) {
+    e.preventDefault(); 
     const content = composeInput.value.trim();
     const communityId = document.getElementById("communitySelect").value;
     const selectElement = document.getElementById('communitySelect');
+    const spoiler = document.getElementById('spoiler');
+    let spoilerChecked = spoiler.checked;
     if (content.length === 0) {
-        e.preventDefault();
         composeInput.style.borderColor = '#ff4444';
         setTimeout(() => {
             composeInput.style.borderColor = 'rgba(255,255,255,0.03)';
@@ -53,13 +55,18 @@ document.getElementById('composeForm').addEventListener('submit', function(e) {
         return;
     }
     else{
-        e.preventDefault(); 
+        console.log()
         fetch('/compose/',{
             method:'POST',
             credentials: 'same-origin',
+            headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": document.querySelector('[name=csrfmiddlewaretoken]').value
+            },
             body: JSON.stringify({
                 content:content,
-                communityId:communityId
+                communityId:communityId,
+                spoiler: spoilerChecked
             })
         })
         .then(response => response.json())

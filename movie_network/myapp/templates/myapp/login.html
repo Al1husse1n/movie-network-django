@@ -9,11 +9,14 @@
     <title>Login</title>
 </head>
 <body>
-    {% block body %}
-    <header class="log-in col-6 offset-6">
+    {% block body %}                                                        
+    <header class="log-in col-6 offset-6">                  
         <a href="{%url 'myapp:signup'%}">Sign up</a>
     </header>
     <div class="col-8 offset-2" id="container">
+        <div id="poster">
+            <img src="{% static 'myapp/images/Scarface.jpg' %}" alt="Poster">
+        </div>
         <form action="#" method="post" class="needs-validation row gy-2" novalidate> 
             {% csrf_token %}
             <div class="form-floating">

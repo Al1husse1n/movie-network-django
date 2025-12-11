@@ -6,10 +6,13 @@
 body{
     background-color: #0b0f0b;
 }
+#poster{
+    display: none;
+}
+
 header{
     margin-top: 30px;
     position: relative;
-    background-color: aqua;
 }
 header a{
     position: absolute;
@@ -56,6 +59,25 @@ input{
     padding-top: 10px;
 }
 
+@media(min-width:969px){
+  #container{
+    position: relative;
+  }
+  #poster{
+    display: block;
+    position: absolute;
+    top:-180px;
+    left: -80px;
+  }
+  form{
+    position: absolute;
+    right: -150px;
+    top: -100px;
+    width: 68vh;
+  }
+  img{
+    width: 350px;
+    height: 80vh;
+  }
 
-
-
+}

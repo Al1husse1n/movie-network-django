@@ -25,7 +25,7 @@ body{
     background:linear-gradient(90deg,var(--panel),rgba(0,0,0,0.3));
     border-bottom:1px solid rgba(0,0,0,0.5);
 }
-.brand{color:var(--accent); font-weight:700;}
+.brand{color:var(--accent); font-weight:700; font-size:24px ;}
 
 /* Button Styles */
 .btn{
@@ -41,6 +41,25 @@ body{
     display:inline-flex;
     align-items:center;
     justify-content:center;
+}
+
+.menu li a{
+    color: #689298;
+    text-decoration: none;
+    font-size: 15px;
+    padding: 10px;
+    border-radius: 10px;
+    display: block;
+}
+
+.menu .active a{
+    color:#00c853;
+}
+
+.menu a:hover {
+    background:linear-gradient(90deg,rgba(0,200,83,0.08),transparent); 
+    color:var(--accent);
+     font-weight:700;
 }
 
 .btn:hover{
@@ -67,6 +86,7 @@ body{
 .menu{list-style:none; padding:10px; margin:0;}
 .menu li{padding:12px; border-radius:10px; cursor:pointer;}
 .menu li.active{background:linear-gradient(90deg,rgba(0,200,83,0.08),transparent); color:var(--accent); font-weight:700;}
+
 .feed{min-height:60vh;}
 .composer textarea{
     width:100%;
@@ -174,8 +194,17 @@ body{
 
 /* Responsive */
 @media (max-width:980px){
-    .container{grid-template-columns:1fr;}
-    .left,.right{display:none;}
+    .container{grid-template-columns:1fr; margin-bottom: 100px;}
+    .left{display:block;}   /* changed: keep left/aside menu visible on mobile */
+    .right{display:none;}   /* changed: still hide right sidebar on mobile */
+    /* changed: keep toggle above overlay and other content */
+    #menuToggle{
+        display: inline-flex;
+        margin-right: 8px;
+        position: relative;  /* changed */
+        z-index: 1101;       /* changed: above overlay (overlay z-index 900) */
+    }
+
 }
 
 /* Character count styling */
@@ -186,5 +215,60 @@ body{
 
 .char-count.over {
     color: #ff4444;
+}
+
+/* changed: off-canvas aside + overlay for mobile */
+#asideOverlay{
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.45);
+    z-index: 900;
+    opacity: 0;
+    transition: opacity 220ms ease;
+}
+
+/* off-canvas panel default (hidden on small screens) */
+#mobile-aside{
+    transition: transform 280ms cubic-bezier(.2,.8,.2,1);
+    will-change: transform;
+}
+
+/* mobile-specific behavior */
+@media (max-width:980px){
+    /* keep layout single column */
+    .container{grid-template-columns:1fr; margin-bottom: 100px;}
+
+    /* hide the normal right sidebar */
+    .right{display:none;}
+
+    /* show the menu toggle button (it is hidden on wider screens by default styling) */
+    #menuToggle{ display: inline-flex; margin-right: 8px; }
+
+    /* start off-canvas: push left aside completely offscreen */
+    #mobile-aside{
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 100vh;
+        width: min(78vw, 320px);
+        background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+        padding: 18px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+        transform: translateX(-110%);
+        z-index: 1000;
+        overflow-y: auto;
+    }
+
+    /* when open */
+    #mobile-aside.open{ transform: translateX(0); }
+
+    /* overlay visible when aside is open */
+    #asideOverlay.visible{ display:block; opacity:1; }
+}
+
+/* ensure toggle is hidden on desktop (if necessary) */
+@media (min-width:981px){
+    #menuToggle{ display:none; }
 }
 

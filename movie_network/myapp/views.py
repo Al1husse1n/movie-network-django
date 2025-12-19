@@ -72,6 +72,9 @@ def compose_post(request):
         return JsonResponse({"message":f"You posted on {community.name}"}, status=201)
     except Exception as e:
         return JsonResponse({"error":str(e)}, status=500)
+    
+def profile_view(request):
+    return render(request, "myapp/profile.html")
 
 
 

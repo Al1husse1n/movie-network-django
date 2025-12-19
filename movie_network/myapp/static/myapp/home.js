@@ -1,92 +1,83 @@
-// Composer character counter
-const composeInput = document.getElementById('composeInput');
-const charCount = document.getElementById('charCount');
-const timeline = document.querySelector("#timeline")
+// changed: wrap initialization so all DOM elements exist and errors don't prevent the menuToggle handler
+document.addEventListener('DOMContentLoaded', () => {
+    // Composer character counter
+    const composeInput = document.getElementById('composeInput');
+    const charCount = document.getElementById('charCount');
+    const timeline = document.querySelector("#timeline");
 
-composeInput.addEventListener('input', () => {
-    const remaining = composeInput.maxLength - composeInput.value.length;
-    charCount.textContent = remaining;
-    
-    if(remaining < 20) {
-        charCount.style.color = '#ffa726'; // Orange warning
-    } else {
-        charCount.style.color = 'var(--muted)';
+    if (composeInput) {
+        composeInput.addEventListener('input', () => {
+            const remaining = composeInput.maxLength - composeInput.value.length;
+            charCount.textContent = remaining;
+            if (remaining < 20) charCount.style.color = '#ffa726';
+            else charCount.style.color = 'var(--muted)';
+            if (remaining < 0) charCount.style.color = '#ff4444';
+        });
     }
-    
-    if(remaining < 0) {
-        charCount.style.color = '#ff4444'; // Red when over limit
+
+    // guard other elements before attaching listeners
+    const dropdown = document.querySelector('.community-dropdown select');
+    if (dropdown) {
+        dropdown.addEventListener('mouseenter', () => dropdown.style.transform = 'translateY(-1px)');
+        dropdown.addEventListener('mouseleave', () => dropdown.style.transform = 'translateY(0)');
+        dropdown.addEventListener('focus', () => document.querySelector('.community-dropdown').style.zIndex = '10');
+        dropdown.addEventListener('blur', () => document.querySelector('.community-dropdown').style.zIndex = '1');
     }
-});
 
-
-// Enhanced dropdown interactions
-const dropdown = document.querySelector('.community-dropdown select');
-
-dropdown.addEventListener('mouseenter', () => {
-    dropdown.style.transform = 'translateY(-1px)';
-});
-
-dropdown.addEventListener('mouseleave', () => {
-    dropdown.style.transform = 'translateY(0)';
-});
-
-// Add focus effect for accessibility
-dropdown.addEventListener('focus', () => {
-    document.querySelector('.community-dropdown').style.zIndex = '10';
-});
-
-dropdown.addEventListener('blur', () => {
-    document.querySelector('.community-dropdown').style.zIndex = '1';
-});
-
-// Form submission enhancement
-document.getElementById('composeForm').addEventListener('submit', function(e) {
-    e.preventDefault(); 
-    const content = composeInput.value.trim();
-    const communityId = document.getElementById("communitySelect").value;
-    const selectElement = document.getElementById('communitySelect');
-    const spoiler = document.getElementById('spoiler');
-    let spoilerChecked = spoiler.checked;
-    if (content.length === 0) {
-        composeInput.style.borderColor = '#ff4444';
-        setTimeout(() => {
-            composeInput.style.borderColor = 'rgba(255,255,255,0.03)';
-        }, 2000);
-        return;
-    }
-    else{
-        console.log()
-        fetch('/compose/',{
-            method:'POST',
-            credentials: 'same-origin',
-            headers: {
-            "Content-Type": "application/json",
-            "X-CSRFToken": document.querySelector('[name=csrfmiddlewaretoken]').value
-            },
-            body: JSON.stringify({
-                content:content,
-                communityId:communityId,
-                spoiler: spoilerChecked
+    const composeForm = document.getElementById('composeForm');
+    if (composeForm) {
+        composeForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const content = (document.getElementById('composeInput')?.value || '').trim();
+            const communityId = document.getElementById("communitySelect")?.value;
+            const spoilerChecked = document.getElementById('spoiler')?.checked || false;
+            if (!content) {
+                const el = document.getElementById('composeInput');
+                if (el) { el.style.borderColor = '#ff4444'; setTimeout(()=> el.style.borderColor = 'rgba(255,255,255,0.03)',2000); }
+                return;
+            }
+            fetch('/compose/',{
+                method:'POST',
+                credentials: 'same-origin',
+                headers: {
+                  "Content-Type": "application/json",
+                  "X-CSRFToken": document.querySelector('[name=csrfmiddlewaretoken]')?.value || ''
+                },
+                body: JSON.stringify({ content, communityId, spoiler: spoilerChecked })
             })
-        })
-        .then(response => response.json())
-        .then(result =>{
-            composeInput.value="";
-            if(result.error){
-                console.log(result.error)
-            }
-            else{
-                 loadCommunityPosts(communityId);
-            }
-            
-        })
+            .then(response => response.json())
+            .then(result => {
+                const ci = document.getElementById('composeInput');
+                if (ci) ci.value = "";
+                if (!result.error && communityId) loadCommunityPosts(communityId);
+            })
+            .catch(err => console.error(err));
+        });
     }
-});
+
+    // community change handler (guarded)
+    const communitySelect = document.getElementById('communitySelect');
+    if (communitySelect) communitySelect.addEventListener('change', function() { loadCommunityPosts(this.value); });
+
+    // mobile aside toggle (guarded)
+    const menuToggle = document.getElementById('menuToggle');
+    const mobileAside = document.getElementById('mobile-aside');
+    const overlay = document.getElementById('asideOverlay');
+    if (menuToggle && mobileAside && overlay) {
+        const openAside = () => { mobileAside.classList.add('open'); overlay.classList.add('visible'); menuToggle.setAttribute('aria-expanded','true'); overlay.setAttribute('aria-hidden','false'); document.body.style.overflow='hidden'; };
+        const closeAside = () => { mobileAside.classList.remove('open'); overlay.classList.remove('visible'); menuToggle.setAttribute('aria-expanded','false'); overlay.setAttribute('aria-hidden','true'); document.body.style.overflow=''; };
+        menuToggle.addEventListener('click', () => mobileAside.classList.contains('open') ? closeAside() : openAside());
+        overlay.addEventListener('click', closeAside);
+        document.addEventListener('keydown', e => { if (e.key === 'Escape' && mobileAside.classList.contains('open')) closeAside(); });
+        mobileAside.addEventListener('click', e => { if (e.target.tagName === 'A') closeAside(); });
+    }
+
+}); // end DOMContentLoaded wrapper
 
 function loadCommunityPosts(communityId) {
     const timeline = document.getElementById('timeline');
     timeline.innerHTML = '<div class="loading">Loading posts...</div>';
-    
+
     fetch(`/${communityId}/get`)
     .then(response => {
         if (!response.ok) {
@@ -95,7 +86,7 @@ function loadCommunityPosts(communityId) {
         return response.json();
     })
     .then(posts => {
-        timeline.innerHTML = ''; 
+        timeline.innerHTML = '';
         if(posts && Object.keys(posts).length > 0){
             for(let postId in posts){
                 const post = posts[postId];
@@ -130,7 +121,7 @@ function loadCommunityPosts(communityId) {
                     <p>The selected community could not be found.</p>
                 </div>
             `;
-        } 
+        }
         else if (error.message.includes('500')) {
             timeline.innerHTML = `
                 <div class="alert alert-error">
@@ -149,10 +140,4 @@ function loadCommunityPosts(communityId) {
         }
     });
 }
-
-
-document.getElementById('communitySelect').addEventListener('change', function(event) {
-    const communityId = this.value;
-    loadCommunityPosts(communityId);
-});
 

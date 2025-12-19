@@ -1,0 +1,130 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GreenBird - Profile</title>
+    <link rel="stylesheet" href="{% static 'myapp/profile.css' %}">
+    <!-- You can add a favicon or other links here -->
+</head>
+<body>
+    <!-- Header / Navigation Bar - Matches the homepage style -->
+    <header class="header">
+        <div class="logo">GreenBird</div>
+        <button class="logout-btn">Logout</button>
+    </header>
+
+    <!-- Main Content Container -->
+    <div class="main-container">
+        <!-- Left Sidebar - Navigation (similar to homepage) -->
+        <aside class="sidebar-left">
+            <nav>
+                <ul>
+                    <li><a href="{% url 'myapp:home' %}">Home</a></li>
+                    <li><a href="#">Explore</a></li>
+                    <li><a href="#">Notifications</a></li>
+                    <li><a href="#">Messages</a></li>
+                    <li class="active"><a href="#">Profile</a></li> 
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Center: Profile Content -->
+        <main class="profile-content">
+            <!-- Profile Header -->
+            <section class="profile-header">
+                <!-- Cover Photo (customize background image here) -->
+                <div class="cover-photo"></div>
+                
+                <!-- Profile Info -->
+                <div class="profile-info">
+                    <img src="https://via.placeholder.com/150" alt="Profile Picture" class="profile-pic"> <!-- Replace with actual image URL -->
+                    <div class="profile-details">
+                        <h1>@username</h1> <!-- Customize username -->
+                        <p class="bio">Lover of movies, TV shows, AI, open source, and great design. #GreenAI enthusiast.</p> <!-- Customize bio -->
+                        
+                        <!-- Followers / Following -->
+                        <div class="follow-stats">
+                            <span><strong>1,280</strong> Following</span>
+                            <span><strong>856</strong> Followers</span> <!-- Customize numbers -->
+                        </div>
+                        
+                        <!-- Action Buttons -->
+                        <div class="profile-actions">
+                            <a href="#" class="btn watchlist-btn">Watchlist</a>
+                            <a href="#" class="btn edit-profile-btn">Edit Profile</a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Favorites Sections -->
+            <section class="favorites">
+                <!-- Top 5 Shows -->
+                <div class="favorites-block">
+                    <h2>Top 5 Shows</h2>
+                    <ol>
+                        <li>Breaking Bad</li>
+                        <li>Stranger Things</li>
+                        <li>The Mandalorian</li>
+                        <li>Succession</li>
+                        <li>Arcane</li>
+                        <!-- Customize list items -->
+                    </ol>
+                </div>
+                
+                <!-- Top 5 Movies -->
+                <div class="favorites-block">
+                    <h2>Top 5 Movies</h2>
+                    <ol>
+                        <li>Inception</li>
+                        <li>The Matrix</li>
+                        <li>Interstellar</li>
+                        <li>Dune</li>
+                        <li>Oppenheimer</li>
+                        <!-- Customize list items -->
+                    </ol>
+                </div>
+                
+                <!-- Weekly Pick -->
+                <div class="favorites-block weekly-pick">
+                    <h2>Weekly Pick</h2>
+                    <p><strong>The Bear (Season 3)</strong> - Intense, heartfelt, and chaotic kitchen drama. Highly recommend!</p>
+                    <!-- Customize weekly pick text and add image if desired -->
+                </div>
+            </section>
+
+            <!-- Posts Section -->
+            <section class="posts-section">
+                <h2>Posts</h2>
+                <!-- Example Posts - Add more or make dynamic -->
+                <div class="post">
+                    <p>Just finished watching Dune Part Two. Mind blown! #Movies</p>
+                    <span class="post-date">December 18, 2025</span>
+                </div>
+                <div class="post">
+                    <p>Excited about the latest open source AI tools. #GreenAI #OpenSource</p>
+                    <span class="post-date">December 15, 2025</span>
+                </div>
+                <!-- Add more posts here -->
+            </section>
+        </main>
+
+        <!-- Right Sidebar - Trends (similar to homepage) -->
+        <aside class="sidebar-right">
+            <div class="trends">
+                <h3>Trends for you</h3>
+                <ul>
+                    <li>#GreenAI</li>
+                    <li>#OpenSource</li>
+                    <li>#Design</li>
+                    <!-- Customize trends -->
+                </ul>
+            </div>
+        </aside>
+    </div>
+
+    <script src="{% static 'myapp/profile.js' %}"></script>
+</body>
+</html>

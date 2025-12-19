@@ -10,23 +10,26 @@
 <body>
     <!-- Top bar -->
     <header class="topbar">
-        <div class="brand">GreenBird</div>                                                                                         
-        <nav class="top-actions">
-            <form method="POST" action="{% url 'myapp:logout' %}">
-                {% csrf_token %}
-                <button type="submit" class="btn small">Logout</button>
-            </form>
-        </nav>
-    </header>
+    <!-- changed: menuToggle moved to left before brand -->
+    <button type="button" id="menuToggle" class="btn small" aria-label="Open menu" aria-expanded="false" aria-controls="mobile-aside" style="margin-right:12px">☰</button> <!-- changed: type=button so it won't submit forms -->
+    <div class="brand">GreenBird</div>
+    <nav class="top-actions">
+        <form method="POST" action="{% url 'myapp:logout' %}">
+            {% csrf_token %}
+            <button type="submit" class="btn small">Logout</button>
+        </form>
+    </nav>
+</header>
 
     <main class="container">
         <!-- Left menu -->
-        <aside class="left">
+        <aside id="mobile-aside" class="left"> <!-- unchanged markup; id used by mobile toggle -->
             <ul class="menu">
-                <li class="active">Home</li>
-                <li>Explore</li>
-                <li>Notifications</li>
-                <li>Messages</li>
+                <li class="active"><a href="#">Home</a></li>
+                <li><a href="#">Explore</a></li>
+                <li><a href="#">Notifications</a></li>
+                <li><a href="#">Messages</a></li>
+                <li><a href="{% url 'myapp:profile' %}" class="active">Profile</a></li>
             </ul>
         </aside>
 
@@ -56,7 +59,7 @@
             <div class="community-dropdown card">                                                                                                           
             <form method="POST" id="communityForm">
                 {% csrf_token %}
-                <select name="community" id="communitySelect">
+                <select name="community" id="communitySelect" aria-label="Select community" title="Select community"> <!-- changed: add accessible name -->
                     <option value="" disabled selected>Select a community</option>
                     {% for community in communities %}
                         <option value="{{ community.id }}">{{ community.name }}</option>
@@ -83,6 +86,8 @@
         </aside>
     </main>
 
+    <!-- changed: overlay used to dim content and close the aside on mobile -->
+    <div id="asideOverlay" aria-hidden="true"></div>
     <script src="{% static 'myapp/home.js' %}"></script>
 </body>
 </html>

@@ -11,7 +11,7 @@
     <!-- Top bar -->
     <header class="topbar">
     <!-- changed: menuToggle moved to left before brand -->
-    <button type="button" id="menuToggle" class="btn small" aria-label="Open menu" aria-expanded="false" aria-controls="mobile-aside" style="margin-right:12px">☰</button> <!-- changed: type=button so it won't submit forms -->
+    <button type="button" id="menuToggle" class="menu-toggle" aria-label="Open menu" aria-expanded="false" aria-controls="sidebar-left" style="margin-right:12px">☰</button> <!-- changed: type=button so it won't submit forms -->
     <div class="brand">GreenBird</div>
     <nav class="top-actions">
         <form method="POST" action="{% url 'myapp:logout' %}">
@@ -23,7 +23,7 @@
 
     <main class="container">
         <!-- Left menu -->
-        <aside id="mobile-aside" class="left"> <!-- unchanged markup; id used by mobile toggle -->
+        <aside id="sidebar-left" class="sidebar-left left"> <!-- unchanged markup; id used by mobile toggle -->
             <ul class="menu">
                 <li class="active"><a href="#">Home</a></li>
                 <li><a href="#">Explore</a></li>

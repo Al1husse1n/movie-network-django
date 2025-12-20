@@ -11,6 +11,7 @@
 <body>
     <!-- Header / Navigation Bar - Matches the homepage style -->
     <header class="header">
+        <button id="menuToggle" class="menu-toggle" aria-label="Open menu" aria-expanded="false" aria-controls="sidebar-left">☰</button>
         <div class="logo">GreenBird</div>
         <button class="logout-btn">Logout</button>
     </header>
@@ -18,7 +19,7 @@
     <!-- Main Content Container -->
     <div class="main-container">
         <!-- Left Sidebar - Navigation (similar to homepage) -->
-        <aside class="sidebar-left">
+        <aside id="sidebar-left" class="sidebar-left">
             <nav>
                 <ul>
                     <li><a href="{% url 'myapp:home' %}">Home</a></li>
@@ -39,20 +40,18 @@
                 
                 <!-- Profile Info -->
                 <div class="profile-info">
-                    <img src="https://via.placeholder.com/150" alt="Profile Picture" class="profile-pic"> <!-- Replace with actual image URL -->
+                    <img src=""  class="profile-pic">
                     <div class="profile-details">
-                        <h1>@username</h1> <!-- Customize username -->
-                        <p class="bio">Lover of movies, TV shows, AI, open source, and great design. #GreenAI enthusiast.</p> <!-- Customize bio -->
-                        
-                        <!-- Followers / Following -->
+                        <h1>@{{username}}</h1> 
+                        <p class="bio">{{bio}}</p> 
+
                         <div class="follow-stats">
-                            <span><strong>1,280</strong> Following</span>
-                            <span><strong>856</strong> Followers</span> <!-- Customize numbers -->
+                            <span><strong>{{following_amount}}</strong> Following</span>
+                            <span><strong>{{follower_amount}}</strong> Followers</span> 
                         </div>
                         
-                        <!-- Action Buttons -->
                         <div class="profile-actions">
-                            <a href="#" class="btn watchlist-btn">Watchlist</a>
+                            <a href="#" class="btn watchlist-btn" id="watchlist-btn">Watchlist</a>
                             <a href="#" class="btn edit-profile-btn">Edit Profile</a>
                         </div>
                     </div>
@@ -125,6 +124,7 @@
         </aside>
     </div>
 
+    <div id="asideOverlay" aria-hidden="true"></div>
     <script src="{% static 'myapp/profile.js' %}"></script>
 </body>
 </html>

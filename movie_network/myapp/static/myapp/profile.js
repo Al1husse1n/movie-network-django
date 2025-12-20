@@ -32,15 +32,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Safe handlers for existing buttons
-    const editBtn = document.querySelector('.edit-profile-btn');
-    if (editBtn) {
-        editBtn.addEventListener('click', function(e) {
-            e.preventDefault();
-            alert('Edit Profile functionality - add your logic here!');
-        });
-    }
-
+    
     const watchlistBtn = document.querySelector('.watchlist-btn');
     if (watchlistBtn) {
         watchlistBtn.addEventListener('click', function(e) {

@@ -246,6 +246,9 @@ body {
     #watchlist-btn{
         margin-bottom: 20px;
     }
+    .follow-stats{
+        padding: 25px;
+    }
 }
 
 /* Mobile toggle & off-canvas sidebar */
@@ -285,10 +288,8 @@ body {
         transform: translateX(0);
     }
 
-    /* keep inner nav/menu readable while outer panel is transparent */
     .sidebar-left nav {
-        background: transparent; /* fully transparent per request */
-        padding: 12px;
+        background: transparent; 
         border-radius: 10px;
     }
 

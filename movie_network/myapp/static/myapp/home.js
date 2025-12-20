@@ -59,9 +59,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const communitySelect = document.getElementById('communitySelect');
     if (communitySelect) communitySelect.addEventListener('change', function() { loadCommunityPosts(this.value); });
 
-    // mobile aside toggle (guarded)
+    // mobile aside toggle (guarded) — support both #mobile-aside and .sidebar-left
     const menuToggle = document.getElementById('menuToggle');
-    const mobileAside = document.getElementById('mobile-aside');
+    const mobileAside = document.getElementById('mobile-aside') || document.getElementById('sidebar-left') || document.querySelector('.sidebar-left');
     const overlay = document.getElementById('asideOverlay');
     if (menuToggle && mobileAside && overlay) {
         const openAside = () => { mobileAside.classList.add('open'); overlay.classList.add('visible'); menuToggle.setAttribute('aria-expanded','true'); overlay.setAttribute('aria-hidden','false'); document.body.style.overflow='hidden'; };

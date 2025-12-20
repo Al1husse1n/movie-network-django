@@ -243,4 +243,69 @@ body {
         padding: 0;
         margin-bottom: 20px;
     }
+    #watchlist-btn{
+        margin-bottom: 20px;
+    }
+}
+
+/* Mobile toggle & off-canvas sidebar */
+.menu-toggle {
+    display: none; /* shown only on small screens */
+    background: transparent;
+    border: none;
+    color: #fff;
+    font-size: 22px;
+    cursor: pointer;
+}
+
+/* Off-canvas behavior for small screens */
+@media (max-width: 1000px) {
+    .menu-toggle {
+        display: block;
+        margin-right: 12px;
+    }
+
+
+    .sidebar-left {
+        position: fixed;
+        top: 60px; /* account for header height */
+        left: 0;
+        bottom: 0;
+        width: 260px;
+        max-width: 80%;
+        padding: 20px 20px 40px 20px;
+        background-color: transparent; /* transparent container as requested */
+        transform: translateX(-110%);
+        transition: transform 250ms ease;
+        z-index: 250;
+        box-shadow: 2px 0 8px rgba(0,0,0,0.6);
+    }
+
+    .sidebar-left.open {
+        transform: translateX(0);
+    }
+
+    /* keep inner nav/menu readable while outer panel is transparent */
+    .sidebar-left nav {
+        background: transparent; /* fully transparent per request */
+        padding: 12px;
+        border-radius: 10px;
+    }
+
+    /* Page content should stay scrollable behind overlay */
+    .profile-content, .sidebar-right {
+        transform: none;
+    }
+
+    #asideOverlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.45);
+        z-index: 200;
+    }
+
+    #asideOverlay.visible {
+        display: block;
+    }
 }

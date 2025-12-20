@@ -205,6 +205,19 @@ body{
         z-index: 1101;       /* changed: above overlay (overlay z-index 900) */
     }
 
+    /* match profile toggle look */
+    .menu-toggle, #menuToggle {
+        display: inline-flex;
+        background: transparent;
+        border: none;
+        color: #fff;
+        font-size: 22px;
+        cursor: pointer;
+        align-items: center;
+        justify-content: center;
+        padding: 6px 10px;
+    }
+
 }
 
 /* Character count styling */
@@ -229,7 +242,7 @@ body{
 }
 
 /* off-canvas panel default (hidden on small screens) */
-#mobile-aside{
+#mobile-aside, .sidebar-left{
     transition: transform 280ms cubic-bezier(.2,.8,.2,1);
     will-change: transform;
 }
@@ -246,13 +259,15 @@ body{
     #menuToggle{ display: inline-flex; margin-right: 8px; }
 
     /* start off-canvas: push left aside completely offscreen */
-    #mobile-aside{
+
+    /* off-canvas panel (mobile) */
+    .sidebar-left{
         position: fixed;
         top: 0;
         left: 0;
         height: 100vh;
         width: min(78vw, 320px);
-        background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+        background: transparent; /* transparent panel per request */
         padding: 18px;
         box-shadow: 0 10px 30px rgba(0,0,0,0.6);
         transform: translateX(-110%);
@@ -260,8 +275,15 @@ body{
         overflow-y: auto;
     }
 
+    /* inner nav gets a slight tint so links stay readable */
+    .sidebar-left nav{
+        background: transparent; /* fully transparent per request */
+        padding: 12px;
+        border-radius: 10px;
+    }
+
     /* when open */
-    #mobile-aside.open{ transform: translateX(0); }
+    .sidebar-left.open{ transform: translateX(0); }
 
     /* overlay visible when aside is open */
     #asideOverlay.visible{ display:block; opacity:1; }

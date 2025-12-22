@@ -6,6 +6,8 @@ from .Forms import *
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import json
+from django.core.exceptions import ValidationError
+from django.db import IntegrityError
 
 def login_view(request):
     if request.method == 'POST':
@@ -72,10 +74,50 @@ def compose_post(request):
         return JsonResponse({"message":f"You posted on {community.name}"}, status=201)
     except Exception as e:
         return JsonResponse({"error":str(e)}, status=500)
-    
-def profile_view(request):
-    return render(request, "myapp/profile.html")
 
+@login_required    
+def profile_view(request):
+    current_user = request.user
+    bio = "no bio yet." if current_user.bio == None else current_user.bio
+    return render(request, "myapp/profile.html", {
+        "username":current_user.username,
+        "bio":bio,
+        "follower_amount":current_user.follower_amount,
+        "following_amount":current_user.following_users.count(),
+    })
+
+@login_required
+def edit_profile(request):
+    current_user = request.user
+    bio = "" if current_user.bio == None else current_user.bio
+    if request.method == "POST":
+        pass
+    return render(request, "myapp/editProfile.html",{
+        "bio": bio,
+        "username": current_user.username
+    })
+
+@csrf_exempt
+@login_required
+def change_profile(request):
+    current_user = request.user
+    if request.method != "PUT":
+        return JsonResponse({"error": "Invalid method"}, status=405)
+    try:
+        if request.method == "PUT":
+            data =  json.loads(request.body)
+            current_user.username = data.get("username")
+            current_user.bio = data.get("bio")
+            current_user.full_clean()
+            current_user.save()
+            return JsonResponse({"message": "Successful update"})
+    except ValidationError as e:
+        return JsonResponse({
+            "errors":e.message_dict
+        }, status=400)
+    
+
+            
 
 
 

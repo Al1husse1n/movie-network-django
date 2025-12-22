@@ -11,5 +11,7 @@ urlpatterns = [
     path('<int:communityId>/get',views.get_community,name='getCommunity'),
     path('compose/',views.compose_post, name='compose'),
     path('', RedirectView.as_view(url='/home/', permanent=True)),
-    path('profile/', views.profile_view, name='profile')
+    path('profile/', views.profile_view, name='profile'),
+    path('editprofile/', views.edit_profile, name="editProfile"),
+    path('changeprofile/', views.change_profile, name='changeProfile')
 ]

@@ -3,7 +3,7 @@ from django.contrib.auth.models import AbstractUser
 import requests
 from django.core.exceptions import ValidationError, PermissionDenied
 from django.utils import timezone
-from datetime import timedelta
+
 
 def default_top_5():
     return [None for i in range(0, 5)]
@@ -51,10 +51,10 @@ class User(AbstractUser):
     top_5_shows = models.JSONField(default=default_top_5)
     weekly_pick = models.JSONField(null=True, blank=True)
     followers = models.ManyToManyField('self', symmetrical=False, related_name='following_users', blank=True)
-    bio = models.TextField(null=True, blank=True)
+    bio = models.TextField(null=True, blank=True,max_length=100)
     joined_in = models.DateTimeField(auto_now_add=True)
-    show_watchlists = models.JSONField(default=list_for_watchlist)
-    movie_watchlists = models.JSONField(default=list_for_watchlist)
+    show_watchlists = models.JSONField(default=list_for_watchlist, blank=True)
+    movie_watchlists = models.JSONField(default=list_for_watchlist, blank=True)
 
     def follow(self, user):
         user.followers.add(self)

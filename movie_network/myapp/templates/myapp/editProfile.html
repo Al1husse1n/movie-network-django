@@ -13,8 +13,6 @@
     <nav class="navbar border-bottom border-secondary py-3">
         <div class="container">
             <span class="navbar-brand fw-bold fs-3 text-green">GreenBird</span>
-            
-            
         </div>
     </nav>
 
@@ -36,31 +34,112 @@
                     <div class="card-body p-4">
                         <h3 class="card-title fw-bold mb-4" id="edit-profile-label">Edit Profile</h3>
                         
-                        <form id="editProfileForm">
-                            <div class="text-center mb-4">
-                                <div class="profile-preview-wrapper mx-auto mb-3">
-                                    <img id="previewImg" src="" alt="" class="rounded-circle img-thumbnail bg-dark">
-                                </div>
-                                <label for="profilePic" class="btn btn-sm btn-outline-secondary rounded-pill">Change Photo</label>
-                                <input type="file" id="profilePic" accept="image/*" class="d-none">
+                        <div class="row">
+                            <div class="col-12 col-md-6 pe-md-3">
+                                <!-- Profile form: username, photo, bio (retains id for existing JS) -->
+                                <form id="editProfileForm" action="/profile/">
+                                    <div class="text-center mb-4">
+                                        <div class="profile-preview-wrapper mx-auto mb-3">
+                                            <img id="previewImg" src="" alt="" class="rounded-circle img-thumbnail bg-dark">
+                                        </div>
+                                        <label for="profilePic" class="btn btn-sm btn-outline-secondary rounded-pill">Change Photo</label>
+                                        <input type="file" id="profilePic" accept="image/*" class="d-none">
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label for="username" class="form-label text-secondary small">Username</label>
+                                        <input type="text" class="form-control bg-dark border-secondary text-white" name="edit-username" id="username" placeholder="@username" value="{{username}}">
+                                        <div id="usernameError" class="text-danger small mt-1 d-none">Username is required.</div>
+                                    </div>
+
+                                    <div class="mb-4">
+                                        <label for="bio" class="form-label text-secondary small">Bio</label>
+                                        <textarea class="form-control bg-dark border-secondary text-white" name="edit-bio" id="bio" rows="4" placeholder="Tell the world about yourself...">{{bio}}</textarea>
+                                        <div id="bioError" class="text-danger small mt-1 d-none">Bio max length reached.</div>
+                                    </div>
+
+                                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                        <button type="button" id="cancelBtn" class="btn btn-link text-secondary text-decoration-none px-4">Cancel</button>
+                                        <button type="submit" class="btn btn-green btn-save-profile rounded-pill px-5 fw-bold" id="save-profile">Save Profile</button>
+                                    </div>
+                                </form>
                             </div>
 
-                            <div class="mb-3">
-                                <label for="username" class="form-label text-secondary small">Username</label>
-                                <input type="text" class="form-control bg-dark border-secondary text-white" id="username" placeholder="@username">
-                                <div id="usernameError" class="text-danger small mt-1 d-none">Username is required.</div>
-                            </div>
+                            <div class="col-12 col-md-6 ps-md-3">
+                                <!-- Top lists form: separate submission for lists -->
+                                <form id="topListsForm">
+                                    <!-- Top lists: Top 5 Shows, Top 5 Movies, Weekly Pick -->
+                                    <div class="mb-4">
+                                        <h5 class="text-secondary small mb-2">Top 5 Shows</h5>
+                                        <div class="row g-2">
+                                            <div class="col-12">
+                                                <div class="input-group mb-2">
+                                                    <span class="input-group-text bg-transparent border-secondary text-secondary">1</span>
+                                                    <input type="text" class="form-control bg-dark border-secondary text-white" name="top_shows_1" id="top_shows_1" placeholder="1." value="{{top_shows.0}}">
+                                                </div>
+                                                <div class="input-group mb-2">
+                                                    <span class="input-group-text bg-transparent border-secondary text-secondary">2</span>
+                                                    <input type="text" class="form-control bg-dark border-secondary text-white" name="top_shows_2" id="top_shows_2" placeholder="2." value="{{top_shows.1}}">
+                                                </div>
+                                                <div class="input-group mb-2">
+                                                    <span class="input-group-text bg-transparent border-secondary text-secondary">3</span>
+                                                    <input type="text" class="form-control bg-dark border-secondary text-white" name="top_shows_3" id="top_shows_3" placeholder="3." value="{{top_shows.2}}">
+                                                </div>
+                                            </div>
+                                            <div class="col-12">
+                                                <div class="input-group mb-2">
+                                                    <span class="input-group-text bg-transparent border-secondary text-secondary">4</span>
+                                                    <input type="text" class="form-control bg-dark border-secondary text-white" name="top_shows_4" id="top_shows_4" placeholder="4." value="{{top_shows.3}}">
+                                                </div>
+                                                <div class="input-group mb-2">
+                                                    <span class="input-group-text bg-transparent border-secondary text-secondary">5</span>
+                                                    <input type="text" class="form-control bg-dark border-secondary text-white" name="top_shows_5" id="top_shows_5" placeholder="5." value="{{top_shows.4}}">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
 
-                            <div class="mb-4">
-                                <label for="bio" class="form-label text-secondary small">Bio</label>
-                                <textarea class="form-control bg-dark border-secondary text-white" id="bio" rows="4" placeholder="Tell the world about yourself..."></textarea>
-                            </div>
+                                    <div class="mb-4">
+                                        <h5 class="text-secondary small mb-2">Top 5 Movies</h5>
+                                        <div class="row g-2">
+                                            <div class="col-12">
+                                                <div class="input-group mb-2">
+                                                    <span class="input-group-text bg-transparent border-secondary text-secondary">1</span>
+                                                    <input type="text" class="form-control bg-dark border-secondary text-white" name="top_movies_1" id="top_movies_1" placeholder="1." value="{{top_movies.0}}">
+                                                </div>
+                                                <div class="input-group mb-2">
+                                                    <span class="input-group-text bg-transparent border-secondary text-secondary">2</span>
+                                                    <input type="text" class="form-control bg-dark border-secondary text-white" name="top_movies_2" id="top_movies_2" placeholder="2." value="{{top_movies.1}}">
+                                                </div>
+                                                <div class="input-group mb-2">
+                                                    <span class="input-group-text bg-transparent border-secondary text-secondary">3</span>
+                                                    <input type="text" class="form-control bg-dark border-secondary text-white" name="top_movies_3" id="top_movies_3" placeholder="3." value="{{top_movies.2}}">
+                                                </div>
+                                            </div>
+                                            <div class="col-12">
+                                                <div class="input-group mb-2">
+                                                    <span class="input-group-text bg-transparent border-secondary text-secondary">4</span>
+                                                    <input type="text" class="form-control bg-dark border-secondary text-white" name="top_movies_4" id="top_movies_4" placeholder="4." value="{{top_movies.3}}">
+                                                </div>
+                                                <div class="input-group mb-2">
+                                                    <span class="input-group-text bg-transparent border-secondary text-secondary">5</span>
+                                                    <input type="text" class="form-control bg-dark border-secondary text-white" name="top_movies_5" id="top_movies_5" placeholder="5." value="{{top_movies.4}}">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
 
-                            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                                <button type="button" id="cancelBtn" class="btn btn-link text-secondary text-decoration-none px-4">Cancel</button>
-                                <button type="submit" class="btn btn-green rounded-pill px-5 fw-bold">Save Changes</button>
+                                    <div class="mb-4">
+                                        <label for="weekly_pick" class="form-label text-secondary small">Weekly Pick</label>
+                                        <input type="text" class="form-control bg-dark border-secondary text-white" name="weekly_pick" id="weekly_pick" placeholder="Your Weekly Pick" value="{{weekly_pick}}">
+                                    </div>
+
+                                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                        <button type="submit" class="btn btn-green-outline rounded-pill px-5 fw-bold">Save Lists</button>
+                                    </div>
+                                </form>
                             </div>
-                        </form>
+                        </div>
                     </div>
                 </div>
             </div>

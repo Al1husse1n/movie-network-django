@@ -4,6 +4,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const editForm = document.getElementById('editProfileForm');
     const usernameInput = document.getElementById('username');
     const usernameError = document.getElementById('usernameError');
+    const bioInput = document.getElementById('bio');
+    const bioError = document.getElementById('bioError');
     const fileInput = document.getElementById('profilePic');
     const previewImg = document.getElementById('previewImg');
     const cancelBtn = document.getElementById('cancelBtn');
@@ -24,34 +26,70 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // 2. FORM VALIDATION & SUBMISSION
-    editForm.addEventListener('submit', (e) => {
-        e.preventDefault(); // Prevent page refresh
 
+    editForm.addEventListener('submit', (e) => {
         // Reset error state
+        usernameError.innerHTML = "Username is required.";
         usernameError.classList.add('d-none');
         usernameInput.classList.remove('border-danger');
-
-        // Validation: Check if username is empty
+        bioError.classList.add('d-none');
+        bioInput.classList.remove('border-danger');
+        e.preventDefault();
         if (usernameInput.value.trim() === "") {
             usernameError.classList.remove('d-none');
             usernameInput.classList.add('border-danger');
             usernameInput.focus();
             return;
         }
-
-        // Logic for "Saving" (In a real app, this would be an API call)
-        alert("Changes saved successfully!");
-        console.log("Updated Username:", usernameInput.value);
-        console.log("Updated Bio:", document.getElementById('bio').value);
+        else{
+            fetch('/changeprofile/',{
+                method:'PUT',
+                headers: {
+                    'Content-Type': 'application/json' 
+                },
+                body:JSON.stringify({
+                    username:usernameInput.value,
+                    bio:bioInput.value
+                })
+            })
+            .then(async response =>{
+                const data = await response.json();
+                if(response.status === 400){
+                    if(data.errors.username){
+                        usernameError.innerHTML = `${data.errors.username}`;
+                        usernameError.classList.remove('d-none');
+                        usernameInput.classList.add('border-danger');
+                    }
+                    else if(data.errors.bio){
+                        bioError.classList.remove('d-none');
+                        bioInput.classList.add('border-danger');
+                    }
+                    else{
+                        console.error(data.errors);
+                    }
+                }
+                else if(!response.ok){
+                    throw new Error("Request failed with status " + response.status + data);
+                }
+                else{
+                    editForm.submit();
+                }
+            })
+            .catch(error =>{
+                console.error("Network or server error", error);
+            })
+        }
+        
     });
 
-    // 3. CANCEL BUTTON LOGIC
+
+
+
+
+
+
     cancelBtn.addEventListener('click', () => {
-        if (confirm("Are you sure you want to discard changes?")) {
-            // Simply refresh or redirect back to profile
             window.location.reload(); 
-        }
     });
 
 });

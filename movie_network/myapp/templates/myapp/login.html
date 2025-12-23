@@ -15,7 +15,8 @@
     </header>
     <div class="col-8 offset-2" id="container">
         <div id="poster">
-            <img src="{% static 'myapp/images/Scarface.jpg' %}" alt="Poster">
+            <!-- <img src="{% static 'myapp/images/Scarface.jpg' %}" alt="Poster"> -->
+             <img src=""  id="poster-image">
         </div>
         <form action="#" method="post" class="needs-validation row gy-2" novalidate> 
             {% csrf_token %}
@@ -52,6 +53,46 @@
             }, false)
             })
         })()
+        document.addEventListener('DOMContentLoaded', function() {
+            const posterImage = document.getElementById('poster-image');
+            
+            function getRandomInt(min, max) {
+                return Math.floor(Math.random() * (max - min + 1)) + min;
+            }
+            
+            // Array of pre-generated static URLs
+            const imagePaths = [
+                "{% static 'myapp/images/1.jpg' %}",
+                "{% static 'myapp/images/2.jpg' %}",
+                "{% static 'myapp/images/3.jpg' %}",
+                "{% static 'myapp/images/4.jpg' %}",
+                "{% static 'myapp/images/5.jpg' %}",
+                "{% static 'myapp/images/6.jpg' %}",
+                "{% static 'myapp/images/7.jpg' %}",
+                "{% static 'myapp/images/8.jpg' %}",
+                "{% static 'myapp/images/9.jpg' %}",
+                "{% static 'myapp/images/10.jpg' %}",
+                "{% static 'myapp/images/11.jpg' %}",
+                "{% static 'myapp/images/12.jpg' %}",
+                "{% static 'myapp/images/13.jpg' %}",
+                "{% static 'myapp/images/14.jpg' %}",
+                "{% static 'myapp/images/15.jpg' %}",
+                "{% static 'myapp/images/16.jpg' %}",
+                "{% static 'myapp/images/17.jpg' %}",
+                "{% static 'myapp/images/18.jpg' %}"
+            ];
+            
+            // Select random image from array
+            const randomIndex = getRandomInt(0, 17); // 0-17 for array indices
+            posterImage.src = imagePaths[randomIndex];
+            
+            // Optional: Handle image loading errors
+            posterImage.onerror = function() {
+                console.error('Failed to load image:', this.src);
+                // Fallback to first image
+                this.src = imagePaths[0];
+            };
+        });
     </script>
     {% endblock %}
 </body>

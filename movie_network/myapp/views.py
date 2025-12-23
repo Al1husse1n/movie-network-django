@@ -115,6 +115,10 @@ def change_profile(request):
         return JsonResponse({
             "errors":e.message_dict
         }, status=400)
+
+@login_required    
+def description(request):
+    return render(request, 'myapp/description.html')
     
 
             

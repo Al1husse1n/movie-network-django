@@ -1,13 +1,17 @@
-/*
-  movie.js
-  ----------
-  This file can later be used to:
-  - Fetch movie data from TMDB API
-  - Dynamically update ranking position
-  - Handle user interactions (likes, save, etc.)
+document.addEventListener("DOMContentLoaded", () => {
+  const btn = document.getElementById("watchlistBtn");
+  if (!btn) return;
 
-  Currently kept minimal as requested.
-*/
+  btn.addEventListener("click", () => {
+    const added = btn.classList.toggle("added");
+    btn.setAttribute("aria-pressed", added ? "true" : "false");
 
-// Example placeholder for future expansion
-console.log("Movie detail page loaded successfully");
+    btn.querySelector(".watchlist-text").textContent =
+      added ? "Saved to Watchlist" : "Add to Watchlist";
+
+    btn.querySelector(".watchlist-icon").textContent =
+      added ? "✓" : "+";
+
+    // future: send fetch request to Django backend
+  });
+});

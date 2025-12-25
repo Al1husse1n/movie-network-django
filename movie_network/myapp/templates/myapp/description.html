@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Movie Details</title>
 
-  <!-- Bootstrap CSS (allowed) -->
+  <!-- Bootstrap CSS -->
   <link
     href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
     rel="stylesheet"
@@ -17,7 +17,6 @@
 </head>
 
 <body>
-  <!-- Main container -->
   <main class="container movie-page my-5">
     <section class="row g-4 align-items-start">
 
@@ -32,6 +31,7 @@
 
       <!-- Movie Info -->
       <article class="col-md-8">
+
         <!-- Title -->
         <header class="mb-3">
           <h1 class="movie-title">
@@ -39,17 +39,26 @@
           </h1>
         </header>
 
-        <!-- Metadata -->
+        <!-- Genres -->
         <div class="movie-meta mb-3">
           <span class="badge genre-badge">Sci-Fi</span>
           <span class="badge genre-badge">Thriller</span>
           <span class="badge genre-badge">Action</span>
         </div>
 
+        <!-- Stats -->
         <div class="movie-stats mb-3">
           <span><strong>⭐ Rating:</strong> 8.8 / 10</span>
           <span class="mx-3">|</span>
           <span><strong>⏱ Runtime:</strong> 148 min</span>
+        </div>
+
+        <!-- Watchlist Button -->
+        <div class="mb-3 watchlist-wrapper">
+          <button id="watchlistBtn" class="watchlist-btn" aria-pressed="false">
+            <span class="watchlist-icon">+</span>
+            <span class="watchlist-text">Add to Watchlist</span>
+          </button>
         </div>
 
         <!-- Overview -->
@@ -61,7 +70,7 @@
           </p>
         </section>
 
-        <!-- Top 5 Section -->
+        <!-- Top 5 Card -->
         <section class="top-five-card p-3">
           <h5 class="mb-1">⭐ Personal Ranking</h5>
           <p class="mb-0">
@@ -69,15 +78,13 @@
           </p>
           <span class="ranking">#3 of Top 5</span>
         </section>
-      </article>
 
+      </article>
     </section>
   </main>
 
   <!-- Bootstrap JS -->
-  <script
-    src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js">
-  </script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
   <!-- Custom JS -->
   <script src="{% static 'myapp/description.js' %}"></script>

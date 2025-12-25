@@ -117,8 +117,58 @@ def change_profile(request):
         }, status=400)
 
 @login_required    
-def description(request):
-    return render(request, 'myapp/description.html')
+def movie_description(request, movieId):
+    movie_data = fetch_movie_data(movie_id=movieId)
+    poster_path = movie_data.get("poster_path")
+    if poster_path:
+        movie_data["poster_url"] = f"https://image.tmdb.org/t/p/w500{poster_path}"
+    else:
+        movie_data["poster_url"] = None
+    poster_path = movie_data["poster_url"]
+    title = movie_data.get("title")
+    release_date = movie_data.get("release_date")[:4]
+    genres = [genre["name"] for genre in movie_data.get("genres")]
+    rating = round(movie_data.get("vote_average"),1)
+    runtime = movie_data.get("runtime")
+    overview = movie_data.get("overview")
+    return render(request, 'myapp/movieDescription.html', {""
+    "posterPath":poster_path, 
+    "title":title, 
+    'release_date':release_date,
+    "genres":genres,
+    "rating":rating,
+    "runtime":runtime,
+    "overview":overview
+    })
+
+@login_required
+def show_description(request, showId):
+    show_data = fetch_show_data(show_id=showId)
+    poster_path = show_data.get("poster_path")
+    if poster_path:
+        show_data["poster_url"] = f"https://image.tmdb.org/t/p/w500{poster_path}"
+    else:
+        show_data["poster_url"] = None
+    poster_path = show_data["poster_url"]
+    name = show_data.get("name")
+    release_date = show_data.get("first_air_date")[:4]
+    genres = [genre["name"] for genre in show_data.get("genres")]
+    rating = round(show_data.get("vote_average"),1)
+    episodes = show_data.get('number_of_episodes')
+    overview = show_data.get("overview")
+    return render(request, 'myapp/showDescription.html', {
+        'poster_path': poster_path,
+        "name":name,
+        "release_date":release_date,
+        "genres":genres,
+        "rating":rating,
+        'episodes':episodes,
+        'overview':overview
+    })
+
+@login_required
+def watchlist(request):
+    return render(request, 'myapp/watchlist.html')
     
 
             

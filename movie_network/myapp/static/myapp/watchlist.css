@@ -1,0 +1,76 @@
+/* Color variables inspired by GreenBird homepage */
+:root {
+  --bg-dark: #050a05;
+  --card-dark: #0c140c;
+  --green-main: #00c853;
+  --green-soft: #1aff7a;
+  --text-main: #e6f2e6;
+  --text-muted: #9fb39f;
+}
+
+body {
+  background-color: var(--bg-dark);
+  color: var(--text-main);
+}
+
+/* Page title styling */
+.page-title {
+  color: var(--green-soft);
+  font-weight: 600;
+}
+
+/* Watchlist card */
+.watchlist-card {
+  background-color: var(--card-dark);
+  border: 1px solid rgba(0, 200, 83, 0.25);
+  border-radius: 12px;
+  overflow: hidden;
+  transition: transform 0.2s ease;
+}
+
+.watchlist-card:hover {
+  transform: translateY(-4px);
+}
+
+/* Poster image */
+.watchlist-poster {
+  width: 100%;
+  height: 260px;
+  object-fit: cover;
+  background-color: #111;
+}
+
+/* Card body */
+.watchlist-card .card-body {
+  padding: 1rem;
+}
+
+/* Title */
+.watchlist-title {
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+/* Rating */
+.watchlist-rating {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+/* Remove button */
+.remove-btn {
+  border: 1px solid var(--green-main);
+  color: var(--green-main);
+  background: transparent;
+}
+
+.remove-btn:hover {
+  background-color: var(--green-main);
+  color: #000;
+}
+
+/* Empty state */
+.empty-state {
+  margin-top: 5rem;
+  color: var(--text-muted);
+}

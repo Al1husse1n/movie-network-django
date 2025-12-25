@@ -1,0 +1,91 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Movie Details</title>
+
+  <!-- Bootstrap CSS -->
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+  />
+
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="{% static 'myapp/showdescription.css' %}" />
+</head>
+
+<body>
+  <main class="container movie-page my-5">
+    <section class="row g-4 align-items-start">
+
+      <!-- Movie Poster -->
+      <aside class="col-md-4 text-center">
+        <img
+          src="{{poster_path}}"
+          alt="{{name}}"
+          class="movie-poster img-fluid rounded"
+        />
+      </aside>
+
+      <!-- Movie Info -->
+      <article class="col-md-8">
+
+        <!-- Title -->
+        <header class="mb-3">
+          <h1 class="movie-title">
+            {{name}} <span class="movie-year">{{release_date}}</span>
+          </h1>
+        </header>
+
+        <!-- Genres -->
+        <div class="movie-meta mb-3">
+          {% for genre in genres %}
+            <span class="badge genre-badge">{{genre}}</span>
+          {% endfor %}
+        </div>
+
+        <!-- Stats -->
+        <div class="movie-stats mb-3">
+          <span><strong>⭐ Rating:</strong> {{rating}} / 10</span>
+          <span class="mx-3">|</span>
+          <span><strong>⏱ Episodes:</strong> {{episodes}}</span>
+        </div>
+
+        <!-- Watchlist Button -->
+        <div class="mb-3 watchlist-wrapper">
+          <button id="watchlistBtn" class="watchlist-btn" aria-pressed="false">
+            <span class="watchlist-icon">+</span>
+            <span class="watchlist-text">Add to Watchlist</span>
+          </button>
+        </div>
+
+        <!-- Overview -->
+        <section class="movie-overview mb-4">
+          <h5>Overview</h5>
+          <p>
+            {{overview}}
+          </p>
+        </section>
+
+        <!-- Top 5 Card -->
+        <section class="top-five-card p-3">
+          <h5 class="mb-1">⭐ Personal Ranking</h5>
+          <p class="mb-0">
+            This movie is in <strong>Person X’s Top 5</strong>
+          </p>
+          <span class="ranking">#3 of Top 5</span>
+        </section>
+
+      </article>
+    </section>
+  </main>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+  <!-- Custom JS -->
+  <script src="{% static 'myapp/description.js' %}"></script>
+</body>
+</html>

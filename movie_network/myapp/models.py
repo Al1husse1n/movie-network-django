@@ -40,7 +40,38 @@ def fetch_show_data(show_id):
         return data
     except requests.exceptions.RequestException as e:
         return {'error': str(e)}
+    
+def fetch_movie_by_name(name):
+    try:
+        url = "https://api.themoviedb.org/3/search/movie"
+        api_key = "REDACTED_TMDB_KEY"
+        params = {
+                "api_key": api_key,
+                "query": name,
+                "language": "en-US"
+            }
+        response = requests.get(url,params=params)
+        response.raise_for_status()
+        data = response.json()
+        return data
+    except requests.exceptions.RequestException as e:
+        return {'error': str(e)}
 
+def fetch_show_by_name(name):
+    try:
+        url = "https://api.themoviedb.org/3/search/tv"
+        api_key = "REDACTED_TMDB_KEY"
+        params = {
+                "api_key": api_key,
+                "query": name,
+                "language": "en-US"
+            }
+        response = requests.get(url,params=params)
+        response.raise_for_status()
+        data = response.json()
+        return data
+    except requests.exceptions.RequestException as e:
+        return {'error': str(e)}
 
 
 class User(AbstractUser):

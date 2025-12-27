@@ -11,6 +11,19 @@ class FetchTest(TestCase):
         show_id = 66732  #Stranger Things
         show = fetch_show_data(show_id)
         self.assertEqual(show.get("name"), "Stranger Things")
+    
+    def test_fetch_movie_by_name(self):
+        movie_name = "Who Framed Roger Rabbit"
+        movie = fetch_movie_by_name(movie_name)
+        movie = movie.get('results')[0]
+        self.assertEqual(movie.get("title"), "Who Framed Roger Rabbit")
+
+    def test_fetch_show_by_name(self):
+        show_name = "Stranger Things"
+        show = fetch_show_by_name(show_name)
+        show = show.get('results')[0]
+        # self.assertIn("error", show)
+        self.assertEqual(show.get("name"), "Stranger Things")
 
 class UserModelTest(TestCase):
     def test_user_creation(self):

@@ -26,11 +26,13 @@ class FetchTest(TestCase):
         self.assertEqual(show.get("name"), "Stranger Things")
 
     def test_fetch_show_by_substring(self):
-        show_name = "Things"
+        show_name = "rings"
         show = fetch_show_by_name(show_name)
-        show = show.get('results')[0]
-        # self.assertIn("error", show)
-        self.assertIn( "Stranger Things",show.get("name"))
+        results = show.get('results')
+        show_names = []
+        for i in range(0,5):
+            show_names.append(results[i].get("name"))
+        self.assertIn( "As the Bell Rings",show_names)
 
 class UserModelTest(TestCase):
     def test_user_creation(self):

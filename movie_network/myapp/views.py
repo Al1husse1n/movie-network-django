@@ -120,7 +120,7 @@ def change_profile(request):
 def movie_description(request, movieId):
     movie_data = fetch_movie_data(movie_id=movieId)
     poster_path = movie_data.get("poster_path")
-    if poster_path:
+    if poster_path:                     
         movie_data["poster_url"] = f"https://image.tmdb.org/t/p/w500{poster_path}"
     else:
         movie_data["poster_url"] = None
@@ -169,6 +169,38 @@ def show_description(request, showId):
 @login_required
 def watchlist(request):
     return render(request, 'myapp/watchlist.html')
+
+def search_movie(request, title):
+    if request.method != "GET":
+        return JsonResponse({"error": "Only GET method allowed"}, status=405)
+    try:
+        movie = fetch_movie_by_name(title)
+        results = movie['results']
+        if not results:
+            return JsonResponse({"error": f"No movies found for '{title}'"}, status=404)
+        movies = {}
+        for movie in results[:5]:
+            movies[movie.get("id")] = movie.get("title")
+        return JsonResponse(movies)
+    except Exception as e:
+        return JsonResponse({"error":str(e)}, status=500)
+
+def search_show(request, name):
+    if request.method != "GET":
+        return JsonResponse({"error": "Only GET method allowed"}, status=405)
+    try:
+        show = fetch_show_by_name(name)
+        results = show['results'] 
+        if not results:
+            return JsonResponse({"error": f"No shows found for '{name}'"}, status=404)
+        shows = {}
+        for show in results[:5]:
+            shows[show.get("id")] = show.get("name")
+        return JsonResponse(shows)
+    except Exception as e:
+        return JsonResponse({"error":str(e)}, status=500)
+
+
     
 
             

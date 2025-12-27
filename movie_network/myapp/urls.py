@@ -16,5 +16,7 @@ urlpatterns = [
     path('changeprofile/', views.change_profile, name='changeProfile'),
     path('moviedescription/<int:movieId>', views.movie_description, name='moviedescription'),
     path('showdescription/<int:showId>', views.show_description, name='moviedescription'),
-    path('watchlist/', views.watchlist, name="watchlist")
+    path('watchlist/', views.watchlist, name="watchlist"),
+    path('searchMovie/<str:title>',views.search_movie, name='searchMovie'),
+    path('searchShow/<str:name>',views.search_show, name='searchShow')
 ]

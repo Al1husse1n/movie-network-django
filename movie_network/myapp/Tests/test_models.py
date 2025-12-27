@@ -25,6 +25,13 @@ class FetchTest(TestCase):
         # self.assertIn("error", show)
         self.assertEqual(show.get("name"), "Stranger Things")
 
+    def test_fetch_show_by_substring(self):
+        show_name = "Things"
+        show = fetch_show_by_name(show_name)
+        show = show.get('results')[0]
+        # self.assertIn("error", show)
+        self.assertIn( "Stranger Things",show.get("name"))
+
 class UserModelTest(TestCase):
     def test_user_creation(self):
         user = User.objects.create(

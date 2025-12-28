@@ -72,6 +72,8 @@ def fetch_show_by_name(name):
         return data
     except requests.exceptions.RequestException as e:
         return {'error': str(e)}
+    
+
 
 
 class User(AbstractUser):

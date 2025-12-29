@@ -187,6 +187,32 @@ body {
     background-color: #002211; /* Darker green tint */
 }
 
+/* --- Link styling for Top lists and Weekly Pick --- */
+.favorites-block a,
+.weekly-pick a {
+    color: #00c853; /* primary accent */
+    text-decoration: none;
+    font-weight: 600;
+    transition: color 120ms ease, transform 120ms ease;
+    display: inline-block;
+    padding: 4px 6px;
+    border-radius: 6px;
+}
+.favorites-block a:hover,
+.weekly-pick a:hover {
+    color: #7dff9a; /* lighter green on hover */
+    text-decoration: underline;
+    transform: translateX(3px);
+}
+.favorites-block a:focus,
+.weekly-pick a:focus {
+    outline: 3px solid rgba(0,200,83,0.12);
+    outline-offset: 2px;
+}
+
+/* Make list links visually separated on small screens */
+.favorites-block ol li a { display: inline-block; width: auto; }
+
 /* Posts Section */
 .posts-section h2 {
     margin-bottom: 20px;

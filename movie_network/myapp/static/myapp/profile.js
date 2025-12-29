@@ -32,12 +32,4 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    
-    const watchlistBtn = document.querySelector('.watchlist-btn');
-    if (watchlistBtn) {
-        watchlistBtn.addEventListener('click', function(e) {
-            e.preventDefault();
-            alert('Opening Watchlist - customize this link or modal!');
-        });
-    }
 });

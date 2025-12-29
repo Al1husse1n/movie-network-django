@@ -53,7 +53,7 @@
                         </div>
                         
                         <div class="profile-actions">
-                            <a href="#" class="btn watchlist-btn" id="watchlist-btn">Watchlist</a>
+                            <a href="{% url 'myapp:watchlist' %}" class="btn watchlist-btn" id="watchlist-btn">Watchlist</a>
                             <a href="{% url 'myapp:editProfile' %}" class="btn edit-profile-btn">Edit Profile</a>
                         </div>
                     </div>
@@ -66,12 +66,13 @@
                 <div class="favorites-block">
                     <h2>Top 5 Shows</h2>
                     <ol>
-                        <li>Breaking Bad</li>
-                        <li>Stranger Things</li>
-                        <li>The Mandalorian</li>
-                        <li>Succession</li>
-                        <li>Arcane</li>
-                        <!-- Customize list items -->
+                        {% for show in top_5_shows %}
+                        {% if not show.tmdb_id %}
+                        <li>{{show.name}}</li>
+                        {% else %}
+                        <li><a href="{% url 'myapp:showdescription' show.tmdb_id %}">{{show.name}}</a></li>
+                        {% endif %}
+                        {% endfor %}
                     </ol>
                 </div>
                 
@@ -79,20 +80,24 @@
                 <div class="favorites-block">
                     <h2>Top 5 Movies</h2>
                     <ol>
-                        <li>Inception</li>
-                        <li>The Matrix</li>
-                        <li>Interstellar</li>
-                        <li>Dune</li>
-                        <li>Oppenheimer</li>
-                        <!-- Customize list items -->
+                        {% for movie in top_5_movies %}
+                        {% if not movie.tmdb_id %}
+                        <li>{{movie.title}}</li>
+                        {% else %}
+                        <li><a href="{% url 'myapp:moviedescription' movie.tmdb_id %}">{{movie.title}}</a></li>
+                        {% endif %}
+                        {% endfor %}
                     </ol>
                 </div>
                 
                 <!-- Weekly Pick -->
                 <div class="favorites-block weekly-pick">
                     <h2>Weekly Pick</h2>
-                    <p><strong>The Bear (Season 3)</strong> - Intense, heartfelt, and chaotic kitchen drama. Highly recommend!</p>
-                    <!-- Customize weekly pick text and add image if desired -->
+                    {% if not weekly_pick.id %}
+                    <p><strong>{{weekly_pick.name}}</strong></p>
+                    {% else %}
+                    <p><a href="{% url 'myapp:moviedescription' weekly_pick.id %}"><strong>{{weekly_pick.name}}</strong></a></p>
+                    {% endif %}
                 </div>
             </section>
 

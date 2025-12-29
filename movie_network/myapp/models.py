@@ -82,7 +82,7 @@ class User(AbstractUser):
     rating = models.FloatField(default=0)
     top_5_movies = models.JSONField(default=default_top_5)
     top_5_shows = models.JSONField(default=default_top_5)
-    weekly_pick = models.JSONField(null=True, blank=True)
+    weekly_pick = models.JSONField(default=dict, blank=True)
     followers = models.ManyToManyField('self', symmetrical=False, related_name='following_users', blank=True)
     bio = models.TextField(null=True, blank=True,max_length=100)
     joined_in = models.DateTimeField(auto_now_add=True)
@@ -103,61 +103,33 @@ class User(AbstractUser):
         user.save()
         return f"you followed {user.username}"
 
-    def add_top_5_movies(self,rank,movie_id):
-        movie_data = fetch_movie_data(movie_id)
-        if 'error' in movie_data:
-            return movie_data
-        elif rank < 1 or rank > 5:
-            return "Please enter your ranking correctly"
+    def add_top_5_movies(self,rank,movie_id, movie_title=''):
+        if rank < 1 or rank > 5:
+            raise ValueError("Please enter your ranking correctly") 
         else:
             movie = {
                 "rank":rank,
-                "tmdb_id":movie_data.get("id"),
-                "title": movie_data.get("title"),
-                'poster_path': movie_data.get('poster_path'),
-                "backdrop_path":movie_data.get("backdrop_path"),
-                "budget": movie_data.get("budget"),
-                "homepage":movie_data.get("homepage"),
-                'popularity':movie_data.get("popularity"),
-                "runtime":movie_data.get("runtime"),
-                "status":movie_data.get("status"),
-                'release_date': movie_data.get('release_date'),
-                'rating': movie_data.get('vote_average'),
-                'overview': movie_data.get('overview'),
-                'genres': [genre['name'] for genre in movie_data.get('genres', [])]
+                "tmdb_id":movie_id,
+                "title": movie_title
 
             }
             self.top_5_movies[rank-1] = movie
             self.save()
-            return f"{movie_data.get('title')} is now {rank} on your top 5 list"
+            return f"{movie_title} is now {rank} on your top 5 list"
         
-    def add_top_5_shows(self, rank, show_id):
-        show_data = fetch_show_data(show_id)
-        if 'error' in show_data:
-            return show_data
-        elif rank < 1 or rank > 5:
-            return "Please enter your ranking correctly"
+    def add_top_5_shows(self, rank, show_id, show_name=""):
+        if rank < 1 or rank > 5:
+            raise ValueError("Please enter your ranking correctly") 
         else:
-            show = {                            
+            show = {
                 "rank":rank,
-                "tmdb_id":show_data.get("id"),
-                "name": show_data.get("name"),
-                'poster_path': show_data.get('poster_path'),
-                "backdrop_path":show_data.get("backdrop_path"),
-                'first_air_date': show_data.get('first_air_date'),
-                'rating': show_data.get('vote_average'),
-                'overview': show_data.get('overview'),
-                'genre_ids': [genre['name'] for genre in show_data.get('genre_ids', [])],
-                'status': show_data.get('status'),
-                'number_of_episodes':show_data.get('number_of_episodes'),
-                "number_of_seasons":show_data.get("number_of_seasons"),
-                "origin_country": show_data.get("origin_country"),
+                "tmdb_id":show_id,
+                "name": show_name
 
             }
             self.top_5_shows[rank-1] = show
             self.save()
-            return f"{show_data.get('title')} is now {rank} on your top 5 list"
-
+            return f"{show_name} is now {rank} on your top 5 list"
         
         
         

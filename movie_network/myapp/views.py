@@ -79,22 +79,28 @@ def compose_post(request):
 def profile_view(request):
     current_user = request.user
     bio = "no bio yet." if current_user.bio == None else current_user.bio
+    weekly_pick = current_user.weekly_pick.get("result")
     return render(request, "myapp/profile.html", {
         "username":current_user.username,
         "bio":bio,
         "follower_amount":current_user.follower_amount,
         "following_amount":current_user.following_users.count(),
+        "top_5_movies": current_user.top_5_movies,
+        "top_5_shows" : current_user.top_5_shows,
+        "weekly_pick": weekly_pick
     })
 
 @login_required
 def edit_profile(request):
     current_user = request.user
     bio = "" if current_user.bio == None else current_user.bio
-    if request.method == "POST":
-        pass
+    weekly_pick = current_user.weekly_pick.get("result")
     return render(request, "myapp/editProfile.html",{
         "bio": bio,
-        "username": current_user.username
+        "username": current_user.username,
+        "top_5_shows": current_user.top_5_shows,
+        "top_5_movies": current_user.top_5_movies,
+        "weekly_pick": weekly_pick
     })
 
 @csrf_exempt
@@ -177,7 +183,7 @@ def search_movie(request, title):
         movie = fetch_movie_by_name(title)
         results = movie['results']
         if not results:
-            return JsonResponse({"error": f"No movies found for '{title}'"}, status=404)
+            return JsonResponse({"error": ""}, status=404)
         movies = {}
         for movie in results[:5]:
             movies[movie.get("id")] = movie.get("title")
@@ -192,13 +198,57 @@ def search_show(request, name):
         show = fetch_show_by_name(name)
         results = show['results'] 
         if not results:
-            return JsonResponse({"error": f"No shows found for '{name}'"}, status=404)
+            return JsonResponse({"error": ""}, status=404)
         shows = {}
         for show in results[:5]:
             shows[show.get("id")] = show.get("name")
         return JsonResponse(shows)
     except Exception as e:
         return JsonResponse({"error":str(e)}, status=500)
+    
+@login_required
+@csrf_exempt
+def update_top_5(request):
+    if request.method != "PUT":
+        return JsonResponse({"error": "Only PUT method allowed"}, status=405)
+    try:
+        current_user = request.user
+        data = json.loads(request.body)
+        result = data.get("result")
+        if data.get("type") == "show":
+            response = current_user.add_top_5_shows(result.get('rank'), result.get("id"), result.get("name"))
+            return JsonResponse({"message":response}, status=200)
+        elif data.get("type") == 'movie':
+            response = current_user.add_top_5_movies(result.get('rank'), result.get("id"), result.get("name"))
+            return JsonResponse({"message":response}, status=200)
+        
+    except ValueError as e:
+        return JsonResponse({"error": str(e)}, status=400)
+    except ValidationError as e:
+        return JsonResponse({"error":e.message_dict}, status=400)
+    except Exception as e:
+        return JsonResponse({"error":str(e)}, status=500)
+
+@login_required
+@csrf_exempt
+def update_wp(request):  
+    if request.method != "PUT":
+        return JsonResponse({"error":"Only PUT method is allowed"}, status=400)
+    try:
+        current_user = request.user
+        data = json.loads(request.body)
+        result = data.get('result')
+        current_user.weekly_pick['result'] = result
+        current_user.save()
+        return JsonResponse({"message":"weely pick updated successfully"}, status=200)
+    except ValidationError as e:
+        return JsonResponse({"errors":e.message_dict}, status=200)
+    except Exception as e:
+        return JsonResponse({"error":str(e)})
+
+
+
+    
 
 
     

@@ -11,6 +11,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const cancelBtn = document.getElementById('cancelBtn');
     const weeklyResult = document.getElementById('weekly-result'); 
     const weeklyInput = document.getElementById('weekly_pick');
+    const topListForm = document.getElementById('topListsForm');
+    // keep track of autocomplete inputs/results for global hide behaviour
+    const _autocompleteInputs = [];
+    const _autocompleteResults = [];
+    let _globalAutocompleteListenersAdded = false;
     
 
     // hide result container when empty
@@ -116,18 +121,20 @@ document.addEventListener('DOMContentLoaded', () => {
     function getShowByName(name){          //return 5 movies that matches the substring
         // encode the name to avoid server errors for special characters
         return fetch(`/searchShow/${encodeURIComponent(name)}`)
-        .then(response => response.json())
         .then(response =>{
             if(response.status == 404){
                 return {};
             }
-            else if(response.status == 500){
-                alert(response.error);
-                return {};
-            }
-            else{
-                return response;
-            }
+            return response.json()
+            .then(parsedResponse =>{
+                if(response.status == 500){
+                   alert(parsedResponse.error);
+                    return {}; 
+                }
+                else{
+                    return parsedResponse;
+                }
+            })
         });
     };
 
@@ -135,6 +142,30 @@ document.addEventListener('DOMContentLoaded', () => {
     function attachFetchAutocomplete(inputEl, resultEl, fetcher) {
         if (!inputEl || !resultEl || typeof fetcher !== 'function') return;
         resultEl.style.display = 'none';
+        // register elements for global click/escape handling
+        _autocompleteInputs.push(inputEl);
+        _autocompleteResults.push(resultEl);
+        // add global listeners once
+        if (!_globalAutocompleteListenersAdded) {
+            _globalAutocompleteListenersAdded = true;
+            // hide when pressing Escape
+            document.addEventListener('keydown', (ev) => {
+                if (ev.key === 'Escape') {
+                    _autocompleteResults.forEach(r => { if (r) r.style.display = 'none'; });
+                }
+            });
+            // hide when clicking outside any registered input/result
+            document.addEventListener('click', (ev) => {
+                const t = ev.target;
+                for (const inp of _autocompleteInputs) {
+                    if (inp && inp.contains && inp.contains(t)) return;
+                }
+                for (const res of _autocompleteResults) {
+                    if (res && res.contains && res.contains(t)) return;
+                }
+                _autocompleteResults.forEach(r => { if (r) r.style.display = 'none'; });
+            });
+        }
         let t;
         inputEl.addEventListener('keyup', () => {
             clearTimeout(t);
@@ -156,6 +187,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         li.tabIndex = 0;
                         li.addEventListener('click', () => {
                             inputEl.value = text;
+                            inputEl.name = k;
                             resultEl.innerHTML = '';
                             resultEl.style.display = 'none';
                         });
@@ -176,6 +208,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }, 300);
         });
+        // also hide on Escape when this input has focus
+        inputEl.addEventListener('keydown', (ev) => {
+            if (ev.key === 'Escape') {
+                resultEl.style.display = 'none';
+            }
+        });
     }
 
     // attach fetch-backed autocomplete to top shows and movies inputs
@@ -189,10 +227,23 @@ document.addEventListener('DOMContentLoaded', () => {
         attachFetchAutocomplete(movieInput, movieResult, getMovieByName);
     }
 
+    // capture initial values (name and value) so we can skip unchanged updates
+    const _initialTop = { movies: {}, shows: {} };
+    for (let i = 1; i <= 5; i++) {
+        const m = document.getElementById(`top_movies_${i}`);
+        const s = document.getElementById(`top_shows_${i}`);
+        _initialTop.movies[i] = { name: m && m.name ? String(m.name) : '', value: m && m.value ? m.value.trim() : '' };
+        _initialTop.shows[i] = { name: s && s.name ? String(s.name) : '', value: s && s.value ? s.value.trim() : '' };
+    }
+    const _initialWeekly = weeklyInput ? { name: weeklyInput.name ? String(weeklyInput.name) : '', value: weeklyInput.value ? weeklyInput.value.trim() : '' } : { name: '', value: '' };
+
     // keep weekly behavior but ensure encoding and empty-check (existing fetch)
     let timeout; // for debounce
     if (weeklyInput && weeklyResult) {
         weeklyResult.style.display = 'none';
+        // register weekly pick autocomplete elements to global handlers
+        _autocompleteInputs.push(weeklyInput);
+        _autocompleteResults.push(weeklyResult);
         weeklyInput.addEventListener('keyup', () => {
             clearTimeout(timeout);
             timeout = setTimeout(async () => {
@@ -208,12 +259,15 @@ document.addEventListener('DOMContentLoaded', () => {
                     let count = 0;
                     for (let key in movies) {
                         const text = movies[key];
+                        const id = key;
                         console.log(text);
                         const li = document.createElement('li');
                         li.textContent = text;
+                        li.id = id;
                         li.tabIndex = 0;
                         li.addEventListener('click', () => {
                             weeklyInput.value = text;
+                            weeklyInput.name = id;
                             weeklyResult.innerHTML = '';
                             weeklyResult.style.display = 'none';
                         });
@@ -234,7 +288,107 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }, 300);
         });
-    }
+        weeklyInput.addEventListener('keydown', (ev) => {
+            if (ev.key === 'Escape') {
+                weeklyResult.style.display = 'none';
+            }
+        });
+    };
+
+    function update_top_5(type, id, name, rank){
+        return fetch('/updateTop5/',{
+            method: 'PUT',
+            headers: {
+            "Content-Type": "application/json",
+            },
+            body:JSON.stringify({
+                type: type,
+                result:{
+                    id:id,
+                    name:name,
+                    rank: rank
+                }
+            })
+        })
+        .then(response => {
+            const data = response;
+            return response.json()
+            .then(parsedResponse => {
+                if(!data.ok){
+                    alert(parsedResponse.error);
+                }
+                else{
+                    console.log(parsedResponse.message);
+                }
+            });
+        });
+    };
+
+    function update_wp(name, id){
+        return fetch('/updateWP/',{
+            method: 'PUT',
+            headers: {
+            "Content-Type": "application/json",
+            },
+            body:JSON.stringify({
+                result:{
+                    id:id,
+                    name:name
+                }
+            })
+        })
+        .then(response => {
+            const data = response;
+            return response.json()
+            .then(parsedResponse => {
+                if(!data.ok){
+                    console.log(parsedResponse.error);
+                }
+                else{
+                    console.log(parsedResponse.message);
+                }
+            });
+        });
+    };
+
+    topListForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        // update weekly pick only if changed
+        if (weeklyInput) {
+            const currentWeekly = { name: weeklyInput.name ? String(weeklyInput.name) : '', value: weeklyInput.value ? weeklyInput.value.trim() : '' };
+            if (currentWeekly.name !== _initialWeekly.name || currentWeekly.value !== _initialWeekly.value) {
+                const wp_id = currentWeekly.name === "" || currentWeekly.value === "" ? 0 : parseInt(currentWeekly.name);
+                const wp_title = weeklyInput.value;
+                await update_wp(wp_title, wp_id);
+            }
+        }
+
+        // update each top movie/show only if changed relative to initial capture
+        for (let i = 1; i < 6; i++) {
+            const movieInput = document.getElementById(`top_movies_${i}`);
+            if (movieInput) {
+                const currentMovie = { name: movieInput.name ? String(movieInput.name) : '', value: movieInput.value ? movieInput.value.trim() : '' };
+                const initialMovie = _initialTop.movies[i] || { name: '', value: '' };
+                if (currentMovie.name !== initialMovie.name || currentMovie.value !== initialMovie.value) {
+                    const movie_id = currentMovie.name === "" || currentMovie.value === "" ? 0 : parseInt(currentMovie.name);
+                    const movie_title = movieInput.value;
+                    await update_top_5('movie', movie_id, movie_title, i);
+                }
+            }
+
+            const showInput = document.getElementById(`top_shows_${i}`);
+            if (showInput) {
+                const currentShow = { name: showInput.name ? String(showInput.name) : '', value: showInput.value ? showInput.value.trim() : '' };
+                const initialShow = _initialTop.shows[i] || { name: '', value: '' };
+                if (currentShow.name !== initialShow.name || currentShow.value !== initialShow.value) {
+                    const show_id = currentShow.name === "" || currentShow.value === "" ? 0 : parseInt(currentShow.name);
+                    const show_name = showInput.value;
+                    await update_top_5('show', show_id, show_name, i);
+                }
+            }
+        }
+     
+    });
 
 
 });

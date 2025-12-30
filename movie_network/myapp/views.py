@@ -186,7 +186,7 @@ def search_movie(request, title):
             return JsonResponse({"error": ""}, status=404)
         movies = {}
         for movie in results[:5]:
-            movies[movie.get("id")] = movie.get("title")
+            movies[movie.get("id")] = f"{movie.get("title")} ({movie.get("release_date")[:4]})"
         return JsonResponse(movies)
     except Exception as e:
         return JsonResponse({"error":str(e)}, status=500)
@@ -201,7 +201,7 @@ def search_show(request, name):
             return JsonResponse({"error": ""}, status=404)
         shows = {}
         for show in results[:5]:
-            shows[show.get("id")] = show.get("name")
+            shows[show.get("id")] = f"{show.get("name")} ({show.get("first_air_date")[:4]})"
         return JsonResponse(shows)
     except Exception as e:
         return JsonResponse({"error":str(e)}, status=500)

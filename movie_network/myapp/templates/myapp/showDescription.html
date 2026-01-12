@@ -26,6 +26,7 @@
           src="{{poster_path}}"
           alt="{{name}}"
           class="movie-poster img-fluid rounded"
+          id = "{{showId}}"
         />
       </aside>
 
@@ -55,9 +56,9 @@
 
         <!-- Watchlist Button -->
         <div class="mb-3 watchlist-wrapper">
-          <button id="watchlistBtn" class="watchlist-btn" aria-pressed="false">
-            <span class="watchlist-icon">+</span>
-            <span class="watchlist-text">Add to Watchlist</span>
+          <button id="showWatchlist" class="watchlist-btn" aria-pressed="false">
+            <span class="watchlist-icon">{{button_icon}}</span>
+            <span class="watchlist-text">{{button_text}}</span>
           </button>
         </div>
 

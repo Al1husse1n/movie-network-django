@@ -130,6 +130,20 @@ def movie_description(request, movieId):
         movie_data["poster_url"] = f"https://image.tmdb.org/t/p/w500{poster_path}"
     else:
         movie_data["poster_url"] = None
+    # Determine if this movie is already in the user's watchlist by comparing IDs
+    try:
+        mid = int(movieId)
+    except Exception:
+        mid = movieId
+
+    in_watchlist = any(m.get('id') == mid for m in request.user.movie_watchlists or [])
+
+    if in_watchlist:
+        button_text = "Saved to Watchlist"
+        button_icon = "✓"
+    else:
+        button_text = "Add to Watchlist"
+        button_icon = "+"
     poster_path = movie_data["poster_url"]
     title = movie_data.get("title")
     release_date = movie_data.get("release_date")[:4]
@@ -137,7 +151,10 @@ def movie_description(request, movieId):
     rating = round(movie_data.get("vote_average"),1)
     runtime = movie_data.get("runtime")
     overview = movie_data.get("overview")
-    return render(request, 'myapp/movieDescription.html', {""
+    return render(request, 'myapp/movieDescription.html', {
+    "button_icon": button_icon,
+    "button_text": button_text,
+    "movieId" : movieId,
     "posterPath":poster_path, 
     "title":title, 
     'release_date':release_date,
@@ -155,6 +172,20 @@ def show_description(request, showId):
         show_data["poster_url"] = f"https://image.tmdb.org/t/p/w500{poster_path}"
     else:
         show_data["poster_url"] = None
+    # Determine if this show is already in the user's watchlist by comparing IDs
+    try:
+        sid = int(showId)
+    except Exception:
+        sid = showId
+
+    in_watchlist = any(s.get('id') == sid for s in request.user.show_watchlists or [])
+
+    if in_watchlist:
+        button_text = "Saved to Watchlist"
+        button_icon = "✓"
+    else:
+        button_text = "Add to Watchlist"
+        button_icon = "+"
     poster_path = show_data["poster_url"]
     name = show_data.get("name")
     release_date = show_data.get("first_air_date")[:4]
@@ -163,6 +194,9 @@ def show_description(request, showId):
     episodes = show_data.get('number_of_episodes')
     overview = show_data.get("overview")
     return render(request, 'myapp/showDescription.html', {
+        "button_icon": button_icon,
+        "button_text": button_text,
+        'showId' : showId,
         'poster_path': poster_path,
         "name":name,
         "release_date":release_date,
@@ -174,6 +208,9 @@ def show_description(request, showId):
 
 @login_required
 def watchlist(request):
+    current_user = request.user
+    show_watchlists = current_user.show_watchlists
+    movie_watchlists = current_user.movie_watchlists
     return render(request, 'myapp/watchlist.html')
 
 def search_movie(request, title):
@@ -245,6 +282,28 @@ def update_wp(request):
         return JsonResponse({"errors":e.message_dict}, status=200)
     except Exception as e:
         return JsonResponse({"error":str(e)})
+    
+@login_required
+@csrf_exempt
+def update_watchlist(request):
+    if request.method != "PUT":
+        return JsonResponse({"error":"only PUT method is allowed"}, status=400)
+    try:
+        current_user = request.user
+        data = json.loads(request.body)
+        if data.get('type') == 'movie':
+            result = current_user.add_movie_watchlist(data.get('movie_id'))
+            return JsonResponse({"message": result}, status=200)
+        elif data.get('type') == 'show':
+            result = current_user.add_show_watchlist(data.get('show_id'))
+            return JsonResponse({"message": result}, status=200)
+    except ValueError as e:
+        return JsonResponse({"error": str(e)}, status=400)
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
+    
+
+
 
 
 

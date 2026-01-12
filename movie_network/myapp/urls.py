@@ -20,5 +20,6 @@ urlpatterns = [
     path('searchMovie/<str:title>',views.search_movie, name='searchMovie'),
     path('searchShow/<str:name>',views.search_show, name='searchShow'),
     path('updateTop5/',views.update_top_5, name='updateTop5'),
-    path('updateWP/', views.update_wp, name='updatewp')
+    path('updateWP/', views.update_wp, name='updatewp'),
+    path('updateWatchlist/', views.update_watchlist, name='updateWatchlist')
 ]

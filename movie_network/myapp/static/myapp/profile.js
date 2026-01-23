@@ -32,4 +32,39 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
+    // Posts "Load more" behavior: show 5 posts initially, reveal 5 more per click
+    const postsContainer = document.getElementById('postsContainer');
+    const loadMoreBtn = document.getElementById('loadMorePosts');
+    const showLessBtn = document.getElementById('showLessPosts');
+    if (postsContainer && loadMoreBtn && showLessBtn) {
+        const posts = Array.from(postsContainer.querySelectorAll('.post'));
+        const pageSize = 5;
+        let shown = Math.min(pageSize, posts.length);
+
+        function updateVisibility() {
+            posts.forEach((p, i) => p.classList.toggle('hidden', i >= shown));
+            // load more visible when there are hidden posts
+            loadMoreBtn.style.display = (shown < posts.length) ? 'inline-block' : 'none';
+            // show less visible only when we've expanded beyond the initial page
+            showLessBtn.style.display = (shown > pageSize) ? 'inline-block' : 'none';
+        }
+
+        // initialize
+        updateVisibility();
+
+        loadMoreBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            shown = Math.min(posts.length, shown + pageSize);
+            updateVisibility();
+        });
+
+        showLessBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            // decrease shown by pageSize but keep at least one page
+            shown = Math.max(pageSize, shown - pageSize);
+            updateVisibility();
+            // scroll the container into view so user sees the top of the posts
+            postsContainer.scrollIntoView({ behavior: 'smooth' });
+        });
+    }
 });

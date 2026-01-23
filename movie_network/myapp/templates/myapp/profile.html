@@ -6,10 +6,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GreenBird - Profile</title>
     <link rel="stylesheet" href="{% static 'myapp/profile.css' %}">
-    <!-- You can add a favicon or other links here -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" />
 </head>
 <body>
-    <!-- Header / Navigation Bar - Matches the homepage style -->
     <header class="header">
         <button id="menuToggle" class="menu-toggle" aria-label="Open menu" aria-expanded="false" aria-controls="sidebar-left">☰</button>
         <div class="logo">GreenBird</div>
@@ -27,7 +26,6 @@
                     <li><a href="{% url 'myapp:home' %}">Home</a></li>
                     <li><a href="#">Explore</a></li>
                     <li><a href="#">Notifications</a></li>
-                    <li><a href="#">Messages</a></li>
                     <li class="active"><a href="#">Profile</a></li> 
                 </ul>
             </nav>
@@ -104,16 +102,27 @@
             <!-- Posts Section -->
             <section class="posts-section">
                 <h2>Posts</h2>
-                <!-- Example Posts - Add more or make dynamic -->
-                <div class="post">
-                    <p>Just finished watching Dune Part Two. Mind blown! #Movies</p>
-                    <span class="post-date">December 18, 2025</span>
+                <div id="postsContainer">
+                {% for post in posts %}
+                    <div class="post" data-index="{{ forloop.counter0 }}">
+                        <p>{{post.content}}</p>
+                        <span class="post-date">{{post.timestamp}}</span>
+                    </div>
+                {% endfor %}
                 </div>
-                <div class="post">
-                    <p>Excited about the latest open source AI tools. #GreenAI #OpenSource</p>
-                    <span class="post-date">December 15, 2025</span>
+
+                <div class="posts-controls">
+                    <button id="loadMorePosts" class="load-more-btn">
+                        <span class="material-symbols-outlined">
+                            keyboard_arrow_down
+                        </span>
+                    </button>
+                    <button id="showLessPosts" class="show-less-btn">
+                        <span class="material-symbols-outlined">
+                            keyboard_arrow_up
+                        </span>
+                    </button>
                 </div>
-                <!-- Add more posts here -->
             </section>
         </main>
 

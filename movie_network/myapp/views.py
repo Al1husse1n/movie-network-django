@@ -87,7 +87,8 @@ def profile_view(request):
         "following_amount":current_user.following_users.count(),
         "top_5_movies": current_user.top_5_movies,
         "top_5_shows" : current_user.top_5_shows,
-        "weekly_pick": weekly_pick
+        "weekly_pick": weekly_pick,
+        'posts': current_user.community_posts.all()
     })
 
 @login_required

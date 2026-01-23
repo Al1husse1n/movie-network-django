@@ -72,6 +72,28 @@ document.addEventListener('DOMContentLoaded', () => {
         mobileAside.addEventListener('click', e => { if (e.target.tagName === 'A') closeAside(); });
     }
 
+    // Search toggles: movie and community
+    const movieToggle = document.getElementById('movieSearchToggle');
+    const movieForm = document.getElementById('movieSearchForm');
+    const movieInput = movieForm && movieForm.querySelector('.search-input');
+
+    const closeSearches = () => { if (movieForm) movieForm.hidden = true; };
+
+    if (movieToggle && movieForm && movieInput) {
+        movieToggle.addEventListener('click', (e) => {
+            const wasOpen = !movieForm.hidden;
+            closeSearches();
+            movieForm.hidden = wasOpen;
+            if (!wasOpen) movieInput.focus();
+        });
+        movieInput.addEventListener('keydown', e => {
+            if (e.key === 'Escape') { movieForm.hidden = true; movieToggle.focus(); }
+        });
+    }
+
+    // close movie search when clicking outside
+    document.addEventListener('click', (e) => { if (!e.target.closest('.search-controls')) closeSearches(); });
+
 }); // end DOMContentLoaded wrapper
 
 function loadCommunityPosts(communityId) {
@@ -98,7 +120,7 @@ function loadCommunityPosts(communityId) {
                         <div class="tweet-body">
                             <div class="tweet-head">
                                 <span class="t-name">${ post.poster_username }</span>
-                                <span class="t-handle">@${ post.poster_username}</span>
+                                <span class="t-handle">${post.spoiler? "spoiler" : ""}</span>
                                 <span class="t-time">· ${ post.post_time }</span>
                             </div>
                             <div class="t-text ${post.spoiler? "post-content" : ""}">${ post.content }</div>

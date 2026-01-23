@@ -21,5 +21,7 @@ urlpatterns = [
     path('searchShow/<str:name>',views.search_show, name='searchShow'),
     path('updateTop5/',views.update_top_5, name='updateTop5'),
     path('updateWP/', views.update_wp, name='updatewp'),
-    path('updateWatchlist/', views.update_watchlist, name='updateWatchlist')
+    path('updateWatchlist/', views.update_watchlist, name='updateWatchlist'),
+    path('communities/' ,views.communities, name='communities'),
+    path('getcommunity/<str:community>', views.get_community_description, name='getcommunity')
 ]

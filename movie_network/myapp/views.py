@@ -42,7 +42,7 @@ def home_view(request):
     communities = current_user.communities.all()
     return render(request,'myapp/home.html',{"communities":communities})
 
-@csrf_exempt
+
 @login_required
 def get_community(request,communityId):
     try:
@@ -213,7 +213,7 @@ def watchlist(request):
     show_watchlists = current_user.show_watchlists
     movie_watchlists = current_user.movie_watchlists
     return render(request, 'myapp/watchlist.html')
-
+@login_required
 def search_movie(request, title):
     if request.method != "GET":
         return JsonResponse({"error": "Only GET method allowed"}, status=405)
@@ -228,7 +228,7 @@ def search_movie(request, title):
         return JsonResponse(movies)
     except Exception as e:
         return JsonResponse({"error":str(e)}, status=500)
-
+@login_required
 def search_show(request, name):
     if request.method != "GET":
         return JsonResponse({"error": "Only GET method allowed"}, status=405)
@@ -302,6 +302,32 @@ def update_watchlist(request):
         return JsonResponse({"error": str(e)}, status=400)
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
+
+def communities(request):
+    return render(request, 'myapp/communities.html')
+
+
+@login_required
+def get_community_description(request,community):
+    if request.method != "GET":
+        return JsonResponse({"error":"only get requests are allowed"}, status=400)
+    try:
+        comms = Community.objects.filter(name__icontains=community)
+        if not comms:
+            return JsonResponse({"error" : "Community Not Found"}, status = 404)
+        result = {}
+        for comm in comms:
+            result[comm.name] = comm.serialize()
+        print(result)
+        return JsonResponse(result, status=200)
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
+    
+
+
+
+
+
     
 
 

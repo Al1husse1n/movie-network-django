@@ -153,11 +153,11 @@ class User(AbstractUser):
     def add_movie_watchlist(self, movieid):
         movie = fetch_movie_data(movieid)
         if 'error' in movie:
-            return 'Error fetching movie data'
+            raise ValueError('Error fetching movie data') 
         movie_id = movie.get('id')
         for m in self.movie_watchlists:
             if m.get('id') == movie_id:
-                return f"{movie.get('title')} is already in your watchlist"
+                raise ValueError(f"{movie.get('title')} is already in your watchlist") 
 
         self.movie_watchlists.append(movie)
         self.save()
@@ -166,11 +166,11 @@ class User(AbstractUser):
     def add_show_watchlist(self, show_id):
         show = fetch_show_data(show_id)
         if 'error' in show:
-            return 'Error fetching movie data'
+            raise ValueError('Error fetching movie data') 
         show_id = show.get("id")     
         for s in self.show_watchlists:
             if s.get('id') == show_id:
-                return f"{show.get('name')} is already in your watchlist"
+                raise ValueError(f"{show.get('name')} is already in your watchlist") 
         self.show_watchlists.append(show)
         self.save()
         return f"{show.get('name')} added to watchlist"
@@ -214,6 +214,15 @@ class Community(models.Model):
 
     def __str__(self):
         return self.name
+    
+    def serialize(self):
+        return {
+            "name": self.name,
+            "admin": self.admin.username,
+            "member_amount": self.member_amount,
+            "moderator_amount":self.moderator_amount,
+            "visibility": self.visibility
+        }
 
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)

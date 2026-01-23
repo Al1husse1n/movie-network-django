@@ -82,6 +82,43 @@ body{
     gap:18px;
     padding:0 12px;
 }
+
+/* Ensure top-actions items have spacing and alignment */
+.top-actions{display:flex; align-items:center; gap:12px;}
+.search-controls{display:flex; align-items:center; gap:10px;}
+
+/* Search controls (movie + community) */
+.search-controls{display:flex; align-items:center; gap:8px; margin-right:8px;}
+.search-icon{
+    background:transparent;
+    border:none;
+    color:var(--accent);
+    font-size:18px;
+    cursor:pointer;
+    padding:6px;
+    border-radius:8px;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+}
+.search-icon:hover{color:#00e676; background:linear-gradient(90deg, rgba(0,200,83,0.04), transparent);} 
+.search-form{position:relative;}
+.search-input{
+    min-width:220px;
+    max-width:320px;
+    padding:8px 12px;
+    border-radius:12px;
+    border:1px solid rgba(255,255,255,0.04);
+    background:transparent;
+    color:#e6f7ea;
+    transition: all 0.18s ease;
+}
+.search-input:focus{outline:none; box-shadow:0 4px 12px rgba(0,200,83,0.12); border-color:#00e676;}
+
+/* hide inputs on small screens unless visible; kept accessible */
+@media (max-width:680px){
+    .search-input{min-width:140px;}
+}
 .left{position:sticky;top:16px;}
 .menu{list-style:none; padding:10px; margin:0;}
 .menu li{padding:12px; border-radius:10px; cursor:pointer;}

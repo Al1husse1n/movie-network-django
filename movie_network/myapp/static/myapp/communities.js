@@ -44,7 +44,7 @@ searchBtn.addEventListener("click", () => {
                     🛡️ ${community.member_amount ?? 0} members
                     </div>
                     <span class="badge ${community.visibility ?? ''}">
-                     ${community.visibility ?? ''}
+                     ${community.visibility.toUpperCase() ?? ''}
                     </span>
                      `;
                     container.appendChild(card);

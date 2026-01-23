@@ -101,7 +101,7 @@ function loadCommunityPosts(communityId) {
                                 <span class="t-handle">@${ post.poster_username}</span>
                                 <span class="t-time">· ${ post.post_time }</span>
                             </div>
-                            <div class="t-text">${ post.content }</div>
+                            <div class="t-text ${post.spoiler? "post-content" : ""}">${ post.content }</div>
                         </div>
                     </article>
                 `;

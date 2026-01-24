@@ -292,6 +292,25 @@ def update_watchlist(request):
     try:
         current_user = request.user
         data = json.loads(request.body)
+        action = data.get('action', 'add')
+        # Remove item from watchlist
+        if action == 'remove':
+            if data.get('type') == 'movie':
+                movie_id = data.get('movie_id')
+                # remove movie objects with matching id
+                before = len(current_user.movie_watchlists or [])
+                current_user.movie_watchlists = [m for m in (current_user.movie_watchlists or []) if m.get('id') != movie_id]
+                current_user.save()
+                return JsonResponse({"message": f"Removed movie {movie_id} from watchlist", "removed": before - len(current_user.movie_watchlists)}, status=200)
+            elif data.get('type') == 'show':
+                show_id = data.get('show_id')
+                before = len(current_user.show_watchlists or [])
+                current_user.show_watchlists = [s for s in (current_user.show_watchlists or []) if s.get('id') != show_id]
+                current_user.save()
+                return JsonResponse({"message": f"Removed show {show_id} from watchlist", "removed": before - len(current_user.show_watchlists)}, status=200)
+            else:
+                return JsonResponse({"error": "Unknown type for removal"}, status=400)
+        # default: add behavior (backwards-compatible)
         if data.get('type') == 'movie':
             result = current_user.add_movie_watchlist(data.get('movie_id'))
             return JsonResponse({"message": result}, status=200)
@@ -315,10 +334,9 @@ def get_community_description(request,community):
         comms = Community.objects.filter(name__icontains=community)
         if not comms:
             return JsonResponse({"error" : "Community Not Found"}, status = 404)
-        result = {}
+        result = {} 
         for comm in comms:
             result[comm.name] = comm.serialize()
-        print(result)
         return JsonResponse(result, status=200)
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)

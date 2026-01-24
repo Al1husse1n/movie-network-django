@@ -30,7 +30,12 @@
 
     <div id="communityResults" class="community-grid"></div>
 </main>
+</main>
 
+<!-- expose current username to JS for membership checks -->
+<script>
+    const CURRENT_USER = "{{ user.username|escapejs }}";
+</script>
 <script src="{% static 'myapp/communities.js' %}"></script>
 </body>
 </html>

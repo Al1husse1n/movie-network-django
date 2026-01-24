@@ -25,6 +25,7 @@
                 <ul>
                     <li><a href="{% url 'myapp:home' %}">Home</a></li>
                     <li><a href="#">Explore</a></li>
+                    <li><a href="/communities/">Communities</a></li>
                     <li><a href="#">Notifications</a></li>
                     <li class="active"><a href="#">Profile</a></li> 
                 </ul>
@@ -138,5 +139,18 @@
 
     <div id="asideOverlay" aria-hidden="true"></div>
     <script src="{% static 'myapp/profile.js' %}"></script>
+    <script>
+        // Ensure Watchlist button always navigates to watchlist page
+        (function(){
+            const btn = document.getElementById('watchlist-btn');
+            if (btn) {
+                btn.addEventListener('click', function(e){
+                    // fallback navigation if anchor prevented elsewhere
+                    const href = btn.getAttribute('href') || '/watchlist/';
+                    window.location.href = href;
+                });
+            }
+        })();
+    </script>
 </body>
 </html>

@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
+from django.conf import settings
 import requests
 from django.core.exceptions import ValidationError, PermissionDenied
 from django.utils import timezone
@@ -13,7 +14,7 @@ def list_for_watchlist():
 """fetch api"""
 def fetch_movie_data(movie_id):
     try:
-        api_key = "REDACTED_TMDB_KEY"
+        api_key = settings.TMDB_API_KEY
         url = f"https://api.themoviedb.org/3/movie/{movie_id}"
         params = {
         "language": "en-US",
@@ -31,7 +32,7 @@ def fetch_movie_data(movie_id):
 def fetch_show_data(show_id):
     try:
         url = f"https://api.themoviedb.org/3/tv/{show_id}"
-        api_key = "REDACTED_TMDB_KEY"
+        api_key = settings.TMDB_API_KEY
         params = {'api_key': api_key, 'language': 'en-US'}
         
         response = requests.get(url, params=params)
@@ -44,7 +45,7 @@ def fetch_show_data(show_id):
 def fetch_movie_by_name(name):
     try:
         url = "https://api.themoviedb.org/3/search/movie"
-        api_key = "REDACTED_TMDB_KEY"
+        api_key = settings.TMDB_API_KEY
         params = {
                 "api_key": api_key,
                 "query": name,
@@ -60,7 +61,7 @@ def fetch_movie_by_name(name):
 def fetch_show_by_name(name):
     try:
         url = "https://api.themoviedb.org/3/search/tv"
-        api_key = "REDACTED_TMDB_KEY"
+        api_key = settings.TMDB_API_KEY
         params = {
                 "api_key": api_key,
                 "query": name,

@@ -4,7 +4,6 @@ from django.contrib.auth.decorators import login_required
 from .models import *
 from .Forms import *
 from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
 import json
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError
@@ -56,7 +55,6 @@ def get_community(request,communityId):
     except Exception as e:      
         return JsonResponse({"error": str(e)}, status=500)
     
-@csrf_exempt
 @login_required
 def compose_post(request):
     if request.method != "POST":
@@ -104,7 +102,6 @@ def edit_profile(request):
         "weekly_pick": weekly_pick
     })
 
-@csrf_exempt
 @login_required
 def change_profile(request):
     current_user = request.user
@@ -245,7 +242,6 @@ def search_show(request, name):
         return JsonResponse({"error":str(e)}, status=500)
     
 @login_required
-@csrf_exempt
 def update_top_5(request):
     if request.method != "PUT":
         return JsonResponse({"error": "Only PUT method allowed"}, status=405)
@@ -268,7 +264,6 @@ def update_top_5(request):
         return JsonResponse({"error":str(e)}, status=500)
 
 @login_required
-@csrf_exempt
 def update_wp(request):  
     if request.method != "PUT":
         return JsonResponse({"error":"Only PUT method is allowed"}, status=400)
@@ -285,7 +280,6 @@ def update_wp(request):
         return JsonResponse({"error":str(e)})
     
 @login_required
-@csrf_exempt
 def update_watchlist(request):
     if request.method != "PUT":
         return JsonResponse({"error":"only PUT method is allowed"}, status=400)

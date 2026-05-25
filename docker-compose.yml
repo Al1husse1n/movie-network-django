@@ -1,0 +1,29 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: movie_network_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-movie_network}
+      POSTGRES_USER: ${POSTGRES_USER:-movie_network}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-movie_network_dev_password}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - movie_network_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-movie_network} -d ${POSTGRES_DB:-movie_network}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # Future cache / broker service (Phase 3)
+  # redis:
+  #   image: redis:7-alpine
+  #   container_name: movie_network_redis
+  #   restart: unless-stopped
+  #   ports:
+  #     - "6379:6379"
+
+volumes:
+  movie_network_pgdata:

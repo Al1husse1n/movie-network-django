@@ -4,6 +4,16 @@ Live Demo: https://movie-network-django.onrender.com
 
 A web application built with Django for creating a social platform around movies. Users can search for movies, share their reviews, rate films, and connect with other movie enthusiasts in a networked environment. The project leverages Django's robust framework and offers scalable, modular features that make it easy to extend according to new requirements.
 
+## Local Development
+
+Quickstart with Docker Compose:
+```bash
+docker compose up -d
+python manage.py migrate
+python manage.py runserver
+```
+For complete setup, environment configuration, and troubleshooting, see the [Development Guide](docs/DEVELOPMENT.md).
+
 ## Features
 
 - User authentication and registration

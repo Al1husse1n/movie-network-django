@@ -9,6 +9,7 @@ dist/
 
 # Django
 *.log
+*.sqlite3
 db.sqlite3
 db.sqlite3-journal
 /media/
@@ -18,10 +19,16 @@ db.sqlite3-journal
 .env
 .env.*
 !.env.example
+!.env.docker.example
+.env.neon.bak
+.env.*.bak
 venv/
 .venv/
 env/
 ENV/
+
+# Database / Docker volumes
+pgdata/
 
 # Screenshots & Local media
 screenshots/

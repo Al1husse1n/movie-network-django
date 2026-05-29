@@ -5,24 +5,23 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('myapp', '0006_alter_user_email'),
+        ("myapp", "0006_alter_user_email"),
     ]
 
     operations = [
         migrations.AlterModelOptions(
-            name='communitypost',
-            options={'ordering': ['-timestamp']},
+            name="communitypost",
+            options={"ordering": ["-timestamp"]},
         ),
         migrations.AlterField(
-            model_name='user',
-            name='movie_watchlists',
+            model_name="user",
+            name="movie_watchlists",
             field=models.JSONField(blank=True, default=myapp.models.list_for_watchlist),
         ),
         migrations.AlterField(
-            model_name='user',
-            name='show_watchlists',
+            model_name="user",
+            name="show_watchlists",
             field=models.JSONField(blank=True, default=myapp.models.list_for_watchlist),
         ),
     ]

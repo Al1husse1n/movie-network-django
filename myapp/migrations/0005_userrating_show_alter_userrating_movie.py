@@ -4,20 +4,19 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('myapp', '0004_user_movie_watchlists_user_show_watchlists'),
+        ("myapp", "0004_user_movie_watchlists_user_show_watchlists"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='userrating',
-            name='show',
+            model_name="userrating",
+            name="show",
             field=models.JSONField(blank=True, null=True),
         ),
         migrations.AlterField(
-            model_name='userrating',
-            name='movie',
+            model_name="userrating",
+            name="movie",
             field=models.JSONField(blank=True, null=True),
         ),
     ]

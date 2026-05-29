@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('myapp', '0007_alter_communitypost_options_and_more'),
+        ("myapp", "0007_alter_communitypost_options_and_more"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='user',
-            name='bio',
+            model_name="user",
+            name="bio",
             field=models.TextField(blank=True, max_length=100, null=True),
         ),
     ]

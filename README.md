@@ -1,5 +1,7 @@
 # Movie Network (Django)
 
+![CI](https://github.com/Al1husse1n/movie-network-django/actions/workflows/ci.yml/badge.svg)
+
 Live Demo: https://movie-network-django.onrender.com
 
 A web application built with Django for creating a social platform around movies. Users can search for movies, share their reviews, rate films, and connect with other movie enthusiasts in a networked environment. The project leverages Django's robust framework and offers scalable, modular features that make it easy to extend according to new requirements.
@@ -88,7 +90,7 @@ Pull requests are welcome! For major changes, please open an issue first to disc
 
 ## License
 
-This project is licensed under the MIT License.  
+This project is licensed under the MIT License.
 See the [LICENSE](LICENSE) file for details.
 
 ## Acknowledgements

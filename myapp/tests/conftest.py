@@ -1,14 +1,18 @@
 import re
+
 import pytest
-from django.test import Client
 import requests_mock as rm_module
-from .factories import UserFactory, CommunityFactory
+from django.test import Client
+
+from .factories import CommunityFactory, UserFactory
 
 
 @pytest.fixture
 def user(db):
     """Fixture providing a test user with a hashed password."""
-    return UserFactory(username="testuser", email="testuser@example.com", password="TestPassword123!")
+    return UserFactory(
+        username="testuser", email="testuser@example.com", password="TestPassword123!"
+    )
 
 
 @pytest.fixture
@@ -34,12 +38,16 @@ def tmdb_mock():
         # Movie details endpoint
         m.get(
             re.compile(r"https://api\.themoviedb\.org/3/movie/\d+"),
-            json={"id": 856, "title": "Who Framed Roger Rabbit", "overview": "A detective and a rabbit."}
+            json={
+                "id": 856,
+                "title": "Who Framed Roger Rabbit",
+                "overview": "A detective and a rabbit.",
+            },
         )
         # TV show details endpoint
         m.get(
             re.compile(r"https://api\.themoviedb\.org/3/tv/\d+"),
-            json={"id": 66732, "name": "Stranger Things", "overview": "Stranger things in town."}
+            json={"id": 66732, "name": "Stranger Things", "overview": "Stranger things in town."},
         )
         # Search movie endpoint
         m.get(
@@ -47,11 +55,15 @@ def tmdb_mock():
             json={
                 "page": 1,
                 "results": [
-                    {"id": 856, "title": "Who Framed Roger Rabbit", "overview": "A detective and a rabbit."}
+                    {
+                        "id": 856,
+                        "title": "Who Framed Roger Rabbit",
+                        "overview": "A detective and a rabbit.",
+                    }
                 ],
                 "total_pages": 1,
                 "total_results": 1,
-            }
+            },
         )
         # Search TV show endpoint
         m.get(
@@ -59,11 +71,15 @@ def tmdb_mock():
             json={
                 "page": 1,
                 "results": [
-                    {"id": 66732, "name": "Stranger Things", "overview": "Stranger things in town."},
-                    {"id": 1234, "name": "As the Bell Rings", "overview": "Short series."}
+                    {
+                        "id": 66732,
+                        "name": "Stranger Things",
+                        "overview": "Stranger things in town.",
+                    },
+                    {"id": 1234, "name": "As the Bell Rings", "overview": "Short series."},
                 ],
                 "total_pages": 1,
                 "total_results": 2,
-            }
+            },
         )
         yield m

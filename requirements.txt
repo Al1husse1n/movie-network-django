@@ -13,3 +13,7 @@ pytest-cov>=5.0
 factory-boy>=3.3
 faker>=25.0
 requests-mock>=1.12
+
+# Linting & tooling
+ruff>=0.6
+pre-commit>=3.7

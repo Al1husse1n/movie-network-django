@@ -2,8 +2,9 @@
 Production settings for movie_network project.
 """
 
-from .base import *
 from django.core.exceptions import ImproperlyConfigured
+
+from .base import *
 
 # Fail-fast security checks for production environment
 if not SECRET_KEY:

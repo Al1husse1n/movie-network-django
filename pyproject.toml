@@ -1,0 +1,32 @@
+[project]
+name = "movie-network-django"
+version = "0.1.0"
+requires-python = ">=3.12"
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+src = ["."]
+
+[tool.ruff.lint]
+select = [
+  "E",   # pycodestyle errors
+  "F",   # pyflakes
+  "I",   # isort
+  "B",   # flake8-bugbear
+  "UP",  # pyupgrade
+  "DJ",  # flake8-django
+]
+ignore = [
+  "E501",  # line-too-long (many existing files exceed 100 chars)
+  "B008",  # function call in default arg (Django patterns)
+]
+
+[tool.ruff.lint.per-file-ignores]
+"**/migrations/*" = ["E", "F", "I", "UP", "DJ"]
+"**/settings/*.py" = ["F403", "F405"]  # wildcard imports in settings split
+"**/tests/*" = ["B011"]                 # pytest-style asserts
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"

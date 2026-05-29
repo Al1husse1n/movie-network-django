@@ -1,91 +1,88 @@
-from django.db import models
-from django.contrib.auth.models import AbstractUser
-from django.conf import settings
 import requests
-from django.core.exceptions import ValidationError, PermissionDenied
+from django.conf import settings
+from django.contrib.auth.models import AbstractUser
+from django.core.exceptions import PermissionDenied, ValidationError
+from django.db import models
 from django.utils import timezone
 
 
 def default_top_5():
     return [None for i in range(0, 5)]
+
+
 def list_for_watchlist():
     return []
 
+
 """fetch api"""
+
+
 def fetch_movie_data(movie_id):
     try:
         api_key = settings.TMDB_API_KEY
         url = f"https://api.themoviedb.org/3/movie/{movie_id}"
-        params = {
-        "language": "en-US",
-        "api_key": api_key
-        }
-            
-        response = requests.get(url,params=params)
-        response.raise_for_status()  
-            
+        params = {"language": "en-US", "api_key": api_key}
+
+        response = requests.get(url, params=params)
+        response.raise_for_status()
+
         data = response.json()
         return data
     except requests.exceptions.RequestException as e:
-        return {'error': str(e)}
-    
+        return {"error": str(e)}
+
+
 def fetch_show_data(show_id):
     try:
         url = f"https://api.themoviedb.org/3/tv/{show_id}"
         api_key = settings.TMDB_API_KEY
-        params = {'api_key': api_key, 'language': 'en-US'}
-        
+        params = {"api_key": api_key, "language": "en-US"}
+
         response = requests.get(url, params=params)
         response.raise_for_status()
         data = response.json()
         return data
     except requests.exceptions.RequestException as e:
-        return {'error': str(e)}
-    
+        return {"error": str(e)}
+
+
 def fetch_movie_by_name(name):
     try:
         url = "https://api.themoviedb.org/3/search/movie"
         api_key = settings.TMDB_API_KEY
-        params = {
-                "api_key": api_key,
-                "query": name,
-                "language": "en-US"
-            }
-        response = requests.get(url,params=params)
+        params = {"api_key": api_key, "query": name, "language": "en-US"}
+        response = requests.get(url, params=params)
         response.raise_for_status()
         data = response.json()
         return data
     except requests.exceptions.RequestException as e:
-        return {'error': str(e)}
+        return {"error": str(e)}
+
 
 def fetch_show_by_name(name):
     try:
         url = "https://api.themoviedb.org/3/search/tv"
         api_key = settings.TMDB_API_KEY
-        params = {
-                "api_key": api_key,
-                "query": name,
-                "language": "en-US"
-            }
-        response = requests.get(url,params=params)
+        params = {"api_key": api_key, "query": name, "language": "en-US"}
+        response = requests.get(url, params=params)
         response.raise_for_status()
         data = response.json()
         return data
     except requests.exceptions.RequestException as e:
-        return {'error': str(e)}
-    
-
+        return {"error": str(e)}
 
 
 class User(AbstractUser):
-    email = models.EmailField(unique=True, blank= False)
+    email = models.EmailField(unique=True, blank=False)
     follower_amount = models.IntegerField(default=0)
     rating = models.FloatField(default=0)
     top_5_movies = models.JSONField(default=default_top_5)
     top_5_shows = models.JSONField(default=default_top_5)
     weekly_pick = models.JSONField(default=dict, blank=True)
-    followers = models.ManyToManyField('self', symmetrical=False, related_name='following_users', blank=True)
-    bio = models.TextField(null=True, blank=True,max_length=100)
+    followers = models.ManyToManyField(
+        "self", symmetrical=False, related_name="following_users", blank=True
+    )
+    bio = models.TextField(null=True, blank=True, max_length=100)
     joined_in = models.DateTimeField(auto_now_add=True)
     show_watchlists = models.JSONField(default=list_for_watchlist, blank=True)
     movie_watchlists = models.JSONField(default=list_for_watchlist, blank=True)
@@ -96,7 +93,7 @@ class User(AbstractUser):
         user.follower_amount = user.followers.count()
         user.save()
         return f"You followed {user.username}"
-    
+
     def unfollow(self, user):
         self.following_users.remove(user)
         user.follower_amount = user.followers.count()
@@ -104,125 +101,110 @@ class User(AbstractUser):
         user.save()
         return f"you followed {user.username}"
 
-    def add_top_5_movies(self,rank,movie_id, movie_title=''):
+    def add_top_5_movies(self, rank, movie_id, movie_title=""):
         if rank < 1 or rank > 5:
-            raise ValueError("Please enter your ranking correctly") 
+            raise ValueError("Please enter your ranking correctly")
         else:
-            movie = {
-                "rank":rank,
-                "tmdb_id":movie_id,
-                "title": movie_title
-
-            }
-            self.top_5_movies[rank-1] = movie
+            movie = {"rank": rank, "tmdb_id": movie_id, "title": movie_title}
+            self.top_5_movies[rank - 1] = movie
             self.save()
             return f"{movie_title} is now {rank} on your top 5 list"
-        
+
     def add_top_5_shows(self, rank, show_id, show_name=""):
         if rank < 1 or rank > 5:
-            raise ValueError("Please enter your ranking correctly") 
+            raise ValueError("Please enter your ranking correctly")
         else:
-            show = {
-                "rank":rank,
-                "tmdb_id":show_id,
-                "name": show_name
-
-            }
-            self.top_5_shows[rank-1] = show
+            show = {"rank": rank, "tmdb_id": show_id, "name": show_name}
+            self.top_5_shows[rank - 1] = show
             self.save()
             return f"{show_name} is now {rank} on your top 5 list"
-        
-        
-        
+
     def following_ratings(self, movie_id):
         try:
             if type(movie_id) not in (int, float):
                 raise ValueError("Movie ID must be a number")
             followings_users = self.following_users.all()
             rating_dict = {}
-            
+
             for user in followings_users:
                 rated_movie = user.ratings.filter(movie__tmdb_id=movie_id).first()
                 if rated_movie:
                     rating_dict[user.username] = float(rated_movie.rating)
-            
+
             return rating_dict
-            
+
         except Exception as e:
-            return {'error': f"Failed to fetch ratings: {str(e)}"}
-    
+            return {"error": f"Failed to fetch ratings: {str(e)}"}
+
     def add_movie_watchlist(self, movieid):
         movie = fetch_movie_data(movieid)
-        if 'error' in movie:
-            raise ValueError('Error fetching movie data') 
-        movie_id = movie.get('id')
+        if "error" in movie:
+            raise ValueError("Error fetching movie data")
+        movie_id = movie.get("id")
         for m in self.movie_watchlists:
-            if m.get('id') == movie_id:
-                raise ValueError(f"{movie.get('title')} is already in your watchlist") 
+            if m.get("id") == movie_id:
+                raise ValueError(f"{movie.get('title')} is already in your watchlist")
 
         self.movie_watchlists.append(movie)
         self.save()
         return f"{movie.get('title')} added to watchlist"
-    
+
     def add_show_watchlist(self, show_id):
         show = fetch_show_data(show_id)
-        if 'error' in show:
-            raise ValueError('Error fetching movie data') 
-        show_id = show.get("id")     
+        if "error" in show:
+            raise ValueError("Error fetching movie data")
+        show_id = show.get("id")
         for s in self.show_watchlists:
-            if s.get('id') == show_id:
-                raise ValueError(f"{show.get('name')} is already in your watchlist") 
+            if s.get("id") == show_id:
+                raise ValueError(f"{show.get('name')} is already in your watchlist")
         self.show_watchlists.append(show)
         self.save()
         return f"{show.get('name')} added to watchlist"
-    
+
     def __str__(self):
         return self.username
-
 
 
 class Message(models.Model):
     sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name="sent_messages")
     receiver = models.ForeignKey(User, on_delete=models.CASCADE, related_name="received_messages")
     content = models.TextField()
-    timestamp = models.DateTimeField(auto_now_add=True) 
+    timestamp = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return self.content
 
     def is_followed(self):
         return self.sender.followers.filter(id=self.receiver.id).exists()
-    
-    def full_clean(self, exclude = None, validate_unique = True):
+
+    def full_clean(self, exclude=None, validate_unique=True):
         super().full_clean(exclude, validate_unique)
         if not self.is_followed():
             raise ValidationError("You can only message if the user follows you")
-        
 
-        
+
 class Community(models.Model):
-    VISIBILITY_CHOICES = [
-        ("public", "public"),
-        ("private", "private")
-    ]
+    VISIBILITY_CHOICES = [("public", "public"), ("private", "private")]
     name = models.CharField(max_length=50)
     admin = models.ForeignKey(User, on_delete=models.CASCADE, related_name="owned_communities")
     members = models.ManyToManyField(User, related_name="communities")
     moderator = models.ManyToManyField(User, related_name="moderated_communities")
     member_amount = models.IntegerField(default=0)
     moderator_amount = models.IntegerField(default=0)
-    visibility = models.CharField(choices=VISIBILITY_CHOICES, default="public", blank=True, max_length=100)
+    visibility = models.CharField(
+        choices=VISIBILITY_CHOICES, default="public", blank=True, max_length=100
+    )
 
     def __str__(self):
         return self.name
-    
+
     def serialize(self):
         return {
             "name": self.name,
             "admin": self.admin.username,
             "member_amount": self.member_amount,
-            "moderator_amount":self.moderator_amount,
-            "visibility": self.visibility
+            "moderator_amount": self.moderator_amount,
+            "visibility": self.visibility,
         }
 
     def save(self, *args, **kwargs):
@@ -230,7 +212,7 @@ class Community(models.Model):
         if not self.members.filter(id=self.admin.id).exists():
             self.members.add(self.admin)
 
-    def add_moderation(self,adder, user):
+    def add_moderation(self, adder, user):
         if user not in self.members.all():
             return "Only members can be moderators"
         elif user in self.moderator.all():
@@ -242,6 +224,7 @@ class Community(models.Model):
             self.moderator_amount = self.moderator.count()
             self.save()
             return f"{user.username} is now a moderator"
+
     def remove_moderation(self, remover, user):
         if user not in self.members.all():
             return f"{user.username} is not a member of {self.name}"
@@ -254,6 +237,7 @@ class Community(models.Model):
             self.moderator_amount = self.moderator.count()
             self.save()
             return f"{user.username} is now removed as a moderator"
+
     def add_member(self, adder, user):
         if user in self.members.all():
             return f"{user.username} is already a member of {self.name}"
@@ -277,7 +261,7 @@ class Community(models.Model):
 
     def remove_member(self, remover, user):
         if user not in self.members.all():
-            return f'{user.username} is not a member of {self.name}'
+            return f"{user.username} is not a member of {self.name}"
         elif remover != self.admin and remover not in self.moderator.all():
             return "Only an Admin or a moderator can remove members"
         elif remover in self.moderator.all() and user in self.moderator.all():
@@ -292,20 +276,21 @@ class Community(models.Model):
             self.member_amount = self.members.count()
             self.save()
             return f"You removed {user.username} from {self.name}"
-        
+
 
 class CommunityPost(models.Model):
     poster = models.ForeignKey(User, on_delete=models.CASCADE, related_name="community_posts")
     community = models.ForeignKey(Community, on_delete=models.CASCADE, related_name="posts")
     content = models.TextField()
-    timestamp = models.DateTimeField(auto_now_add=True) 
+    timestamp = models.DateTimeField(auto_now_add=True)
     spoiler = models.BooleanField(default=False)
+
     class Meta:
-        ordering = ['-timestamp']
+        ordering = ["-timestamp"]
 
     def __str__(self):
         return f"{self.poster.username}  {self.content}"
-    
+
     def is_member(self):
         poster = self.poster
         return self.community.members.filter(id=self.poster.id).exists()
@@ -319,7 +304,6 @@ class CommunityPost(models.Model):
         else:
             self.delete()
             return "Post Deleted successfully"
-    
 
     def post_time(self):
         time_elapsed = timezone.now() - self.timestamp
@@ -329,62 +313,55 @@ class CommunityPost(models.Model):
         total_hours = total_seconds / 3600
         total_days = total_seconds / 86400
         total_weeks = total_days / 7
-        total_months = total_days / 30.44  
-        total_years = total_days / 365.25  
-        
+        total_months = total_days / 30.44
+        total_years = total_days / 365.25
+
         if total_years >= 1:
             years = int(total_years)
-            return f'{years} year{"s" if years > 1 else ""} ago'
+            return f"{years} year{'s' if years > 1 else ''} ago"
         elif total_months >= 1:
             months = int(total_months)
-            return f'{months} month{"s" if months > 1 else ""} ago'
+            return f"{months} month{'s' if months > 1 else ''} ago"
         elif total_weeks >= 1:
             weeks = int(total_weeks)
-            return f'{weeks} week{"s" if weeks > 1 else ""} ago'
+            return f"{weeks} week{'s' if weeks > 1 else ''} ago"
         elif total_days >= 1:
             days = int(total_days)
-            return f'{days} day{"s" if days > 1 else ""} ago'
+            return f"{days} day{'s' if days > 1 else ''} ago"
         elif total_hours >= 1:
             hours = int(total_hours)
-            return f'{hours} hour{"s" if hours > 1 else ""} ago'
+            return f"{hours} hour{'s' if hours > 1 else ''} ago"
         elif total_minutes >= 1:
             minutes = int(total_minutes)
-            return f'{minutes} minute{"s" if minutes > 1 else ""} ago'
+            return f"{minutes} minute{'s' if minutes > 1 else ''} ago"
         else:
             seconds = int(total_seconds)
-            return f'{seconds} second{"s" if seconds > 1 else ""} ago'
-    
+            return f"{seconds} second{'s' if seconds > 1 else ''} ago"
+
     def serialize(self):
-        return{
-            "id":self.id,
-            "poster_username":self.poster.username,
-            "poster_id": self.poster.id,   
+        return {
+            "id": self.id,
+            "poster_username": self.poster.username,
+            "poster_id": self.poster.id,
             "community_name": self.community.name,
-            "community_id": self.community.id, 
-            "content":self.content,
-            "post_time":self.post_time(),
+            "community_id": self.community.id,
+            "content": self.content,
+            "post_time": self.post_time(),
             "spoiler": self.spoiler,
         }
-        
-            
+
     def save(self, *args, **kwargs):
         # Only validate for NEW posts (not when updating existing ones)
         if not self.pk:  # self.pk is None for new objects
             if not self.is_member():
                 raise PermissionDenied("Only community members can create posts")
-        
+
         super().save(*args, **kwargs)
 
 
-class UserRating(models.Model):  #you can view your followings rating
+class UserRating(models.Model):  # you can view your followings rating
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="ratings")
-    movie = models.JSONField(null=True, blank=True) 
+    movie = models.JSONField(null=True, blank=True)
     show = models.JSONField(null=True, blank=True)
-    rating = models.DecimalField(max_digits=2, decimal_places=1) #users rating
+    rating = models.DecimalField(max_digits=2, decimal_places=1)  # users rating
     timestamp = models.DateTimeField(auto_now=True)
-
-
-
-
-
-

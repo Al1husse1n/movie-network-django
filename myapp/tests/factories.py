@@ -1,6 +1,7 @@
 import factory
 from factory.django import DjangoModelFactory
-from myapp.models import User, Community, CommunityPost, Message, UserRating
+
+from myapp.models import Community, CommunityPost, Message, User, UserRating
 
 
 class UserFactory(DjangoModelFactory):

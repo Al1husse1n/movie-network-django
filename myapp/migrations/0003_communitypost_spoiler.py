@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('myapp', '0002_alter_message_receiver_communitypost'),
+        ("myapp", "0002_alter_message_receiver_communitypost"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='communitypost',
-            name='spoiler',
+            model_name="communitypost",
+            name="spoiler",
             field=models.BooleanField(default=False),
         ),
     ]

@@ -1,14 +1,14 @@
 import pytest
-from django.core.exceptions import ValidationError, PermissionDenied
+from django.core.exceptions import PermissionDenied, ValidationError
+
 from myapp.models import (
-    User,
-    Community,
     CommunityPost,
     Message,
     fetch_movie_data,
     fetch_show_data,
 )
-from .factories import UserFactory, CommunityFactory, CommunityPostFactory, MessageFactory
+
+from .factories import CommunityFactory, UserFactory
 
 
 @pytest.mark.django_db

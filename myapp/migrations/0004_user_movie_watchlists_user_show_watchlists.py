@@ -5,20 +5,19 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('myapp', '0003_communitypost_spoiler'),
+        ("myapp", "0003_communitypost_spoiler"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='user',
-            name='movie_watchlists',
+            model_name="user",
+            name="movie_watchlists",
             field=models.JSONField(default=myapp.models.list_for_watchlist),
         ),
         migrations.AddField(
-            model_name='user',
-            name='show_watchlists',
+            model_name="user",
+            name="show_watchlists",
             field=models.JSONField(default=myapp.models.list_for_watchlist),
         ),
     ]

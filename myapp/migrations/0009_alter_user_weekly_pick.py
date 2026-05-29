@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('myapp', '0008_alter_user_bio'),
+        ("myapp", "0008_alter_user_bio"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='user',
-            name='weekly_pick',
+            model_name="user",
+            name="weekly_pick",
             field=models.JSONField(blank=True, default=dict),
         ),
     ]

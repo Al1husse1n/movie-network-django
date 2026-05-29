@@ -1,7 +1,9 @@
 import pytest
 from django.test import RequestFactory
-from myapp.Forms import SignUpForm, LoginForm, PostForm
+
+from myapp.Forms import LoginForm, PostForm, SignUpForm
 from myapp.models import User
+
 from .factories import UserFactory
 
 

@@ -5,11 +5,11 @@
 }
 
 body{
-    background-color: #0b0f0b; 
-} 
+    background-color: #0b0f0b;
+}
 header{
     margin-top: 30px;
-    position: relative; 
+    position: relative;
     background-color: aqua;
 }
 header a{
@@ -20,7 +20,7 @@ header a{
     font-size: 15px;
     font-weight: 600px;
     border-radius: 60px;
-    padding: 15px 20px 15px;   
+    padding: 15px 20px 15px;
     right: 15px;
     top:-130px;
 }

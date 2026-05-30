@@ -24,19 +24,19 @@ header a{
     border-radius: 60px;
     padding: 15px 20px 15px;
     right: 15px;
-    top: -270px;  
+    top: -270px;
 
 }
 
 #container{
     background-color: #0b0f0b ;
     margin-top: 300px;
-    border-radius: 50px;    
+    border-radius: 50px;
 }
 
 form{
     padding: 40px;
-   
+
 }
 
 input{

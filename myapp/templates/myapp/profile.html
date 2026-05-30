@@ -27,7 +27,7 @@
                     <li><a href="#">Explore</a></li>
                     <li><a href="/communities/">Communities</a></li>
                     <li><a href="#">Notifications</a></li>
-                    <li class="active"><a href="#">Profile</a></li> 
+                    <li class="active"><a href="#">Profile</a></li>
                 </ul>
             </nav>
         </aside>
@@ -38,19 +38,19 @@
             <section class="profile-header">
                 <!-- Cover Photo (customize background image here) -->
                 <div class="cover-photo"></div>
-                
+
                 <!-- Profile Info -->
                 <div class="profile-info">
                     <img src=""  class="profile-pic">
                     <div class="profile-details">
-                        <h1>@{{username}}</h1> 
-                        <p class="bio">{{bio}}</p> 
+                        <h1>@{{username}}</h1>
+                        <p class="bio">{{bio}}</p>
 
                         <div class="follow-stats">
                             <span><strong>{{following_amount}}</strong> Following</span>
-                            <span><strong>{{follower_amount}}</strong> Followers</span> 
+                            <span><strong>{{follower_amount}}</strong> Followers</span>
                         </div>
-                        
+
                         <div class="profile-actions">
                             <a href="{% url 'myapp:watchlist' %}" class="btn watchlist-btn" id="watchlist-btn">Watchlist</a>
                             <a href="{% url 'myapp:editProfile' %}" class="btn edit-profile-btn">Edit Profile</a>
@@ -73,7 +73,7 @@
                         {% endfor %}
                     </ol>
                 </div>
-                
+
                 <!-- Top 5 Movies -->
                 <div class="favorites-block">
                     <h2>Top 5 Movies</h2>
@@ -87,7 +87,7 @@
                         {% endfor %}
                     </ol>
                 </div>
-                
+
                 <!-- Weekly Pick -->
                 <div class="favorites-block weekly-pick">
                     <h2>Weekly Pick</h2>

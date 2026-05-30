@@ -65,7 +65,7 @@
                 </form>
             </div>
 
-            <div class="community-dropdown card">                                                                                                           
+            <div class="community-dropdown card">
             <form method="POST" id="communityForm">
                 {% csrf_token %}
                 <select name="community" id="communitySelect" aria-label="Select community" title="Select community"> <!-- changed: add accessible name -->
@@ -74,10 +74,10 @@
                         <option value="{{ community.id }}">{{ community.name }}</option>
                     {% endfor %}
                 </select>
-             
+
             </form>
           </div>
-            <!-- Timeline --> 
+            <!-- Timeline -->
             <div id="timeline">
             </div>
         </section>

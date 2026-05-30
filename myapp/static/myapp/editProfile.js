@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-    
+
     // Select Elements
     const editForm = document.getElementById('editProfileForm');
     const usernameInput = document.getElementById('username');
@@ -9,14 +9,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const fileInput = document.getElementById('profilePic');
     const previewImg = document.getElementById('previewImg');
     const cancelBtn = document.getElementById('cancelBtn');
-    const weeklyResult = document.getElementById('weekly-result'); 
+    const weeklyResult = document.getElementById('weekly-result');
     const weeklyInput = document.getElementById('weekly_pick');
     const topListForm = document.getElementById('topListsForm');
     // keep track of autocomplete inputs/results for global hide behaviour
     const _autocompleteInputs = [];
     const _autocompleteResults = [];
     let _globalAutocompleteListenersAdded = false;
-    
+
 
     // hide result container when empty
     if (weeklyResult) {
@@ -29,12 +29,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const file = this.files[0];
         if (file) {
             const reader = new FileReader();
-            
+
             reader.onload = function(e) {
                 // Set the preview image src to the file's data URL
                 previewImg.setAttribute('src', e.target.result);
             }
-            
+
             reader.readAsDataURL(file);
         }
     });
@@ -58,7 +58,7 @@ document.addEventListener('DOMContentLoaded', () => {
             fetch('/changeprofile/',{
                 method:'PUT',
                 headers: {
-                    'Content-Type': 'application/json' 
+                    'Content-Type': 'application/json'
                 },
                 body:JSON.stringify({
                     username:usernameInput.value,
@@ -92,12 +92,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 console.error("Network or server error", error);
             })
         }
-        
+
     });
 
 
     cancelBtn.addEventListener('click', () => {
-            window.location.reload(); 
+            window.location.reload();
     });
 
     function getMovieByName(name){          //return 5 movies that matches the substring
@@ -129,7 +129,7 @@ document.addEventListener('DOMContentLoaded', () => {
             .then(parsedResponse =>{
                 if(response.status == 500){
                    alert(parsedResponse.error);
-                    return {}; 
+                    return {};
                 }
                 else{
                     return parsedResponse;
@@ -387,7 +387,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
         }
-     
+
     });
 
 

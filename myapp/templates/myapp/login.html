@@ -9,18 +9,18 @@
     <title>Login</title>
 </head>
 <body>
-    {% block body %}                                                        
-    <header class="log-in col-6 offset-6">                  
+    {% block body %}
+    <header class="log-in col-6 offset-6">
         <a href="{%url 'myapp:signup'%}">Sign up</a>
     </header>
     <div class="col-8 offset-2" id="container">
         <div id="poster">
              <img src=""  id="poster-image">
         </div>
-        <form action="#" method="post" class="needs-validation row gy-2" novalidate> 
+        <form action="#" method="post" class="needs-validation row gy-2" novalidate>
             {% csrf_token %}
             <div class="form-floating">
-                {{form.username}} 
+                {{form.username}}
                 <label for="id_username" id="label1">username</label>
                 <div class="invalid-feedback">
                     Please enter a valid username.
@@ -32,7 +32,7 @@
                 <div class="invalid-feedback">
                     Please enter a valid password.
                 </div>
-            </div>  
+            </div>
             <button type="submit" id="log-in">Log in</button>
         </form>
     </div>
@@ -54,7 +54,7 @@
         })()
         document.addEventListener('DOMContentLoaded', function() {
             const posterImage = document.getElementById('poster-image');
-            
+
             function getRandomInt(min, max) {
                 return Math.floor(Math.random() * (max - min + 1)) + min;
             }
@@ -78,11 +78,11 @@
                 "{% static 'myapp/images/17.jpg' %}",
                 "{% static 'myapp/images/18.jpg' %}"
             ];
-            
-         
-            const randomIndex = getRandomInt(0, 17); 
+
+
+            const randomIndex = getRandomInt(0, 17);
             posterImage.src = imagePaths[randomIndex];
-            
+
             posterImage.onerror = function() {
                 console.error('Failed to load image:', this.src);
                 this.src = imagePaths[0];

@@ -67,7 +67,7 @@ body {
 .sidebar-left nav li {
     margin-bottom: 20px;
     color: #00c853;
-  
+
 }
 
 .sidebar-left nav a {
@@ -83,7 +83,7 @@ body {
     color:#00c853;
 }
 .sidebar-left nav a:hover {
-    background:linear-gradient(90deg,rgba(0,200,83,0.08),transparent); 
+    background:linear-gradient(90deg,rgba(0,200,83,0.08),transparent);
     color:var(--accent);
      font-weight:700;
 }
@@ -343,7 +343,7 @@ body {
     }
 
     .sidebar-left nav {
-        background: transparent; 
+        background: transparent;
         border-radius: 10px;
     }
 

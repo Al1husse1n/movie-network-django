@@ -6,8 +6,15 @@ from django.core.exceptions import ValidationError
 from django.http import JsonResponse
 from django.shortcuts import redirect, render
 
-from .Forms import *
-from .models import *
+from .Forms import LoginForm, SignUpForm
+from .models import (
+    Community,
+    CommunityPost,
+    fetch_movie_by_name,
+    fetch_movie_data,
+    fetch_show_by_name,
+    fetch_show_data,
+)
 
 
 def login_view(request):
@@ -83,7 +90,7 @@ def compose_post(request):
 @login_required
 def profile_view(request):
     current_user = request.user
-    bio = "no bio yet." if current_user.bio == None else current_user.bio
+    bio = "no bio yet." if current_user.bio is None else current_user.bio
     weekly_pick = current_user.weekly_pick.get("result")
     return render(
         request,
@@ -104,7 +111,7 @@ def profile_view(request):
 @login_required
 def edit_profile(request):
     current_user = request.user
-    bio = "" if current_user.bio == None else current_user.bio
+    bio = "" if current_user.bio is None else current_user.bio
     weekly_pick = current_user.weekly_pick.get("result")
     return render(
         request,
@@ -232,9 +239,6 @@ def show_description(request, showId):
 
 @login_required
 def watchlist(request):
-    current_user = request.user
-    show_watchlists = current_user.show_watchlists
-    movie_watchlists = current_user.movie_watchlists
     return render(request, "myapp/watchlist.html")
 
 

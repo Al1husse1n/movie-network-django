@@ -1,7 +1,7 @@
 from django import forms
 from django.contrib.auth.forms import AuthenticationForm
 
-from .models import *
+from .models import CommunityPost, Message, User
 
 
 class SignUpForm(forms.ModelForm):

@@ -82,7 +82,7 @@ class User(AbstractUser):
     followers = models.ManyToManyField(
         "self", symmetrical=False, related_name="following_users", blank=True
     )
-    bio = models.TextField(null=True, blank=True, max_length=100)
+    bio = models.TextField(null=True, blank=True, max_length=100)  # noqa: DJ001 - legacy column allows NULL in database
     joined_in = models.DateTimeField(auto_now_add=True)
     show_watchlists = models.JSONField(default=list_for_watchlist, blank=True)
     movie_watchlists = models.JSONField(default=list_for_watchlist, blank=True)
@@ -198,6 +198,11 @@ class Community(models.Model):
     def __str__(self):
         return self.name
 
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        if not self.members.filter(id=self.admin.id).exists():
+            self.members.add(self.admin)
+
     def serialize(self):
         return {
             "name": self.name,
@@ -206,11 +211,6 @@ class Community(models.Model):
             "moderator_amount": self.moderator_amount,
             "visibility": self.visibility,
         }
-
-    def save(self, *args, **kwargs):
-        super().save(*args, **kwargs)
-        if not self.members.filter(id=self.admin.id).exists():
-            self.members.add(self.admin)
 
     def add_moderation(self, adder, user):
         if user not in self.members.all():
@@ -291,8 +291,15 @@ class CommunityPost(models.Model):
     def __str__(self):
         return f"{self.poster.username}  {self.content}"
 
+    def save(self, *args, **kwargs):
+        # Only validate for NEW posts (not when updating existing ones)
+        if not self.pk:  # self.pk is None for new objects
+            if not self.is_member():
+                raise PermissionDenied("Only community members can create posts")
+
+        super().save(*args, **kwargs)
+
     def is_member(self):
-        poster = self.poster
         return self.community.members.filter(id=self.poster.id).exists()
 
     def delete_post(self, user):
@@ -350,14 +357,6 @@ class CommunityPost(models.Model):
             "spoiler": self.spoiler,
         }
 
-    def save(self, *args, **kwargs):
-        # Only validate for NEW posts (not when updating existing ones)
-        if not self.pk:  # self.pk is None for new objects
-            if not self.is_member():
-                raise PermissionDenied("Only community members can create posts")
-
-        super().save(*args, **kwargs)
-
 
 class UserRating(models.Model):  # you can view your followings rating
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="ratings")
@@ -365,3 +364,11 @@ class UserRating(models.Model):  # you can view your followings rating
     show = models.JSONField(null=True, blank=True)
     rating = models.DecimalField(max_digits=2, decimal_places=1)  # users rating
     timestamp = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        target = ""
+        if self.movie and isinstance(self.movie, dict):
+            target = self.movie.get("title", "")
+        elif self.show and isinstance(self.show, dict):
+            target = self.show.get("name", "")
+        return f"{self.user.username} rated {target or 'item'} {self.rating}"

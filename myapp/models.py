@@ -1,9 +1,15 @@
+from datetime import datetime, timedelta
+
 import requests
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.core.exceptions import PermissionDenied, ValidationError
-from django.db import models
+from django.db import models, transaction
 from django.utils import timezone
+
+
+class TMDBError(Exception):
+    pass
 
 
 def default_top_5():
@@ -372,3 +378,194 @@ class UserRating(models.Model):  # you can view your followings rating
         elif self.show and isinstance(self.show, dict):
             target = self.show.get("name", "")
         return f"{self.user.username} rated {target or 'item'} {self.rating}"
+
+
+def _parse_date(date_str):
+    if not date_str:
+        return None
+    try:
+        return datetime.strptime(str(date_str).strip(), "%Y-%m-%d").date()
+    except (ValueError, TypeError):
+        return None
+
+
+def _parse_rating(val):
+    if val is None or val == "":
+        return None
+    try:
+        return round(float(val), 1)
+    except (ValueError, TypeError):
+        return None
+
+
+class Genre(models.Model):
+    tmdb_id = models.IntegerField(unique=True)
+    name = models.CharField(max_length=100)
+
+    def __str__(self):
+        return self.name
+
+
+class Movie(models.Model):
+    tmdb_id = models.IntegerField(unique=True, db_index=True)
+    title = models.CharField(max_length=255, db_index=True)
+    original_title = models.CharField(max_length=255, blank=True)
+    overview = models.TextField(blank=True)
+    poster_path = models.CharField(max_length=255, blank=True)
+    backdrop_path = models.CharField(max_length=255, blank=True)
+    release_date = models.DateField(null=True, blank=True)
+    runtime = models.IntegerField(null=True, blank=True)
+    tmdb_rating = models.DecimalField(max_digits=3, decimal_places=1, null=True, blank=True)
+    genres = models.ManyToManyField(Genre, related_name="movies", blank=True)
+    cached_at = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-release_date", "title"]
+        indexes = [models.Index(fields=["title"])]
+
+    def __str__(self):
+        return f"{self.title} ({self.release_date.year if self.release_date else '?'})"
+
+    @classmethod
+    def get_or_create_from_tmdb(cls, tmdb_id):
+        """
+        Fetches from TMDB if not cached locally, otherwise returns the existing row.
+        Updates the cached_at timestamp on cache hit.
+        """
+        existing = cls.objects.filter(tmdb_id=tmdb_id).first()
+        if existing and (timezone.now() - existing.cached_at) < timedelta(days=30):
+            return existing
+
+        data = fetch_movie_data(tmdb_id)
+        if not data or "error" in data or "status_message" in data:
+            err = (
+                data.get("error")
+                or data.get("status_message")
+                or f"Failed to fetch movie {tmdb_id}"
+            )
+            raise TMDBError(err)
+
+        with transaction.atomic():
+            movie, _ = cls.objects.update_or_create(
+                tmdb_id=tmdb_id,
+                defaults={
+                    "title": data.get("title") or "",
+                    "original_title": data.get("original_title") or "",
+                    "overview": data.get("overview") or "",
+                    "poster_path": data.get("poster_path") or "",
+                    "backdrop_path": data.get("backdrop_path") or "",
+                    "release_date": _parse_date(data.get("release_date")),
+                    "runtime": data.get("runtime"),
+                    "tmdb_rating": _parse_rating(data.get("vote_average")),
+                },
+            )
+            genre_list = []
+            for g in data.get("genres") or []:
+                if isinstance(g, dict) and g.get("id"):
+                    genre, _ = Genre.objects.get_or_create(
+                        tmdb_id=g["id"], defaults={"name": g.get("name", "")}
+                    )
+                    genre_list.append(genre)
+            movie.genres.set(genre_list)
+
+        return movie
+
+
+class Show(models.Model):
+    tmdb_id = models.IntegerField(unique=True, db_index=True)
+    name = models.CharField(max_length=255, db_index=True)
+    original_name = models.CharField(max_length=255, blank=True)
+    overview = models.TextField(blank=True)
+    poster_path = models.CharField(max_length=255, blank=True)
+    backdrop_path = models.CharField(max_length=255, blank=True)
+    first_air_date = models.DateField(null=True, blank=True)
+    number_of_seasons = models.IntegerField(null=True, blank=True)
+    number_of_episodes = models.IntegerField(null=True, blank=True)
+    tmdb_rating = models.DecimalField(max_digits=3, decimal_places=1, null=True, blank=True)
+    genres = models.ManyToManyField(Genre, related_name="shows", blank=True)
+    cached_at = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-first_air_date", "name"]
+        indexes = [models.Index(fields=["name"])]
+
+    def __str__(self):
+        return f"{self.name} ({self.first_air_date.year if self.first_air_date else '?'})"
+
+    @classmethod
+    def get_or_create_from_tmdb(cls, tmdb_id):
+        existing = cls.objects.filter(tmdb_id=tmdb_id).first()
+        if existing and (timezone.now() - existing.cached_at) < timedelta(days=30):
+            return existing
+
+        data = fetch_show_data(tmdb_id)
+        if not data or "error" in data or "status_message" in data:
+            err = (
+                data.get("error") or data.get("status_message") or f"Failed to fetch show {tmdb_id}"
+            )
+            raise TMDBError(err)
+
+        with transaction.atomic():
+            show, _ = cls.objects.update_or_create(
+                tmdb_id=tmdb_id,
+                defaults={
+                    "name": data.get("name") or "",
+                    "original_name": data.get("original_name") or "",
+                    "overview": data.get("overview") or "",
+                    "poster_path": data.get("poster_path") or "",
+                    "backdrop_path": data.get("backdrop_path") or "",
+                    "first_air_date": _parse_date(data.get("first_air_date")),
+                    "number_of_seasons": data.get("number_of_seasons"),
+                    "number_of_episodes": data.get("number_of_episodes"),
+                    "tmdb_rating": _parse_rating(data.get("vote_average")),
+                },
+            )
+            genre_list = []
+            for g in data.get("genres") or []:
+                if isinstance(g, dict) and g.get("id"):
+                    genre, _ = Genre.objects.get_or_create(
+                        tmdb_id=g["id"], defaults={"name": g.get("name", "")}
+                    )
+                    genre_list.append(genre)
+            show.genres.set(genre_list)
+
+        return show
+
+
+class Review(models.Model):
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="reviews"
+    )
+    movie = models.ForeignKey(
+        Movie, on_delete=models.CASCADE, null=True, blank=True, related_name="reviews"
+    )
+    show = models.ForeignKey(
+        Show, on_delete=models.CASCADE, null=True, blank=True, related_name="reviews"
+    )
+    rating = models.DecimalField(max_digits=2, decimal_places=1, null=True, blank=True)
+    body = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+        constraints = [
+            models.CheckConstraint(
+                condition=(
+                    models.Q(movie__isnull=False, show__isnull=True)
+                    | models.Q(movie__isnull=True, show__isnull=False)
+                ),
+                name="review_exactly_one_media",
+            ),
+        ]
+
+    def __str__(self):
+        target = self.movie or self.show
+        return f"{self.user.username} reviewed {target}"
+
+    def clean(self):
+        super().clean()
+        if (self.movie is None) == (self.show is None):
+            raise ValidationError("Review must reference exactly one of movie or show.")

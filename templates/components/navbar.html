@@ -1,0 +1,123 @@
+<header class="sticky top-0 z-50 bg-base/90 backdrop-blur-md border-b border-[#3d352e]/70 transition-colors" x-data="{ mobileOpen: false }">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex items-center justify-between h-16">
+      
+      <!-- Left: Brand Mark -->
+      <div class="flex items-center gap-8">
+        <a href="{% url 'myapp:home' %}" class="flex items-center gap-2 group text-decoration-none focus-ring rounded-md">
+          <!-- Stylized Cinema Marquee Dot / Reel Icon -->
+          <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-amber/15 border border-amber/40 text-amber group-hover:border-amber group-hover:bg-amber/25 transition-all duration-200">
+            <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M18 4l2 4h-3l-2-4h-2l2 4h-3l-2-4H8l2 4H7L5 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V4h-4z"/>
+            </svg>
+          </span>
+          <span class="font-display font-bold text-xl tracking-tight text-cream-100 group-hover:text-amber transition-colors duration-200">
+            Movie Network
+          </span>
+        </a>
+
+        <!-- Desktop Navigation Links -->
+        <nav class="hidden md:flex items-center gap-1" aria-label="Main navigation">
+          <a href="{% url 'myapp:home' %}" class="px-3 py-1.5 rounded-md text-sm font-medium text-cream-300 hover:text-cream-100 hover:bg-base-100/70 transition-colors duration-150 focus-ring">
+            Home
+          </a>
+          <a href="{% url 'myapp:communities' %}" class="px-3 py-1.5 rounded-md text-sm font-medium text-cream-300 hover:text-cream-100 hover:bg-base-100/70 transition-colors duration-150 focus-ring">
+            Communities
+          </a>
+          <a href="{% url 'myapp:watchlist' %}" class="px-3 py-1.5 rounded-md text-sm font-medium text-cream-300 hover:text-cream-100 hover:bg-base-100/70 transition-colors duration-150 focus-ring">
+            Watchlist
+          </a>
+          {% if request.user.is_authenticated %}
+            <a href="{% url 'myapp:profile' %}" class="px-3 py-1.5 rounded-md text-sm font-medium text-cream-300 hover:text-cream-100 hover:bg-base-100/70 transition-colors duration-150 focus-ring">
+              Profile
+            </a>
+          {% endif %}
+        </nav>
+      </div>
+
+      <!-- Right: User Controls / Authentication -->
+      <div class="hidden md:flex items-center gap-4">
+        {% if request.user.is_authenticated %}
+          <div class="flex items-center gap-3">
+            <a href="{% url 'myapp:profile' %}" class="flex items-center gap-2 group text-decoration-none focus-ring rounded-full" title="Signed in as {{ request.user.username }}">
+              <div class="w-8 h-8 rounded-full bg-amber/20 border border-amber/40 text-amber font-mono text-sm font-semibold flex items-center justify-center group-hover:border-amber group-hover:bg-amber/30 transition-all">
+                {{ request.user.username|slice:":1"|upper }}
+              </div>
+              <span class="text-sm font-medium text-cream-300 group-hover:text-cream-100 transition-colors">
+                {{ request.user.username }}
+              </span>
+            </a>
+            <span class="text-cream-muted/40" aria-hidden="true">|</span>
+            <a href="{% url 'myapp:logout' %}" class="btn-ghost text-xs px-2.5 py-1">
+              Sign out
+            </a>
+          </div>
+        {% else %}
+          <div class="flex items-center gap-3">
+            <a href="{% url 'myapp:login' %}" class="btn-ghost text-sm">
+              Sign in
+            </a>
+            <a href="{% url 'myapp:signup' %}" class="btn-primary text-xs px-3.5 py-1.5">
+              Join
+            </a>
+          </div>
+        {% endif %}
+      </div>
+
+      <!-- Mobile Menu Button -->
+      <div class="flex md:hidden">
+        <button type="button"
+                @click="mobileOpen = !mobileOpen"
+                class="p-2 rounded-md text-cream-300 hover:text-cream hover:bg-base-100 focus-ring"
+                aria-label="Toggle navigation menu"
+                :aria-expanded="mobileOpen">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true" x-show="!mobileOpen">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true" x-show="mobileOpen" x-cloak>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Mobile Dropdown Navigation -->
+  <div class="md:hidden border-t border-[#3d352e]/50 bg-base-900/95 backdrop-blur-lg px-4 pt-3 pb-4 space-y-2"
+       x-show="mobileOpen"
+       x-cloak
+       x-transition:enter="transition ease-out duration-150"
+       x-transition:enter-start="opacity-0 -translate-y-2"
+       x-transition:enter-end="opacity-100 translate-y-0"
+       x-transition:leave="transition ease-in duration-100"
+       x-transition:leave-start="opacity-100 translate-y-0"
+       x-transition:leave-end="opacity-0 -translate-y-2">
+    <a href="{% url 'myapp:home' %}" class="block px-3 py-2 rounded-md text-base font-medium text-cream-200 hover:bg-base-100 hover:text-amber">
+      Home
+    </a>
+    <a href="{% url 'myapp:communities' %}" class="block px-3 py-2 rounded-md text-base font-medium text-cream-200 hover:bg-base-100 hover:text-amber">
+      Communities
+    </a>
+    <a href="{% url 'myapp:watchlist' %}" class="block px-3 py-2 rounded-md text-base font-medium text-cream-200 hover:bg-base-100 hover:text-amber">
+      Watchlist
+    </a>
+    {% if request.user.is_authenticated %}
+      <a href="{% url 'myapp:profile' %}" class="block px-3 py-2 rounded-md text-base font-medium text-cream-200 hover:bg-base-100 hover:text-amber">
+        Profile ({{ request.user.username }})
+      </a>
+      <a href="{% url 'myapp:logout' %}" class="block px-3 py-2 rounded-md text-base font-medium text-oxblood hover:bg-base-100">
+        Sign out
+      </a>
+    {% else %}
+      <div class="pt-3 border-t border-[#3d352e]/50 flex flex-col gap-2">
+        <a href="{% url 'myapp:login' %}" class="btn-secondary w-full text-center">
+          Sign in
+        </a>
+        <a href="{% url 'myapp:signup' %}" class="btn-primary w-full text-center">
+          Join Movie Network
+        </a>
+      </div>
+    {% endif %}
+  </div>
+</header>

@@ -1,0 +1,421 @@
+{% extends "base.html" %}
+
+{% block title %}Design System Preview — Cinema Foyer{% endblock %}
+{% block meta_description %}Visual preview and design tokens for the Cinema Foyer design system.{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-16">
+
+  <!-- Header Banner -->
+  <section class="border-b border-[#3d352e]/70 pb-8">
+    <div class="inline-flex items-center gap-2 px-2.5 py-1 rounded bg-amber/10 border border-amber/30 text-amber text-xs font-mono mb-4">
+      <span>PHASE 2.2 FOUNDATION REFERENCE</span>
+    </div>
+    <h1 class="font-display font-bold text-4xl sm:text-5xl text-cream-100 tracking-tight">
+      Cinema Foyer Design System
+    </h1>
+    <p class="mt-3 text-lg text-cream-300 max-w-3xl font-sans leading-relaxed">
+      A cinematic, dramatic, warm editorial aesthetic for film lovers. Inspired by revival-house cinema foyers, brass fixtures, dark velvet drapery, and Alamo Drafthouse / Criterion warmth.
+    </p>
+  </section>
+
+  <!-- 1. Color Palette Tokens -->
+  <section class="space-y-6">
+    <div class="flex items-baseline justify-between border-b border-[#3d352e]/50 pb-2">
+      <h2 class="font-display font-semibold text-2xl text-cream-100">1. Color Palette</h2>
+      <span class="text-xs font-mono text-cream-muted">Tailwind + CSS Custom Properties</span>
+    </div>
+
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+      <!-- Charcoal Base -->
+      <div class="card p-3 flex flex-col gap-2">
+        <div class="h-16 rounded border border-[#3d352e]" style="background-color: #1a1714;"></div>
+        <div>
+          <span class="font-medium text-xs text-cream-100 block">Charcoal Base</span>
+          <code class="font-mono text-[11px] text-cream-muted">#1a1714</code>
+          <span class="text-[10px] text-amber block font-mono">--color-base</span>
+        </div>
+      </div>
+
+      <!-- Base 900 (Deep Frame) -->
+      <div class="card p-3 flex flex-col gap-2">
+        <div class="h-16 rounded border border-[#3d352e]" style="background-color: #0f0d0b;"></div>
+        <div>
+          <span class="font-medium text-xs text-cream-100 block">Deepest Black</span>
+          <code class="font-mono text-[11px] text-cream-muted">#0f0d0b</code>
+          <span class="text-[10px] text-amber block font-mono">base-900</span>
+        </div>
+      </div>
+
+      <!-- Surface / Card (Base 200) -->
+      <div class="card p-3 flex flex-col gap-2">
+        <div class="h-16 rounded border border-[#3d352e]" style="background-color: #24201c;"></div>
+        <div>
+          <span class="font-medium text-xs text-cream-100 block">Velvet Surface</span>
+          <code class="font-mono text-[11px] text-cream-muted">#24201c</code>
+          <span class="text-[10px] text-amber block font-mono">base-200 / card</span>
+        </div>
+      </div>
+
+      <!-- Amber Primary -->
+      <div class="card p-3 flex flex-col gap-2">
+        <div class="h-16 rounded border border-amber/30" style="background-color: #d4a259;"></div>
+        <div>
+          <span class="font-medium text-xs text-cream-100 block">Amber Primary</span>
+          <code class="font-mono text-[11px] text-cream-muted">#d4a259</code>
+          <span class="text-[10px] text-amber block font-mono">--color-amber</span>
+        </div>
+      </div>
+
+      <!-- Amber Hover (400) -->
+      <div class="card p-3 flex flex-col gap-2">
+        <div class="h-16 rounded border border-amber/30" style="background-color: #e0b478;"></div>
+        <div>
+          <span class="font-medium text-xs text-cream-100 block">Amber Bright</span>
+          <code class="font-mono text-[11px] text-cream-muted">#e0b478</code>
+          <span class="text-[10px] text-amber block font-mono">amber-400</span>
+        </div>
+      </div>
+
+      <!-- Oxblood Accent -->
+      <div class="card p-3 flex flex-col gap-2">
+        <div class="h-16 rounded border border-red-950" style="background-color: #7c2d12;"></div>
+        <div>
+          <span class="font-medium text-xs text-cream-100 block">Oxblood Accent</span>
+          <code class="font-mono text-[11px] text-cream-muted">#7c2d12</code>
+          <span class="text-[10px] text-amber block font-mono">--color-oxblood</span>
+        </div>
+      </div>
+
+      <!-- Cream High-Contrast -->
+      <div class="card p-3 flex flex-col gap-2">
+        <div class="h-16 rounded border border-stone-400" style="background-color: #faf6ee;"></div>
+        <div>
+          <span class="font-medium text-xs text-cream-100 block">Cream Bright</span>
+          <code class="font-mono text-[11px] text-cream-muted">#faf6ee</code>
+          <span class="text-[10px] text-amber block font-mono">cream-100</span>
+        </div>
+      </div>
+
+      <!-- Cream Standard Body -->
+      <div class="card p-3 flex flex-col gap-2">
+        <div class="h-16 rounded border border-stone-500" style="background-color: #f5f0e6;"></div>
+        <div>
+          <span class="font-medium text-xs text-cream-100 block">Cream Body</span>
+          <code class="font-mono text-[11px] text-cream-muted">#f5f0e6</code>
+          <span class="text-[10px] text-amber block font-mono">--color-cream</span>
+        </div>
+      </div>
+
+      <!-- Cream Muted -->
+      <div class="card p-3 flex flex-col gap-2">
+        <div class="h-16 rounded border border-stone-600" style="background-color: #a89f91;"></div>
+        <div>
+          <span class="font-medium text-xs text-cream-100 block">Cream Muted</span>
+          <code class="font-mono text-[11px] text-cream-muted">#a89f91</code>
+          <span class="text-[10px] text-amber block font-mono">cream-muted</span>
+        </div>
+      </div>
+
+      <!-- Muted Gold -->
+      <div class="card p-3 flex flex-col gap-2">
+        <div class="h-16 rounded border border-yellow-800" style="background-color: #c59b4c;"></div>
+        <div>
+          <span class="font-medium text-xs text-cream-100 block">Muted Gold</span>
+          <code class="font-mono text-[11px] text-cream-muted">#c59b4c</code>
+          <span class="text-[10px] text-amber block font-mono">gold / secondary</span>
+        </div>
+      </div>
+
+      <!-- Deep Oxblood -->
+      <div class="card p-3 flex flex-col gap-2">
+        <div class="h-16 rounded border border-red-950" style="background-color: #5f2210;"></div>
+        <div>
+          <span class="font-medium text-xs text-cream-100 block">Deep Oxblood</span>
+          <code class="font-mono text-[11px] text-cream-muted">#5f2210</code>
+          <span class="text-[10px] text-amber block font-mono">oxblood-600</span>
+        </div>
+      </div>
+
+      <!-- Border Token -->
+      <div class="card p-3 flex flex-col gap-2">
+        <div class="h-16 rounded border border-stone-700" style="background-color: #3d352e;"></div>
+        <div>
+          <span class="font-medium text-xs text-cream-100 block">Border Brass</span>
+          <code class="font-mono text-[11px] text-cream-muted">#3d352e</code>
+          <span class="text-[10px] text-amber block font-mono">--color-border</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2. Typography Scale -->
+  <section class="space-y-6">
+    <div class="flex items-baseline justify-between border-b border-[#3d352e]/50 pb-2">
+      <h2 class="font-display font-semibold text-2xl text-cream-100">2. Typography Hierarchy</h2>
+      <span class="text-xs font-mono text-cream-muted">Fraunces (Display) • Inter (UI) • JetBrains Mono (Metadata)</span>
+    </div>
+
+    <div class="card p-6 divide-y divide-[#3d352e]/60 space-y-6">
+      
+      <!-- Display Hero -->
+      <div class="pt-2 flex flex-col md:flex-row md:items-baseline justify-between gap-4">
+        <div class="space-y-1">
+          <span class="text-xs font-mono text-amber">Display Hero — Fraunces 700</span>
+          <h1 class="font-display font-bold text-4xl sm:text-5xl text-cream-100 tracking-tight">
+            The Spirit of the Beehive
+          </h1>
+        </div>
+        <span class="text-xs font-mono text-cream-muted shrink-0">48px / 3rem • line-height 1.1</span>
+      </div>
+
+      <!-- Headline H1 -->
+      <div class="pt-6 flex flex-col md:flex-row md:items-baseline justify-between gap-4">
+        <div class="space-y-1">
+          <span class="text-xs font-mono text-amber">Heading 1 — Fraunces 600</span>
+          <h2 class="font-display font-semibold text-3xl text-cream-100">
+            Cinema in the Golden Age of Revival
+          </h2>
+        </div>
+        <span class="text-xs font-mono text-cream-muted shrink-0">30px / 1.875rem • Fraunces SemiBold</span>
+      </div>
+
+      <!-- Headline H2 -->
+      <div class="pt-6 flex flex-col md:flex-row md:items-baseline justify-between gap-4">
+        <div class="space-y-1">
+          <span class="text-xs font-mono text-amber">Heading 2 — Fraunces 600</span>
+          <h3 class="font-display font-semibold text-2xl text-cream-100">
+            Weekly Curated Masterpieces
+          </h3>
+        </div>
+        <span class="text-xs font-mono text-cream-muted shrink-0">24px / 1.5rem • Fraunces SemiBold</span>
+      </div>
+
+      <!-- Headline H3 -->
+      <div class="pt-6 flex flex-col md:flex-row md:items-baseline justify-between gap-4">
+        <div class="space-y-1">
+          <span class="text-xs font-mono text-amber">Heading 3 — Fraunces 600</span>
+          <h4 class="font-display font-semibold text-xl text-cream-200">
+            Community Discussions & Reviews
+          </h4>
+        </div>
+        <span class="text-xs font-mono text-cream-muted shrink-0">20px / 1.25rem</span>
+      </div>
+
+      <!-- Body Lead -->
+      <div class="pt-6 flex flex-col md:flex-row md:items-baseline justify-between gap-4">
+        <div class="space-y-1 max-w-2xl">
+          <span class="text-xs font-mono text-amber">Body Lead — Inter 500</span>
+          <p class="font-sans text-base text-cream-200 leading-relaxed">
+            In Castile in 1940, in the wake of the Spanish Civil War, a travelling cinema brings James Whale’s Frankenstein to a remote village, forever altering a young girl's perception of reality.
+          </p>
+        </div>
+        <span class="text-xs font-mono text-cream-muted shrink-0">16px / 1rem • Inter Medium</span>
+      </div>
+
+      <!-- Body Regular -->
+      <div class="pt-6 flex flex-col md:flex-row md:items-baseline justify-between gap-4">
+        <div class="space-y-1 max-w-2xl">
+          <span class="text-xs font-mono text-amber">Body Regular — Inter 400</span>
+          <p class="font-sans text-sm text-cream-300 leading-normal">
+            Track films you want to watch, create custom collections, write detailed reviews, and share discoveries with fellow cinema enthusiasts around the world.
+          </p>
+        </div>
+        <span class="text-xs font-mono text-cream-muted shrink-0">14px / 0.875rem • Inter Regular</span>
+      </div>
+
+      <!-- Metadata & Code -->
+      <div class="pt-6 flex flex-col md:flex-row md:items-baseline justify-between gap-4">
+        <div class="space-y-2">
+          <span class="text-xs font-mono text-amber">Metadata & Tags — JetBrains Mono</span>
+          <div class="flex flex-wrap items-center gap-3">
+            <span class="badge badge-amber">★ 8.9 CRITIC SCORE</span>
+            <span class="badge badge-oxblood">SPOILER ALERT</span>
+            <span class="badge badge-muted">RUNTIME 1h 38m</span>
+            <span class="font-mono text-xs text-cream-muted">RELEASED OCT 1973</span>
+          </div>
+        </div>
+        <span class="text-xs font-mono text-cream-muted shrink-0">12px / 0.75rem • JetBrains Mono</span>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- 3. Button Component Variants -->
+  <section class="space-y-6">
+    <div class="flex items-baseline justify-between border-b border-[#3d352e]/50 pb-2">
+      <h2 class="font-display font-semibold text-2xl text-cream-100">3. Button Variants</h2>
+      <span class="text-xs font-mono text-cream-muted">Micro-interactions: 150ms transitions, focus-rings</span>
+    </div>
+
+    <div class="card p-6 flex flex-wrap items-center gap-4">
+      <button type="button" class="btn-primary">
+        Primary Action
+      </button>
+
+      <button type="button" class="btn-primary">
+        <svg class="w-4 h-4 fill-current" viewBox="0 0 20 20" aria-hidden="true">
+          <path d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z"/>
+        </svg>
+        Watch Trailer
+      </button>
+
+      <button type="button" class="btn-secondary">
+        Secondary Action
+      </button>
+
+      <button type="button" class="btn-ghost">
+        Ghost Action
+      </button>
+
+      <button type="button" class="btn-oxblood">
+        <svg class="w-4 h-4 fill-current" viewBox="0 0 20 20" aria-hidden="true">
+          <path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd"/>
+        </svg>
+        Oxblood Favorite
+      </button>
+
+      <button type="button" class="btn-primary" disabled aria-disabled="true">
+        Disabled Primary
+      </button>
+
+      <button type="button" class="btn-secondary" disabled aria-disabled="true">
+        Disabled Secondary
+      </button>
+    </div>
+  </section>
+
+  <!-- 4. Reusable Poster Card Component Demonstration -->
+  <section class="space-y-6">
+    <div class="flex items-baseline justify-between border-b border-[#3d352e]/50 pb-2">
+      <h2 class="font-display font-semibold text-2xl text-cream-100">4. Poster Card Component</h2>
+      <span class="text-xs font-mono text-cream-muted">Aspect 2:3 • Warm-tinted shadow • Hover lift</span>
+    </div>
+
+    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
+      
+      <!-- Card 1: Sample with TMDB poster -->
+      {% include "components/poster_card.html" with title="Tokyo Story" year="1953" rating=8.6 poster_url="https://image.tmdb.org/t/p/w500/g2nh0lA82g267fLd42yM9f5F4wz.jpg" item_type="movie" %}
+
+      <!-- Card 2: Sample with classic poster -->
+      {% include "components/poster_card.html" with title="Stalker" year="1979" rating=8.1 poster_url="https://image.tmdb.org/t/p/w500/w95015b6V1tq3XQ68nEwZ8YJ5wR.jpg" item_type="movie" %}
+
+      <!-- Card 3: Sample show -->
+      {% include "components/poster_card.html" with title="Dekalog" year="1989" rating=9.0 poster_url="https://image.tmdb.org/t/p/w500/6iYcM875z7oQe1k0H7C3L7a67W5.jpg" item_type="show" %}
+
+      <!-- Card 4: High score movie -->
+      {% include "components/poster_card.html" with title="Mirror" year="1975" rating=8.3 poster_url="https://image.tmdb.org/t/p/w500/7V9N2n7HwV9wB8Y1eLp4QvFqg1P.jpg" item_type="movie" %}
+
+      <!-- Card 5: Poster fallback (Simulating absent poster_url) -->
+      {% include "components/poster_card.html" with title="La Jetée" year="1962" rating=8.2 item_type="movie" %}
+
+      <!-- Card 6: Poster fallback (Unrated upcoming film) -->
+      {% include "components/poster_card.html" with title="In the Mood for Love" year="2000" item_type="movie" %}
+
+    </div>
+  </section>
+
+  <!-- 5. Form Elements -->
+  <section class="space-y-6">
+    <div class="flex items-baseline justify-between border-b border-[#3d352e]/50 pb-2">
+      <h2 class="font-display font-semibold text-2xl text-cream-100">5. Form Inputs & Controls</h2>
+      <span class="text-xs font-mono text-cream-muted">Charcoal surface • Amber focus rings</span>
+    </div>
+
+    <div class="card p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+      
+      <!-- Text Input -->
+      <div class="space-y-2">
+        <label for="preview-text" class="block text-xs font-mono uppercase tracking-wider text-cream-300">
+          Search Film or Director
+        </label>
+        <input type="text" id="preview-text" class="input" placeholder="e.g. Andrei Tarkovsky, 1979...">
+        <p class="text-xs text-cream-muted">Instant live search across TMDB archives.</p>
+      </div>
+
+      <!-- Select Dropdown -->
+      <div class="space-y-2">
+        <label for="preview-select" class="block text-xs font-mono uppercase tracking-wider text-cream-300">
+          Curated Genre Filter
+        </label>
+        <select id="preview-select" class="input">
+          <option value="">All Genres</option>
+          <option value="noir">Film Noir</option>
+          <option value="neo-realism">Italian Neorealism</option>
+          <option value="french-new-wave">French New Wave</option>
+          <option value="sci-fi">Philosophical Sci-Fi</option>
+        </select>
+      </div>
+
+      <!-- Textarea -->
+      <div class="md:col-span-2 space-y-2">
+        <label for="preview-textarea" class="block text-xs font-mono uppercase tracking-wider text-cream-300">
+          Film Review / Editorial Notes
+        </label>
+        <textarea id="preview-textarea" rows="3" class="input" placeholder="Write your cinematic impressions, cinematography notes, or thematic breakdown..."></textarea>
+      </div>
+
+      <!-- Checkbox & Toggles -->
+      <div class="flex items-center gap-6 md:col-span-2 pt-2">
+        <label class="inline-flex items-center gap-2 cursor-pointer">
+          <input type="checkbox" class="w-4 h-4 rounded border-[#3d352e] bg-base-900 text-amber focus:ring-amber/40 focus:ring-offset-0">
+          <span class="text-sm text-cream-200">Contains spoilers</span>
+        </label>
+
+        <label class="inline-flex items-center gap-2 cursor-pointer">
+          <input type="checkbox" checked class="w-4 h-4 rounded border-[#3d352e] bg-base-900 text-amber focus:ring-amber/40 focus:ring-offset-0">
+          <span class="text-sm text-cream-200">Add to public watchlist</span>
+        </label>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- 6. Spacing Scale Visualization -->
+  <section class="space-y-6">
+    <div class="flex items-baseline justify-between border-b border-[#3d352e]/50 pb-2">
+      <h2 class="font-display font-semibold text-2xl text-cream-100">6. Spacing Scale Rhythm</h2>
+      <span class="text-xs font-mono text-cream-muted">Editorial standard increments</span>
+    </div>
+
+    <div class="card p-6 space-y-3 font-mono text-xs">
+      <div class="flex items-center gap-4">
+        <span class="w-24 text-cream-muted">xs (4px):</span>
+        <div class="h-4 bg-amber/40 rounded" style="width: 4px;"></div>
+        <span class="text-cream-muted">--space-xs</span>
+      </div>
+      <div class="flex items-center gap-4">
+        <span class="w-24 text-cream-muted">sm (8px):</span>
+        <div class="h-4 bg-amber/40 rounded" style="width: 8px;"></div>
+        <span class="text-cream-muted">--space-sm</span>
+      </div>
+      <div class="flex items-center gap-4">
+        <span class="w-24 text-cream-muted">md (16px):</span>
+        <div class="h-4 bg-amber/50 rounded" style="width: 16px;"></div>
+        <span class="text-cream-muted">--space-md</span>
+      </div>
+      <div class="flex items-center gap-4">
+        <span class="w-24 text-cream-muted">lg (24px):</span>
+        <div class="h-4 bg-amber/60 rounded" style="width: 24px;"></div>
+        <span class="text-cream-muted">--space-lg</span>
+      </div>
+      <div class="flex items-center gap-4">
+        <span class="w-24 text-cream-muted">xl (32px):</span>
+        <div class="h-4 bg-amber/70 rounded" style="width: 32px;"></div>
+        <span class="text-cream-muted">--space-xl</span>
+      </div>
+      <div class="flex items-center gap-4">
+        <span class="w-24 text-cream-muted">2xl (48px):</span>
+        <div class="h-4 bg-amber/80 rounded" style="width: 48px;"></div>
+        <span class="text-cream-muted">--space-2xl</span>
+      </div>
+      <div class="flex items-center gap-4">
+        <span class="w-24 text-cream-muted">3xl (64px):</span>
+        <div class="h-4 bg-amber rounded" style="width: 64px;"></div>
+        <span class="text-cream-muted">--space-3xl</span>
+      </div>
+    </div>
+  </section>
+
+</div>
+{% endblock %}

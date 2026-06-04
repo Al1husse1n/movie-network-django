@@ -1,0 +1,106 @@
+{% load static %}<!DOCTYPE html>
+<html lang="en" class="dark">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Movie Network{% endblock %}</title>
+    <meta name="description" content="{% block meta_description %}A social platform for film lovers.{% endblock %}">
+
+    <!-- Fonts: Fraunces (Display), Inter (UI), JetBrains Mono (Metadata) via Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+    <!-- Tailwind via CDN with Cinema Foyer custom config -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              base: {
+                DEFAULT: "#1a1714",
+                50: "#f5f0e6",
+                100: "#2d2823",
+                200: "#24201c",
+                800: "#141210",
+                900: "#0f0d0b",
+              },
+              amber: {
+                DEFAULT: "#d4a259",
+                300: "#edd09e",
+                400: "#e0b478",
+                500: "#d4a259",
+                600: "#b8863f",
+                700: "#8c6226",
+              },
+              oxblood: {
+                DEFAULT: "#7c2d12",
+                500: "#991b1b",
+                600: "#5f2210",
+                700: "#451608",
+              },
+              cream: {
+                DEFAULT: "#f5f0e6",
+                100: "#faf6ee",
+                200: "#f5f0e6",
+                300: "#ede4d4",
+                400: "#e8e0d0",
+                muted: "#a89f91",
+              },
+              gold: {
+                DEFAULT: "#c59b4c",
+                hover: "#d4aa59",
+                muted: "#a88238",
+              },
+            },
+            fontFamily: {
+              display: ["Fraunces", "Georgia", "serif"],
+              sans: ["Inter", "-apple-system", "BlinkMacSystemFont", "Segoe UI", "Roboto", "sans-serif"],
+              mono: ["JetBrains Mono", "ui-monospace", "monospace"],
+            },
+            borderRadius: {
+              DEFAULT: "4px",
+              md: "6px",
+              lg: "8px",
+            },
+            boxShadow: {
+              warm: "0 10px 25px -5px rgba(26, 15, 10, 0.6), 0 8px 10px -6px rgba(26, 15, 10, 0.6)",
+              "warm-lg": "0 20px 30px -10px rgba(15, 13, 11, 0.8), 0 10px 15px -5px rgba(212, 162, 89, 0.15)",
+              "warm-glow": "0 0 25px rgba(212, 162, 89, 0.25)",
+            },
+          },
+        },
+      };
+    </script>
+
+    <!-- HTMX and Alpine.js (Foundation for progressive enhancement) -->
+    <script src="https://unpkg.com/htmx.org@1.9.12"></script>
+    <script defer src="https://unpkg.com/alpinejs@3.14.1/dist/cdn.min.js"></script>
+
+    <!-- Design System CSS Tokens & Custom Styles -->
+    <link rel="stylesheet" href="{% static 'css/app.css' %}">
+    {% block extra_head %}{% endblock %}
+  </head>
+  <body class="bg-base text-cream font-sans antialiased min-h-screen flex flex-col selection:bg-amber selection:text-base-900">
+    {% include "components/navbar.html" %}
+
+    {% if messages %}
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 w-full" aria-live="polite">
+        {% for message in messages %}
+          <div class="p-3 mb-2 rounded-md text-sm border flex items-center justify-between {% if message.tags == 'error' %}bg-oxblood/30 border-oxblood text-red-200{% elif message.tags == 'success' %}bg-amber/20 border-amber text-amber-200{% else %}bg-base-100 border-[#3d352e] text-cream-300{% endif %}">
+            <span>{{ message }}</span>
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    <main class="flex-1">
+      {% block content %}{% endblock %}
+    </main>
+
+    {% include "components/footer.html" %}
+    {% block extra_scripts %}{% endblock %}
+  </body>
+</html>

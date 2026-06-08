@@ -25,5 +25,7 @@ urlpatterns = [
     path("updateWP/", views.update_wp, name="updatewp"),
     path("updateWatchlist/", views.update_watchlist, name="updateWatchlist"),
     path("communities/", views.communities, name="communities"),
+    path("communities/join/", views.join_community, name="joinCommunity"),
+    path("communities/leave/", views.leave_community, name="leaveCommunity"),
     path("getcommunity/<str:community>", views.get_community_description, name="getcommunity"),
 ]

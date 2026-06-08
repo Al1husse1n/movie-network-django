@@ -1,156 +1,311 @@
+{% extends "base.html" %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GreenBird - Profile</title>
-    <link rel="stylesheet" href="{% static 'myapp/profile.css' %}">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" />
-</head>
-<body>
-    <header class="header">
-        <button id="menuToggle" class="menu-toggle" aria-label="Open menu" aria-expanded="false" aria-controls="sidebar-left">☰</button>
-        <div class="logo">GreenBird</div>
-        <form action="{% url 'myapp:logout' %}">
-            <button class="logout-btn">Logout</button>
-        </form>
-    </header>
 
-    <!-- Main Content Container -->
-    <div class="main-container">
-        <!-- Left Sidebar - Navigation (similar to homepage) -->
-        <aside id="sidebar-left" class="sidebar-left">
-            <nav>
-                <ul>
-                    <li><a href="{% url 'myapp:home' %}">Home</a></li>
-                    <li><a href="#">Explore</a></li>
-                    <li><a href="/communities/">Communities</a></li>
-                    <li><a href="#">Notifications</a></li>
-                    <li class="active"><a href="#">Profile</a></li>
-                </ul>
-            </nav>
-        </aside>
+{% block title %}@{{ username }} — Profile — Movie Network{% endblock %}
+{% block meta_description %}{{ username }}'s profile, curated Top 5 films, series, and community discussions on Movie Network.{% endblock %}
 
-        <!-- Center: Profile Content -->
-        <main class="profile-content">
-            <!-- Profile Header -->
-            <section class="profile-header">
-                <!-- Cover Photo (customize background image here) -->
-                <div class="cover-photo"></div>
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16 space-y-12">
 
-                <!-- Profile Info -->
-                <div class="profile-info">
-                    <img src=""  class="profile-pic">
-                    <div class="profile-details">
-                        <h1>@{{username}}</h1>
-                        <p class="bio">{{bio}}</p>
-
-                        <div class="follow-stats">
-                            <span><strong>{{following_amount}}</strong> Following</span>
-                            <span><strong>{{follower_amount}}</strong> Followers</span>
-                        </div>
-
-                        <div class="profile-actions">
-                            <a href="{% url 'myapp:watchlist' %}" class="btn watchlist-btn" id="watchlist-btn">Watchlist</a>
-                            <a href="{% url 'myapp:editProfile' %}" class="btn edit-profile-btn">Edit Profile</a>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <section class="favorites">
-                <!-- Top 5 Shows -->
-                <div class="favorites-block">
-                    <h2>Top 5 Shows</h2>
-                    <ol>
-                        {% for show in top_5_shows %}
-                        {% if not show.tmdb_id %}
-                        <li>{{show.name}}</li>
-                        {% else %}
-                        <li><a href="{% url 'myapp:showdescription' show.tmdb_id %}">{{show.name}}</a></li>
-                        {% endif %}
-                        {% endfor %}
-                    </ol>
-                </div>
-
-                <!-- Top 5 Movies -->
-                <div class="favorites-block">
-                    <h2>Top 5 Movies</h2>
-                    <ol>
-                        {% for movie in top_5_movies %}
-                        {% if not movie.tmdb_id %}
-                        <li>{{movie.title}}</li>
-                        {% else %}
-                        <li><a href="{% url 'myapp:moviedescription' movie.tmdb_id %}">{{movie.title}}</a></li>
-                        {% endif %}
-                        {% endfor %}
-                    </ol>
-                </div>
-
-                <!-- Weekly Pick -->
-                <div class="favorites-block weekly-pick">
-                    <h2>Weekly Pick</h2>
-                    {% if not weekly_pick.id %}
-                    <p><strong>{{weekly_pick.name}}</strong></p>
-                    {% else %}
-                    <p><a href="{% url 'myapp:moviedescription' weekly_pick.id %}"><strong>{{weekly_pick.name}}</strong></a></p>
-                    {% endif %}
-                </div>
-            </section>
-
-            <!-- Posts Section -->
-            <section class="posts-section">
-                <h2>Posts</h2>
-                <div id="postsContainer">
-                {% for post in posts %}
-                    <div class="post" data-index="{{ forloop.counter0 }}">
-                        <p>{{post.content}}</p>
-                        <span class="post-date">{{post.timestamp}}</span>
-                    </div>
-                {% endfor %}
-                </div>
-
-                <div class="posts-controls">
-                    <button id="loadMorePosts" class="load-more-btn">
-                        <span class="material-symbols-outlined">
-                            keyboard_arrow_down
-                        </span>
-                    </button>
-                    <button id="showLessPosts" class="show-less-btn">
-                        <span class="material-symbols-outlined">
-                            keyboard_arrow_up
-                        </span>
-                    </button>
-                </div>
-            </section>
-        </main>
-        <aside class="sidebar-right">
-            <div class="trends">
-                <h3>Trends for you</h3>
-                <ul>
-                    <li>#GreenAI</li>
-                    <li>#OpenSource</li>
-                    <li>#Design</li>
-                </ul>
-            </div>
-        </aside>
+  <!-- Cover & Header Section -->
+  <section class="relative">
+    <!-- Cinematic Cover Banner -->
+    <div class="h-44 sm:h-56 md:h-64 w-full rounded-b-xl overflow-hidden relative bg-gradient-to-r from-[#24140e] via-[#1a1714] to-[#2d120a] border-x border-b border-[#3d352e]/70 shadow-warm">
+      <div class="absolute inset-0 bg-gradient-to-t from-base via-transparent to-black/40"></div>
+      <!-- Subtle Art Deco Watermark Pattern -->
+      <div class="absolute inset-0 opacity-10 bg-[radial-gradient(#d4a259_1px,transparent_1px)] [background-size:16px_16px]"></div>
     </div>
 
-    <div id="asideOverlay" aria-hidden="true"></div>
-    <script src="{% static 'myapp/profile.js' %}"></script>
-    <script>
-        // Ensure Watchlist button always navigates to watchlist page
-        (function(){
-            const btn = document.getElementById('watchlist-btn');
-            if (btn) {
-                btn.addEventListener('click', function(e){
-                    // fallback navigation if anchor prevented elsewhere
-                    const href = btn.getAttribute('href') || '/watchlist/';
-                    window.location.href = href;
-                });
-            }
-        })();
-    </script>
-</body>
-</html>
+    <!-- Overlapping Profile Identity Card -->
+    <div class="card -mt-16 sm:-mt-20 relative z-10 p-6 sm:p-8 bg-base-200/95 backdrop-blur-md border border-[#3d352e]/80 shadow-warm-lg">
+      <div class="flex flex-col md:flex-row md:items-end justify-between gap-6">
+
+        <!-- Avatar & Details -->
+        <div class="flex flex-col sm:flex-row items-center sm:items-end gap-6 text-center sm:text-left">
+          <!-- Initial-Based Circular Avatar -->
+          <div class="w-24 h-24 sm:w-28 sm:h-28 rounded-full bg-amber/20 border-2 border-amber/60 text-amber font-mono font-bold text-3xl sm:text-4xl flex items-center justify-center shadow-warm-lg shrink-0 ring-4 ring-base-200">
+            {{ username|slice:":1"|upper }}
+          </div>
+
+          <div class="space-y-2">
+            <div class="flex flex-wrap items-center justify-center sm:justify-start gap-3">
+              <h1 class="font-display font-bold text-2xl sm:text-3xl text-cream-100 tracking-tight">
+                @{{ username }}
+              </h1>
+              <span class="badge badge-amber text-[10px]">
+                MEMBER
+              </span>
+            </div>
+
+            <p class="font-sans text-sm text-cream-200 max-w-xl leading-relaxed">
+              {{ bio }}
+            </p>
+
+            <!-- Metadata & Follow Counts -->
+            <div class="flex flex-wrap items-center justify-center sm:justify-start gap-4 pt-1 text-xs font-mono text-cream-muted">
+              <div>
+                <span class="font-semibold text-cream-100">{{ following_amount }}</span>
+                <span class="text-cream-muted/80">Following</span>
+              </div>
+              <span class="text-[#3d352e]" aria-hidden="true">•</span>
+              <div>
+                <span class="font-semibold text-cream-100">{{ follower_amount }}</span>
+                <span class="text-cream-muted/80">Followers</span>
+              </div>
+              <span class="text-[#3d352e]" aria-hidden="true">•</span>
+              <div>
+                <span>Joined {{ user.joined_in|date:"M Y"|default:"2026" }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Profile Actions -->
+        <div class="flex items-center justify-center gap-3 shrink-0">
+          <a href="{% url 'myapp:watchlist' %}" class="btn-secondary text-xs sm:text-sm">
+            <svg class="w-4 h-4 fill-current mr-1" viewBox="0 0 20 20" aria-hidden="true">
+              <path d="M5 4a2 2 0 012-2h6a2 2 0 012 2v14l-5-2.5L5 18V4z"/>
+            </svg>
+            Watchlist
+          </a>
+          <a href="{% url 'myapp:editProfile' %}" class="btn-primary text-xs sm:text-sm">
+            <svg class="w-4 h-4 fill-current mr-1" viewBox="0 0 20 20" aria-hidden="true">
+              <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z"/>
+            </svg>
+            Edit Profile
+          </a>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- Pick of the Week Section (If set) -->
+  {% if weekly_pick %}
+    <section class="card p-6 sm:p-8 border border-amber/30 bg-gradient-to-br from-base-200 to-base-900 shadow-warm relative overflow-hidden">
+      <div class="flex flex-col md:flex-row items-center gap-6 sm:gap-8">
+        <!-- Visual Spotlight -->
+        <div class="w-32 sm:w-40 aspect-[2/3] rounded-md overflow-hidden bg-base-900 border border-amber/40 shadow-warm shrink-0 relative group">
+          {% if weekly_pick.poster_url %}
+            <img src="{{ weekly_pick.poster_url }}"
+                 alt="{{ weekly_pick.title }}"
+                 class="w-full h-full object-cover" />
+          {% else %}
+            <div class="w-full h-full flex flex-col items-center justify-center p-3 text-center bg-base-900 text-amber">
+              <svg class="w-8 h-8 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 4v16M17 4v16M3 8h4m10 0h4M3 12h18M3 16h4m10 0h4M4 20h16a1 1 0 001-1V5a1 1 0 00-1-1H4a1 1 0 00-1 1v14a1 1 0 001 1z" />
+              </svg>
+              <span class="font-display text-xs text-cream-200">{{ weekly_pick.title }}</span>
+            </div>
+          {% endif %}
+        </div>
+
+        <!-- Spotlight Content -->
+        <div class="space-y-3 flex-1 text-center md:text-left">
+          <div class="inline-flex items-center gap-2 px-2.5 py-0.5 rounded bg-amber/15 border border-amber/40 text-amber text-[11px] font-mono uppercase tracking-wider">
+            ★ Pick of the Week
+          </div>
+          <h2 class="font-display font-bold text-2xl sm:text-3xl text-cream-100 tracking-tight">
+            {% if weekly_pick.href %}
+              <a href="{{ weekly_pick.href }}" class="hover:text-amber transition-colors">
+                {{ weekly_pick.title }}
+              </a>
+            {% else %}
+              {{ weekly_pick.title }}
+            {% endif %}
+          </h2>
+          {% if weekly_pick.overview %}
+            <p class="font-sans text-sm text-cream-300 leading-relaxed max-w-2xl">
+              {{ weekly_pick.overview|truncatewords:45 }}
+            </p>
+          {% endif %}
+          <div class="pt-1">
+            {% if weekly_pick.href %}
+              <a href="{{ weekly_pick.href }}" class="btn-ghost text-xs px-0 hover:bg-transparent hover:text-amber underline underline-offset-4">
+                View {% if weekly_pick.item_type == "show" %}series{% else %}film{% endif %} overview & screening details &rarr;
+              </a>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </section>
+  {% endif %}
+
+  <!-- Top 5 Movies Section -->
+  <section class="space-y-6">
+    <div class="flex items-center justify-between border-b border-[#3d352e]/50 pb-3">
+      <div class="flex items-center gap-3">
+        <h2 class="font-display font-semibold text-xl sm:text-2xl text-cream-100">
+          Top 5 Films
+        </h2>
+        <span class="badge badge-amber text-[10px]">
+          SIGNATURE LIST
+        </span>
+      </div>
+      <a href="{% url 'myapp:editProfile' %}" class="text-xs font-mono text-cream-muted hover:text-amber transition-colors">
+        Edit List
+      </a>
+    </div>
+
+    {% if top_5_movies.0 or top_5_movies.1 or top_5_movies.2 or top_5_movies.3 or top_5_movies.4 %}
+      <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4 sm:gap-6">
+        {% for movie in top_5_movies %}
+          {% if movie %}
+            {% include "components/poster_card.html" with title=movie.title poster_url=movie.poster_url year=movie.year rating=movie.rating href=movie.href item_type="movie" %}
+          {% endif %}
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="card p-8 text-center space-y-3 border-dashed border-[#3d352e]">
+        <p class="text-sm font-sans text-cream-muted">
+          No Top 5 films curated yet. Select your 5 signature films to display on your marquee.
+        </p>
+        <a href="{% url 'myapp:editProfile' %}" class="btn-secondary text-xs inline-flex">
+          Curate Top 5 Films
+        </a>
+      </div>
+    {% endif %}
+  </section>
+
+  <!-- Top 5 Shows Section -->
+  <section class="space-y-6">
+    <div class="flex items-center justify-between border-b border-[#3d352e]/50 pb-3">
+      <div class="flex items-center gap-3">
+        <h2 class="font-display font-semibold text-xl sm:text-2xl text-cream-100">
+          Top 5 Television Series
+        </h2>
+        <span class="badge badge-muted text-[10px]">
+          SERIES
+        </span>
+      </div>
+      <a href="{% url 'myapp:editProfile' %}" class="text-xs font-mono text-cream-muted hover:text-amber transition-colors">
+        Edit List
+      </a>
+    </div>
+
+    {% if top_5_shows.0 or top_5_shows.1 or top_5_shows.2 or top_5_shows.3 or top_5_shows.4 %}
+      <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4 sm:gap-6">
+        {% for show in top_5_shows %}
+          {% if show %}
+            {% include "components/poster_card.html" with title=show.title poster_url=show.poster_url year=show.year rating=show.rating href=show.href item_type="show" %}
+          {% endif %}
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="card p-8 text-center space-y-3 border-dashed border-[#3d352e]">
+        <p class="text-sm font-sans text-cream-muted">
+          No Top 5 television series curated yet. Showcase your favorite series here.
+        </p>
+        <a href="{% url 'myapp:editProfile' %}" class="btn-secondary text-xs inline-flex">
+          Curate Top 5 Series
+        </a>
+      </div>
+    {% endif %}
+  </section>
+
+  <!-- Community Posts Section -->
+  <section class="space-y-6" x-data="{ visibleCount: 5 }">
+    <div class="flex items-center justify-between border-b border-[#3d352e]/50 pb-3">
+      <div class="flex items-center gap-3">
+        <h2 class="font-display font-semibold text-xl sm:text-2xl text-cream-100">
+          Community Discussions & Reviews
+        </h2>
+        <span class="badge badge-muted text-[10px]">
+          {{ posts|length }}
+        </span>
+      </div>
+    </div>
+
+    {% if posts %}
+      <div class="space-y-4">
+        {% for post in posts %}
+          <article class="card p-5 sm:p-6 space-y-3 border border-[#3d352e]/80 shadow-warm"
+                   x-show="{{ forloop.counter0 }} < visibleCount"
+                   x-cloak
+                   x-data="{ revealed: false }">
+
+            <!-- Post Header -->
+            <div class="flex flex-wrap items-center justify-between gap-2 border-b border-[#3d352e]/40 pb-2.5">
+              <div class="flex items-center gap-2">
+                <a href="{% url 'myapp:getcommunity' post.community.name %}" class="text-xs font-mono uppercase tracking-wider text-amber hover:text-amber-400 font-semibold transition-colors">
+                  c/{{ post.community.name }}
+                </a>
+                {% if post.spoiler %}
+                  <span class="badge badge-oxblood text-[9px] px-1.5 py-0.2">
+                    SPOILER
+                  </span>
+                {% endif %}
+              </div>
+              <time datetime="{{ post.timestamp|date:'c' }}" class="text-xs font-mono text-cream-muted">
+                {{ post.timestamp|date:"M j, Y • g:i a" }}
+              </time>
+            </div>
+
+            <!-- Post Content with Spoiler Blur Handling -->
+            {% if post.spoiler %}
+              <div class="relative py-1">
+                <!-- Blurred Content until revealed -->
+                <p class="font-sans text-sm text-cream-200 leading-relaxed transition-all duration-300"
+                   :class="revealed ? '' : 'filter blur-sm select-none opacity-40 pointer-events-none'">
+                  {{ post.content }}
+                </p>
+
+                <!-- Spoiler Overlay Prompt -->
+                <div x-show="!revealed"
+                     class="absolute inset-0 flex items-center justify-center bg-base-900/60 rounded p-4 text-center cursor-pointer hover:bg-base-900/80 transition-colors"
+                     @click="revealed = true"
+                     role="button"
+                     tabindex="0"
+                     @keydown.enter="revealed = true"
+                     @keydown.space.prevent="revealed = true"
+                     aria-label="Reveal spoiler content">
+                  <span class="inline-flex items-center gap-2 text-xs font-mono text-red-300 bg-oxblood/30 border border-oxblood-500/60 px-3 py-1.5 rounded shadow-sm">
+                    <svg class="w-4 h-4 fill-current text-red-400" viewBox="0 0 20 20" aria-hidden="true">
+                      <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                    </svg>
+                    Post contains spoilers. Click to reveal.
+                  </span>
+                </div>
+              </div>
+            {% else %}
+              <p class="font-sans text-sm text-cream-200 leading-relaxed py-1">
+                {{ post.content }}
+              </p>
+            {% endif %}
+
+          </article>
+        {% endfor %}
+      </div>
+
+      <!-- Pagination / Expand Controls -->
+      {% if posts|length > 5 %}
+        <div class="flex items-center justify-center gap-3 pt-4">
+          <button type="button"
+                  class="btn-secondary text-xs"
+                  x-show="visibleCount < {{ posts|length }}"
+                  @click="visibleCount += 5">
+            Load More Posts ({{ posts|length }} total)
+          </button>
+          <button type="button"
+                  class="btn-ghost text-xs"
+                  x-show="visibleCount > 5"
+                  @click="visibleCount = 5">
+            Show Less
+          </button>
+        </div>
+      {% endif %}
+
+    {% else %}
+      <div class="card p-8 text-center space-y-3 border border-[#3d352e]/60">
+        <p class="text-sm font-sans text-cream-muted">
+          No community discussions or reviews published yet.
+        </p>
+        <a href="{% url 'myapp:communities' %}" class="btn-secondary text-xs inline-flex">
+          Explore Communities
+        </a>
+      </div>
+    {% endif %}
+  </section>
+
+</div>
+{% endblock %}

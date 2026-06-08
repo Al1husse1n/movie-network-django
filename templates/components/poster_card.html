@@ -9,16 +9,16 @@
     - item_type: (string, optional) 'movie' or 'show'
 {% endcomment %}
 <div class="group relative flex flex-col w-full">
-  <a href="{{ href|default:'#' }}" 
+  <a href="{{ href|default:'#' }}"
      class="block relative aspect-[2/3] w-full rounded-md overflow-hidden bg-base-900 border border-[#3d352e]/80 shadow-warm group-hover:shadow-warm-lg group-hover:border-amber/60 group-hover:-translate-y-1.5 transition-all duration-200 ease-out focus-ring">
-    
+
     {% if poster_url %}
-      <img src="{{ poster_url }}" 
-           alt="{{ title }}" 
+      <img src="{{ poster_url }}"
+           alt="{{ title }}"
            loading="lazy"
            class="w-full h-full object-cover transition-transform duration-300 ease-out group-hover:scale-[1.03]"
            onerror="this.style.display='none'; this.nextElementSibling.classList.remove('hidden');" />
-      
+
       <!-- Fallback shown if image fails to load -->
       <div class="hidden absolute inset-0 flex flex-col items-center justify-center p-4 text-center bg-gradient-to-b from-base-200 to-base-900 border border-[#3d352e]">
         <svg class="w-10 h-10 text-amber/40 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">

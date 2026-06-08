@@ -1,41 +1,459 @@
-{% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Communities</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+{% extends "base.html" %}
 
-    <link rel="stylesheet" href="{% static 'myapp/communities.css' %}">
-</head>
-<body>
+{% block title %}Communities — Movie Network{% endblock %}
+{% block meta_description %}Discover and join cinema communities, discussion salons, and film clubs curated by cinephiles.{% endblock %}
 
-<main class="content">
-    <h2 class="page-title">Find Communities</h2>
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 md:py-14 space-y-10" x-data="communitiesApp()">
 
-    <div class="search-row">
-        <input
-            type="text"
-            id="searchInput"
-            placeholder="Search communities..."
-            class="search-input"
-        >
-        <button id="searchBtn" class="search-btn">Search</button>
+  <!-- Hidden CSRF token element for getCookie fallback -->
+  {% csrf_token %}
+
+  <!-- Page Header -->
+  <header class="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-[#3d352e]/70 pb-8">
+    <div class="space-y-2">
+      <span class="text-xs font-mono uppercase tracking-widest text-amber block">
+        Discover
+      </span>
+      <h1 class="font-display font-bold text-3xl sm:text-4xl lg:text-5xl text-cream-100 tracking-tight">
+        Communities
+      </h1>
+      <p class="font-sans text-sm text-cream-muted max-w-xl">
+        Explore cinema salons, director focus clubs, and film discussion circles curated by fellow cinephiles.
+      </p>
     </div>
 
-    <!-- Placeholder / Alternative text -->
-    <p id="placeholderText" class="placeholder-text">
-        search for communities
+    <!-- Quick stats / Create community hint -->
+    <div class="flex items-center gap-3 self-start md:self-end">
+      <a href="{% url 'myapp:home' %}"
+         class="btn-secondary text-xs inline-flex items-center gap-2 focus-ring"
+         title="Community creation is coming soon in the foyer">
+        <svg class="w-4 h-4 text-amber" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+        </svg>
+        <span>Create Community</span>
+        <span class="badge-muted text-[10px] py-0 px-1.5 ml-1 font-mono">Soon</span>
+      </a>
+    </div>
+  </header>
+
+  <!-- Search & Filter Controls -->
+  <section class="card p-4 sm:p-6 bg-base-200/80 border border-[#3d352e] shadow-warm" aria-label="Community search">
+    <form @submit.prevent="search()" class="flex flex-col sm:flex-row gap-3 items-stretch">
+      <div class="relative flex-1">
+        <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-cream-muted">
+          <svg class="w-5 h-5 text-cream-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+          </svg>
+        </div>
+        <input
+          type="text"
+          id="communitySearchInput"
+          x-model="searchQuery"
+          @input.debounce.300ms="search()"
+          placeholder="Search communities by name (e.g. Noir, Sci-Fi, Hitchcock)..."
+          class="input pl-11 pr-10 w-full font-sans text-sm text-cream-100 placeholder:text-cream-muted/60 bg-base-900 border-[#3d352e] focus:border-amber focus-ring"
+          autocomplete="off"
+        />
+        <!-- Clear input button -->
+        <button
+          type="button"
+          x-show="searchQuery.length > 0"
+          x-cloak
+          @click="clearSearch()"
+          class="absolute inset-y-0 right-0 pr-3 flex items-center text-cream-muted hover:text-cream-100 transition-colors"
+          aria-label="Clear search input"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+
+      <button
+        type="submit"
+        id="communitySearchBtn"
+        :disabled="loading"
+        class="btn-primary sm:w-auto text-sm px-6 font-semibold flex items-center justify-center gap-2 cursor-pointer"
+      >
+        <template x-if="loading">
+          <svg class="animate-spin w-4 h-4 text-base-900" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+        </template>
+        <span x-text="loading ? 'Searching...' : 'Search'"></span>
+      </button>
+    </form>
+  </section>
+
+  <!-- Initial Guidance Placeholder State -->
+  <div x-show="!hasSearched && results.length === 0 && !loading" class="text-center py-16 px-4">
+    <div class="w-16 h-16 rounded-full bg-base-200 border border-[#3d352e] text-amber mx-auto flex items-center justify-center mb-4 shadow-warm">
+      <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+      </svg>
+    </div>
+    <h2 class="font-display text-xl text-cream-100 font-semibold mb-2">Search Cinema Circles</h2>
+    <p class="font-sans text-sm text-cream-muted max-w-md mx-auto">
+      Type a community name above to discover discussion circles, join film debates, and share screenings with like-minded cinephiles.
     </p>
+  </div>
 
-    <div id="communityResults" class="community-grid"></div>
-</main>
-</main>
+  <!-- Loading Skeleton State -->
+  <div x-show="loading" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6" aria-busy="true">
+    <template x-for="i in [1, 2, 3]" :key="i">
+      <div class="card p-6 bg-base-200/60 border border-[#3d352e] animate-pulse space-y-4">
+        <div class="flex items-center justify-between">
+          <div class="h-6 bg-base-100 rounded w-2/3"></div>
+          <div class="h-5 bg-base-100 rounded w-16"></div>
+        </div>
+        <div class="space-y-2">
+          <div class="h-4 bg-base-100 rounded w-1/2"></div>
+          <div class="h-4 bg-base-100 rounded w-3/4"></div>
+        </div>
+        <div class="pt-4 border-t border-[#3d352e]/50 flex justify-between items-center">
+          <div class="h-4 bg-base-100 rounded w-20"></div>
+          <div class="h-9 bg-base-100 rounded w-28"></div>
+        </div>
+      </div>
+    </template>
+  </div>
 
-<!-- expose current username to JS for membership checks -->
-<script>
-    const CURRENT_USER = "{{ user.username|escapejs }}";
+  <!-- Empty Search Results State -->
+  <div x-show="hasSearched && results.length === 0 && !loading" x-cloak class="card p-10 sm:p-14 text-center max-w-2xl mx-auto space-y-4 border border-[#3d352e] shadow-warm">
+    <div class="w-14 h-14 rounded-full bg-base-900 border border-[#3d352e] text-cream-muted mx-auto flex items-center justify-center">
+      <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+      </svg>
+    </div>
+    <div class="space-y-1.5">
+      <h2 class="font-display font-semibold text-xl text-cream-100">
+        No communities found for '<span class="text-amber" x-text="lastSearchedQuery"></span>'
+      </h2>
+      <p class="font-sans text-sm text-cream-muted max-w-md mx-auto">
+        We couldn't find any cinema salons matching your query. Consider starting one for your favorite genre or director.
+      </p>
+    </div>
+    <div class="pt-2">
+      <a href="{% url 'myapp:home' %}" class="btn-secondary text-xs inline-flex items-center gap-2 focus-ring">
+        <span>Return to Home Foyer</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- Results Grid -->
+  <section x-show="results.length > 0 && !loading" x-cloak aria-label="Community search results">
+    <div class="flex items-center justify-between mb-4">
+      <span class="font-mono text-xs text-cream-muted tracking-wider uppercase">
+        Found <span class="text-amber font-semibold" x-text="results.length"></span> <span x-text="results.length === 1 ? 'circle' : 'circles'"></span>
+      </span>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+      <template x-for="community in results" :key="community.name">
+        <article class="card p-5 sm:p-6 bg-base-200/90 border border-[#3d352e] hover:border-amber/40 transition-all duration-200 flex flex-col justify-between group shadow-warm">
+
+          <div class="space-y-3.5">
+            <!-- Top Row: Name & Badges -->
+            <div class="flex items-start justify-between gap-3">
+              <h3 class="font-display font-semibold text-lg sm:text-xl text-cream-100 leading-snug group-hover:text-amber transition-colors line-clamp-2"
+                  x-text="community.name">
+              </h3>
+
+              <!-- Visibility Badge -->
+              <span
+                :class="community.visibility === 'public' ? 'badge-amber' : 'badge-oxblood'"
+                class="uppercase font-mono text-[10px] tracking-wider px-2 py-0.5 rounded shrink-0 self-start"
+                x-text="community.visibility">
+              </span>
+            </div>
+
+            <!-- Meta: Admin & Description -->
+            <div class="space-y-1.5 text-xs text-cream-muted font-sans">
+              <div class="flex items-center gap-1.5">
+                <svg class="w-3.5 h-3.5 text-cream-muted/80" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                </svg>
+                <span>Curator: <strong class="text-cream font-medium" x-text="community.admin || '—'"></strong></span>
+              </div>
+
+              <p class="text-xs text-cream-muted/90 line-clamp-2 pt-1">
+                <template x-if="community.visibility === 'public'">
+                  <span>Open cinema salon for discussions, reviews, and film recommendations.</span>
+                </template>
+                <template x-if="community.visibility !== 'public'">
+                  <span>Private film circle. Membership curated by circle administrators.</span>
+                </template>
+              </p>
+            </div>
+          </div>
+
+          <!-- Bottom Row: Member count & Actions -->
+          <div class="pt-5 mt-5 border-t border-[#3d352e]/60 flex items-center justify-between gap-3">
+            <!-- Member Count Badge -->
+            <div class="inline-flex items-center gap-1.5 font-mono text-xs text-cream-muted bg-base-900/80 px-2.5 py-1 rounded border border-[#3d352e]">
+              <svg class="w-3.5 h-3.5 text-amber" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
+              </svg>
+              <span><span class="text-cream-100 font-semibold" x-text="community.member_amount"></span> members</span>
+            </div>
+
+            <!-- Join / Leave / Owner Button -->
+            <div class="flex items-center gap-2">
+              <!-- Inline feedback message -->
+              <span x-show="community.feedback"
+                    x-text="community.feedback"
+                    x-transition
+                    class="text-[11px] font-mono text-amber pr-1">
+              </span>
+
+              <!-- Case 1: Owner (disabled badge) -->
+              <template x-if="community.isOwner">
+                <span class="inline-flex items-center gap-1 px-3 py-1.5 rounded-md text-xs font-mono font-semibold bg-amber/15 text-amber border border-amber/30 cursor-default"
+                      title="You are the creator and administrator of this circle">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+                  </svg>
+                  Owner
+                </span>
+              </template>
+
+              <!-- Case 2: Member (show Leave button) -->
+              <template x-if="!community.isOwner && community.isMember">
+                <button
+                  type="button"
+                  @click="leave(community)"
+                  :disabled="community.busy"
+                  class="btn-secondary text-xs px-3.5 py-1.5 font-semibold text-cream-muted hover:text-oxblood hover:border-oxblood/60 transition-colors focus-ring"
+                >
+                  <template x-if="community.busy">
+                    <span class="inline-flex items-center gap-1">
+                      <svg class="animate-spin w-3 h-3 text-cream-muted" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      Leaving...
+                    </span>
+                  </template>
+                  <template x-if="!community.busy">
+                    <span>Leave</span>
+                  </template>
+                </button>
+              </template>
+
+              <!-- Case 3: Not a member (show Join button) -->
+              <template x-if="!community.isOwner && !community.isMember">
+                <button
+                  type="button"
+                  @click="join(community)"
+                  :disabled="community.busy || community.visibility !== 'public'"
+                  :class="community.visibility === 'public' ? 'btn-primary' : 'btn-secondary opacity-60 cursor-not-allowed'"
+                  class="text-xs px-3.5 py-1.5 font-semibold focus-ring"
+                  :title="community.visibility === 'public' ? 'Join this circle' : 'Private community invitations only'"
+                >
+                  <template x-if="community.busy">
+                    <span class="inline-flex items-center gap-1">
+                      <svg class="animate-spin w-3 h-3 text-base-900" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      Joining...
+                    </span>
+                  </template>
+                  <template x-if="!community.busy">
+                    <span x-text="community.visibility === 'public' ? 'Join' : 'Private'"></span>
+                  </template>
+                </button>
+              </template>
+            </div>
+          </div>
+
+        </article>
+      </template>
+    </div>
+  </section>
+
+</div>
+
+<!-- Initial user membership data embedded safely from template context -->
+<script id="user-community-data" type="application/json">
+{
+  "username": "{{ request.user.username|escapejs }}",
+  "joined": [{% for c in request.user.communities.all %}"{{ c.name|escapejs }}"{% if not forloop.last %},{% endif %}{% endfor %}],
+  "owned": [{% for c in request.user.owned_communities.all %}"{{ c.name|escapejs }}"{% if not forloop.last %},{% endif %}{% endfor %}]
+}
 </script>
-<script src="{% static 'myapp/communities.js' %}"></script>
-</body>
-</html>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+      const cookies = document.cookie.split(';');
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    if (!cookieValue) {
+      const input = document.querySelector('input[name="csrfmiddlewaretoken"]');
+      if (input) cookieValue = input.value;
+    }
+    return cookieValue;
+  }
+
+  function communitiesApp() {
+    let initialUser = { username: '', joined: [], owned: [] };
+    const elem = document.getElementById('user-community-data');
+    if (elem) {
+      try {
+        initialUser = JSON.parse(elem.textContent);
+      } catch (e) {
+        console.error('Failed to parse user community data', e);
+      }
+    }
+
+    return {
+      searchQuery: '',
+      lastSearchedQuery: '',
+      loading: false,
+      hasSearched: false,
+      results: [],
+      currentUser: initialUser.username || '',
+      joinedCommunities: new Set(initialUser.joined || []),
+      ownedCommunities: new Set(initialUser.owned || []),
+
+      clearSearch() {
+        this.searchQuery = '';
+        this.lastSearchedQuery = '';
+        this.results = [];
+        this.hasSearched = false;
+      },
+
+      async search() {
+        const query = this.searchQuery.trim();
+        if (!query) {
+          this.results = [];
+          this.hasSearched = false;
+          this.lastSearchedQuery = '';
+          return;
+        }
+
+        this.loading = true;
+        this.lastSearchedQuery = query;
+
+        try {
+          const res = await fetch(`/getcommunity/${encodeURIComponent(query)}`);
+          if (res.status === 404) {
+            this.results = [];
+            this.hasSearched = true;
+          } else if (!res.ok) {
+            this.results = [];
+            this.hasSearched = true;
+          } else {
+            const data = await res.json();
+            const list = [];
+            for (const key in data) {
+              const comm = data[key];
+              const isOwner = this.ownedCommunities.has(comm.name) || (this.currentUser && comm.admin === this.currentUser);
+              const isMember = this.joinedCommunities.has(comm.name) || isOwner;
+              list.push({
+                name: comm.name,
+                admin: comm.admin,
+                member_amount: comm.member_amount || 0,
+                moderator_amount: comm.moderator_amount || 0,
+                visibility: (comm.visibility || 'public').toLowerCase(),
+                isOwner: isOwner,
+                isMember: isMember,
+                busy: false,
+                feedback: ''
+              });
+            }
+            this.results = list;
+            this.hasSearched = true;
+          }
+        } catch (err) {
+          console.error('Search request failed', err);
+          this.results = [];
+          this.hasSearched = true;
+        } finally {
+          this.loading = false;
+        }
+      },
+
+      async join(community) {
+        if (community.busy || community.isMember) return;
+        community.busy = true;
+        community.feedback = '';
+
+        try {
+          const res = await fetch('/communities/join/', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: JSON.stringify({ community_name: community.name })
+          });
+
+          const data = await res.json();
+          if (res.ok && data.ok) {
+            community.isMember = true;
+            community.member_amount = data.member_count;
+            this.joinedCommunities.add(community.name);
+            community.feedback = 'Joined!';
+            setTimeout(() => { community.feedback = ''; }, 3000);
+          } else {
+            community.feedback = data.error || 'Failed to join';
+            setTimeout(() => { community.feedback = ''; }, 4000);
+          }
+        } catch (err) {
+          community.feedback = 'Network error';
+          setTimeout(() => { community.feedback = ''; }, 4000);
+        } finally {
+          community.busy = false;
+        }
+      },
+
+      async leave(community) {
+        if (community.busy || !community.isMember || community.isOwner) return;
+        community.busy = true;
+        community.feedback = '';
+
+        try {
+          const res = await fetch('/communities/leave/', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: JSON.stringify({ community_name: community.name })
+          });
+
+          const data = await res.json();
+          if (res.ok && data.ok) {
+            community.isMember = false;
+            community.member_amount = data.member_count;
+            this.joinedCommunities.delete(community.name);
+            community.feedback = 'Left circle';
+            setTimeout(() => { community.feedback = ''; }, 3000);
+          } else {
+            community.feedback = data.error || 'Failed to leave';
+            setTimeout(() => { community.feedback = ''; }, 4000);
+          }
+        } catch (err) {
+          community.feedback = 'Network error';
+          setTimeout(() => { community.feedback = ''; }, 4000);
+        } finally {
+          community.busy = false;
+        }
+      }
+    };
+  }
+</script>
+{% endblock %}

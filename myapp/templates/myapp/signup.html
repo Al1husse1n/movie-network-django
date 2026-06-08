@@ -1,63 +1,211 @@
+{% extends "base.html" %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
-  <link rel="stylesheet" href="{% static 'myapp/signUp.css' %}">
-  <title>Sign-up</title>
-</head>
-<body>
-{% block body %}
-  <header class="sign-up col-6 offset-6">
-    <a href="{% url 'myapp:login' %}">Log in</a>
-  </header>
-  <div id="create-label">Create an account</div>
-  <div class="" id="container">
-    <form action="#" method="post" class="row gy-3 needs-validation" novalidate>
-      {% csrf_token %}
-      <div id="username" class="form-floating">
-        {{form.username}}
-        <label for="id_username">username</label>
-        <div class="invalid-feedback">
-          Please enter a valid username.
-        </div>
+
+{% block title %}Create Account — Movie Network{% endblock %}
+{% block meta_description %}Join Movie Network to curate watchlists, track film ratings, and connect with communities of film lovers.{% endblock %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10 md:py-16">
+  <div class="card overflow-hidden shadow-warm-lg border border-[#3d352e]/80 grid grid-cols-1 md:grid-cols-2 bg-base-200">
+
+    <!-- Left Column: Registration Form -->
+    <div class="p-6 sm:p-10 lg:p-12 flex flex-col justify-center bg-base-200 order-2 md:order-1">
+
+      <div class="mb-6">
+        <span class="text-xs font-mono uppercase tracking-widest text-amber block mb-1">
+          Join the Club
+        </span>
+        <h1 class="font-display font-bold text-3xl sm:text-4xl text-cream-100 tracking-tight">
+          Create your account
+        </h1>
+        <p class="mt-2 text-sm text-cream-muted font-sans">
+          Become a member of our revival-house cinema community.
+        </p>
       </div>
-      <div id="email" class="form-floating">
-        {{form.email}}
-        <label for="id_email">Email</label>
-        <div class="invalid-feedback">
-          Please enter a valid Email.
+
+      <!-- Oxblood Error Callout Box -->
+      {% if form.errors %}
+        <div role="alert"
+             aria-live="assertive"
+             class="bg-oxblood/25 border border-oxblood-500 text-cream-100 rounded-md p-4 mb-6 text-sm flex items-start gap-3 shadow-warm">
+          <svg class="w-5 h-5 text-red-400 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+          </svg>
+          <div class="space-y-1">
+            <span class="font-medium text-cream-100 block">Registration problem</span>
+            {% if form.non_field_errors %}
+              {% for error in form.non_field_errors %}
+                <p class="text-xs text-red-200">{{ error }}</p>
+              {% endfor %}
+            {% endif %}
+            {% if form.username.errors %}
+              {% for error in form.username.errors %}
+                <p class="text-xs text-red-200"><strong>Username:</strong> {{ error }}</p>
+              {% endfor %}
+            {% endif %}
+            {% if form.email.errors %}
+              {% for error in form.email.errors %}
+                <p class="text-xs text-red-200"><strong>Email:</strong> {{ error }}</p>
+              {% endfor %}
+            {% endif %}
+            {% if form.password.errors %}
+              {% for error in form.password.errors %}
+                <p class="text-xs text-red-200"><strong>Password:</strong> {{ error }}</p>
+              {% endfor %}
+            {% endif %}
+          </div>
         </div>
-      </div>
-      <div id="password" class="form-floating">
-        {{form.password}}
-        <label for="id_password">password</label>
-        <div class="invalid-feedback">
-          Please enter a valid password.
+      {% endif %}
+
+      <!-- Signup Form (Server-Rendered POST) -->
+      <form action="{% url 'myapp:signup' %}" method="post" class="space-y-5" novalidate>
+        {% csrf_token %}
+
+        <!-- Username Field -->
+        <div class="space-y-1.5">
+          <label for="id_username" class="block text-xs font-mono uppercase tracking-wider text-cream-300">
+            Username
+          </label>
+          <input type="text"
+                 name="username"
+                 id="id_username"
+                 autocomplete="username"
+                 required
+                 autofocus
+                 value="{{ form.username.value|default:'' }}"
+                 class="input focus-ring {% if form.username.errors %}border-oxblood-500 ring-1 ring-oxblood-500{% endif %}"
+                 placeholder="Choose a username" />
+          {% if form.username.errors %}
+            <p class="text-xs text-red-300 mt-1 font-sans">{{ form.username.errors.0 }}</p>
+          {% endif %}
         </div>
+
+        <!-- Email Field -->
+        <div class="space-y-1.5">
+          <label for="id_email" class="block text-xs font-mono uppercase tracking-wider text-cream-300">
+            Email Address
+          </label>
+          <input type="email"
+                 name="email"
+                 id="id_email"
+                 autocomplete="email"
+                 required
+                 value="{{ form.email.value|default:'' }}"
+                 class="input focus-ring {% if form.email.errors %}border-oxblood-500 ring-1 ring-oxblood-500{% endif %}"
+                 placeholder="you@example.com" />
+          {% if form.email.errors %}
+            <p class="text-xs text-red-300 mt-1 font-sans">{{ form.email.errors.0 }}</p>
+          {% endif %}
+        </div>
+
+        <!-- Password Field -->
+        <div class="space-y-1.5">
+          <label for="id_password" class="block text-xs font-mono uppercase tracking-wider text-cream-300">
+            Password
+          </label>
+          <input type="password"
+                 name="password"
+                 id="id_password"
+                 autocomplete="new-password"
+                 required
+                 class="input focus-ring {% if form.password.errors %}border-oxblood-500 ring-1 ring-oxblood-500{% endif %}"
+                 placeholder="Create a secure password" />
+          {% if form.password.errors %}
+            <p class="text-xs text-red-300 mt-1 font-sans">{{ form.password.errors.0 }}</p>
+          {% endif %}
+        </div>
+
+        <!-- Submit Button -->
+        <div class="pt-2">
+          <button type="submit" class="btn-primary w-full py-2.5 text-sm font-semibold tracking-wide">
+            Create account
+          </button>
+        </div>
+
+        <!-- Link to Login -->
+        <div class="text-center pt-2 border-t border-[#3d352e]/50">
+          <p class="text-xs text-cream-muted">
+            Already a member?
+            <a href="{% url 'myapp:login' %}" class="text-amber hover:text-amber-400 font-medium transition-colors duration-150 underline-offset-2 hover:underline">
+              Sign in
+            </a>
+          </p>
+        </div>
+
+      </form>
+    </div>
+
+    <!-- Right Column: Featured Revival Cinema Poster & Tagline Visual -->
+    <div class="relative min-h-[320px] md:min-h-[560px] w-full overflow-hidden bg-base-900 flex flex-col justify-end p-6 sm:p-8 order-1 md:order-2">
+      <!-- Random Poster Backdrop -->
+      <img id="signup-poster-img"
+           src="{% static 'myapp/images/2.jpg' %}"
+           alt="Cinema marquee poster"
+           class="w-full h-full object-cover absolute inset-0 opacity-75 transition-opacity duration-500 scale-105" />
+
+      <!-- Cinematic Vignette & Ambient Gradient -->
+      <div class="absolute inset-0 bg-gradient-to-t from-base-900 via-base-900/60 to-transparent pointer-events-none"></div>
+
+      <!-- Art-Deco Decorative Border Frame -->
+      <div class="absolute inset-4 sm:inset-5 border border-amber/25 rounded pointer-events-none hidden sm:block"></div>
+
+      <!-- Right Column Overlay Content -->
+      <div class="relative z-10 space-y-3">
+        <div class="inline-flex items-center gap-2 px-2.5 py-1 rounded bg-base-900/80 backdrop-blur-md border border-amber/40 text-amber text-xs font-mono">
+          <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M18 4l2 4h-3l-2-4h-2l2 4h-3l-2-4H8l2 4H7L5 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V4h-4z"/>
+          </svg>
+          <span>ADMIT ONE</span>
+        </div>
+
+        <h2 class="font-display font-bold text-2xl sm:text-3xl text-cream-100 tracking-tight leading-snug">
+          Every great film starts with a ticket.
+        </h2>
+
+        <p class="font-sans text-xs sm:text-sm text-cream-muted leading-relaxed max-w-sm">
+          Track viewings, build curated lists, and debate cinema with passionate film lovers worldwide.
+        </p>
       </div>
-      <button type="submit" id="sign-up">Sign up</button>
-    </form>
+    </div>
+
   </div>
-
-  <script>
-        (() => {
-            'use strict'
-            const forms = document.querySelectorAll('.needs-validation')
-
-            Array.from(forms).forEach(form => {
-            form.addEventListener('submit', event => {
-                if (!form.checkValidity()) {
-                event.preventDefault()
-                event.stopPropagation()
-                }
-                form.classList.add('was-validated')
-            }, false)
-            })
-        })()
-    </script>
+</div>
 {% endblock %}
-</body>
-</html>
+
+{% block extra_scripts %}
+<script>
+  // Pick random poster image from static assets for revival aesthetic
+  document.addEventListener('DOMContentLoaded', function() {
+    const poster = document.getElementById('signup-poster-img');
+    if (!poster) return;
+
+    const posterPool = [
+      "{% static 'myapp/images/1.jpg' %}",
+      "{% static 'myapp/images/2.jpg' %}",
+      "{% static 'myapp/images/3.jpg' %}",
+      "{% static 'myapp/images/4.jpg' %}",
+      "{% static 'myapp/images/5.jpg' %}",
+      "{% static 'myapp/images/6.jpg' %}",
+      "{% static 'myapp/images/7.jpg' %}",
+      "{% static 'myapp/images/8.jpg' %}",
+      "{% static 'myapp/images/9.jpg' %}",
+      "{% static 'myapp/images/10.jpg' %}",
+      "{% static 'myapp/images/11.jpg' %}",
+      "{% static 'myapp/images/12.jpg' %}",
+      "{% static 'myapp/images/13.jpg' %}",
+      "{% static 'myapp/images/14.jpg' %}",
+      "{% static 'myapp/images/15.jpg' %}",
+      "{% static 'myapp/images/16.jpg' %}",
+      "{% static 'myapp/images/17.jpg' %}",
+      "{% static 'myapp/images/18.jpg' %}"
+    ];
+
+    const chosen = posterPool[Math.floor(Math.random() * posterPool.length)];
+    const img = new Image();
+    img.src = chosen;
+    img.onload = function() {
+      poster.src = chosen;
+    };
+  });
+</script>
+{% endblock %}

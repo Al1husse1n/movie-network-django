@@ -1,161 +1,1025 @@
+{% extends "base.html" %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GreenBird | Edit Profile</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="{% static 'myapp/editProfile.css'%}">
-</head>
-<body class="bg-dark-custom text-white">
 
-    <nav class="navbar border-bottom border-secondary py-3">
-        <div class="container">
-            <span class="navbar-brand fw-bold fs-3 text-green">GreenBird</span>
-        </div>
-    </nav>
+{% block title %}Edit Profile — Movie Network{% endblock %}
+{% block meta_description %}Customize your Movie Network profile, bio, Top 5 films, series, and weekly pick.{% endblock %}
 
-    <div class="container mt-5">
-        <div class="row justify-content-center">
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 space-y-10" x-data="editProfileApp()">
+  {% csrf_token %}
 
-            <div class="col-md-3 d-none d-md-block">
-                <ul class="list-unstyled sidebar-nav" id="nav-bar">
-                    <li class="mb-4"><a href="{% url 'myapp:home' %}">Home</a></li>
-                    <li class="mb-4"><a href="#">Explore</a></li>
-                    <li class="mb-4"><a href="#">Notifications</a></li>
-                    <li class="mb-4 active-link"><a href="{% url 'myapp:profile' %}">Profile</a></li>
-                </ul>
-            </div>
+  <!-- Header -->
+  <header class="border-b border-[#3d352e]/70 pb-6">
+    <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+      <div class="space-y-1">
+        <span class="font-mono text-xs text-amber uppercase tracking-wider">Your Profile</span>
+        <h1 class="font-display font-bold text-3xl sm:text-4xl text-cream-100 tracking-tight">Edit Profile</h1>
+      </div>
+      <a href="{% url 'myapp:profile' %}" class="btn-secondary text-xs sm:text-sm self-start sm:self-auto">
+        <svg class="w-4 h-4 fill-current mr-1" viewBox="0 0 20 20" aria-hidden="true">
+          <path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd"/>
+        </svg>
+        Back to Profile
+      </a>
+    </div>
+  </header>
 
-            <div class="col-md-7 col-lg-6">
-                <div class="card bg-card-custom border-0 shadow-lg rounded-4">
-                    <div class="card-body p-4">
-                        <h3 class="card-title fw-bold mb-4" id="edit-profile-label">Edit Profile</h3>
-
-                        <div class="row">
-                            <div class="col-12 col-md-6 pe-md-3">
-                                <!-- Profile form: username, photo, bio (retains id for existing JS) -->
-                                <form id="editProfileForm" action="/profile/">
-                                    <div class="text-center mb-4">
-                                        <div class="profile-preview-wrapper mx-auto mb-3">
-                                            <img id="previewImg" src="" alt="" class="rounded-circle img-thumbnail bg-dark">
-                                        </div>
-                                        <label for="profilePic" class="btn btn-sm btn-outline-secondary rounded-pill">Change Photo</label>
-                                        <input type="file" id="profilePic" accept="image/*" class="d-none">
-                                    </div>
-
-                                    <div class="mb-3">
-                                        <label for="username" class="form-label text-secondary small">Username</label>
-                                        <input type="text" class="form-control bg-dark border-secondary text-white" name="edit-username" id="username" placeholder="@username" value="{{username}}">
-                                        <div id="usernameError" class="text-danger small mt-1 d-none">Username is required.</div>
-                                    </div>
-
-                                    <div class="mb-4">
-                                        <label for="bio" class="form-label text-secondary small">Bio</label>
-                                        <textarea class="form-control bg-dark border-secondary text-white" name="edit-bio" id="bio" rows="4" placeholder="Tell the world about yourself...">{{bio}}</textarea>
-                                        <div id="bioError" class="text-danger small mt-1 d-none">Bio max length reached.</div>
-                                    </div>
-
-                                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                                        <button type="button" id="cancelBtn" class="btn btn-link text-secondary text-decoration-none px-4">Cancel</button>
-                                        <button type="submit" class="btn btn-green btn-save-profile rounded-pill px-5 fw-bold" id="save-profile">Save Profile</button>
-                                    </div>
-                                </form>
-                            </div>
-
-                            <div class="col-12 col-md-6 ps-md-3">
-                                <!-- Top lists form: separate submission for lists -->
-                                <form id="topListsForm" action="#">
-                                    <!-- Top lists: Top 5 Shows, Top 5 Movies, Weekly Pick -->
-                                    <div class="mb-4">
-                                        <h5 class="text-secondary small mb-2">Top 5 Shows</h5>
-                                        <div class="row g-2">
-                                            <div class="col-12">
-                                                <div class="input-group mb-2">
-                                                    <span class="input-group-text bg-transparent border-secondary text-secondary">1</span>
-                                                    <input type="text" class="form-control bg-dark border-secondary text-white" name="top_shows_1" id="top_shows_1" placeholder="1." value="{{top_5_shows.0.name}}" autocomplete="off">
-                                                    <div id="show-result-1" class="autocomplete-results mt-2" role="listbox" aria-label="Show suggestions"></div>
-                                                </div>
-                                                <div class="input-group mb-2">
-                                                    <span class="input-group-text bg-transparent border-secondary text-secondary">2</span>
-                                                    <input type="text" class="form-control bg-dark border-secondary text-white" name="top_shows_2" id="top_shows_2" placeholder="2." value="{{top_5_shows.1.name}}" autocomplete="off">
-                                                    <div id="show-result-2" class="autocomplete-results mt-2" role="listbox" aria-label="Show suggestions"></div>
-                                                </div>
-                                                <div class="input-group mb-2">
-                                                    <span class="input-group-text bg-transparent border-secondary text-secondary">3</span>
-                                                    <input type="text" class="form-control bg-dark border-secondary text-white" name="top_shows_3" id="top_shows_3" placeholder="3." value="{{top_5_shows.2.name}}" autocomplete="off">
-                                                    <div id="show-result-3" class="autocomplete-results mt-2" role="listbox" aria-label="Show suggestions"></div>
-                                                </div>
-                                            </div>
-                                            <div class="col-12">
-                                                <div class="input-group mb-2">
-                                                    <span class="input-group-text bg-transparent border-secondary text-secondary">4</span>
-                                                    <input type="text" class="form-control bg-dark border-secondary text-white" name="top_shows_4" id="top_shows_4" placeholder="4." value="{{top_5_shows.3.name}}" autocomplete="off">
-                                                    <div id="show-result-4" class="autocomplete-results mt-2" role="listbox" aria-label="Show suggestions"></div>
-                                                </div>
-                                                <div class="input-group mb-2">
-                                                    <span class="input-group-text bg-transparent border-secondary text-secondary">5</span>
-                                                    <input type="text" class="form-control bg-dark border-secondary text-white" name="top_shows_5" id="top_shows_5" placeholder="5." value="{{top_5_shows.4.name}}" autocomplete="off">
-                                                    <div id="show-result-5" class="autocomplete-results mt-2" role="listbox" aria-label="Show suggestions"></div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div class="mb-4">
-                                        <h5 class="text-secondary small mb-2">Top 5 Movies</h5>
-                                        <div class="row g-2">
-                                            <div class="col-12">
-                                                <div class="input-group mb-2">
-                                                    <span class="input-group-text bg-transparent border-secondary text-secondary">1</span>
-                                                    <input type="text" class="form-control bg-dark border-secondary text-white" name="" id="top_movies_1" placeholder="1." value="{{top_5_movies.0.title}}" autocomplete="off">
-                                                    <div id="movie-result-1" class="autocomplete-results mt-2" role="listbox" aria-label="Movie suggestions"></div>
-                                                </div>
-                                                <div class="input-group mb-2">
-                                                    <span class="input-group-text bg-transparent border-secondary text-secondary">2</span>
-                                                    <input type="text" class="form-control bg-dark border-secondary text-white" name="" id="top_movies_2" placeholder="2." value="{{top_5_movies.1.title}}" autocomplete="off">
-                                                    <div id="movie-result-2" class="autocomplete-results mt-2" role="listbox" aria-label="Movie suggestions"></div>
-                                                </div>
-                                                <div class="input-group mb-2">
-                                                    <span class="input-group-text bg-transparent border-secondary text-secondary">3</span>
-                                                    <input type="text" class="form-control bg-dark border-secondary text-white" name="" id="top_movies_3" placeholder="3." value="{{top_5_movies.2.title}}" autocomplete="off">
-                                                    <div id="movie-result-3" class="autocomplete-results mt-2" role="listbox" aria-label="Movie suggestions"></div>
-                                                </div>
-                                            </div>
-                                            <div class="col-12">
-                                                <div class="input-group mb-2">
-                                                    <span class="input-group-text bg-transparent border-secondary text-secondary">4</span>
-                                                    <input type="text" class="form-control bg-dark border-secondary text-white" name="" id="top_movies_4" placeholder="4." value="{{top_5_movies.3.title}}" autocomplete="off">
-                                                    <div id="movie-result-4" class="autocomplete-results mt-2" role="listbox" aria-label="Movie suggestions"></div>
-                                                </div>
-                                                <div class="input-group mb-2">
-                                                    <span class="input-group-text bg-transparent border-secondary text-secondary">5</span>
-                                                    <input type="text" class="form-control bg-dark border-secondary text-white" name="" id="top_movies_5" placeholder="5." value="{{top_5_movies.4.title}}" autocomplete="off">
-                                                    <div id="movie-result-5" class="autocomplete-results mt-2" role="listbox" aria-label="Movie suggestions"></div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div class="input-group mb-4">
-                                        <label for="weekly_pick" class="form-label text-secondary small d-block" id="weekly-label">Weekly Pick</label>
-                                        <input type="text" class="form-control bg-dark border-secondary text-white" name="weekly_pick" id="weekly_pick" placeholder="Your Weekly Pick" value="{{weekly_pick.name}}" autocomplete="off">
-                                        <div id="weekly-result" class="autocomplete-results mt-2" role="listbox" aria-label="Weekly pick suggestions"></div>
-                                    </div>
-
-                                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                                        <button type="submit" class="btn btn-green-outline rounded-pill px-5 fw-bold">Save Lists</button>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+  <!-- Section 1: Identity (Username & Bio) -->
+  <section class="card p-6 sm:p-8 space-y-6" aria-labelledby="identity-heading">
+    <div class="border-b border-[#3d352e]/60 pb-3 flex items-center justify-between">
+      <div>
+        <h2 id="identity-heading" class="font-display font-semibold text-xl text-cream-100">
+          Account Identity
+        </h2>
+        <p class="font-sans text-xs text-cream-muted mt-0.5">
+          Update how you appear across reviews, discussions, and member directories.
+        </p>
+      </div>
+      <span class="badge badge-amber text-[10px]">REQUIRED</span>
     </div>
 
-    <script src="{% static 'myapp/editProfile.js'%}"></script>
-</body>
-</html>
+    <form @submit.prevent="saveIdentity()" class="space-y-5">
+      <div class="flex flex-col sm:flex-row gap-6 items-start">
+        <!-- Initial-based Avatar preview -->
+        <div class="flex flex-col items-center gap-2 shrink-0 self-center sm:self-start">
+          <div class="w-20 h-20 rounded-full bg-amber/20 border-2 border-amber/60 text-amber font-mono font-bold text-2xl flex items-center justify-center shadow-warm ring-4 ring-base-200">
+            <span x-text="(identity.username || 'U').slice(0, 1).toUpperCase()"></span>
+          </div>
+          <span class="font-mono text-[11px] text-cream-muted">Avatar Initials</span>
+        </div>
+
+        <!-- Form fields -->
+        <div class="flex-1 w-full space-y-4">
+          <div>
+            <label for="username-input" class="block text-xs font-mono text-cream-muted uppercase tracking-wider mb-1.5">
+              Username <span class="text-amber">*</span>
+            </label>
+            <div class="relative">
+              <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-cream-muted font-mono text-sm pointer-events-none">@</span>
+              <input
+                id="username-input"
+                name="username"
+                type="text"
+                class="input pl-8"
+                x-model="identity.username"
+                placeholder="username"
+                required
+                maxlength="150"
+              />
+            </div>
+          </div>
+
+          <div>
+            <div class="flex justify-between items-center mb-1.5">
+              <label for="bio-input" class="block text-xs font-mono text-cream-muted uppercase tracking-wider">
+                Bio
+              </label>
+              <span
+                class="text-xs font-mono transition-colors"
+                :class="(identity.bio || '').length >= 90 ? ((identity.bio || '').length > 100 ? 'text-red-400 font-bold' : 'text-amber') : 'text-cream-muted'"
+              >
+                <span x-text="(identity.bio || '').length"></span> / 100
+              </span>
+            </div>
+            <textarea
+              id="bio-input"
+              name="bio"
+              rows="3"
+              class="input resize-y"
+              x-model="identity.bio"
+              maxlength="100"
+              placeholder="Tell the film community about your taste in cinema..."
+            ></textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action row with Save button and inline feedback -->
+      <div class="pt-2 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
+        <div aria-live="polite" class="flex-1 min-h-[24px]">
+          <template x-if="identity.status === 'success'">
+            <div class="inline-flex items-center gap-2 text-xs font-mono text-amber bg-amber/15 border border-amber/40 px-3 py-1.5 rounded-md">
+              <svg class="w-4 h-4 text-amber fill-current" viewBox="0 0 20 20" aria-hidden="true">
+                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+              </svg>
+              <span x-text="identity.message"></span>
+            </div>
+          </template>
+          <template x-if="identity.status === 'error'">
+            <div class="inline-flex items-center gap-2 text-xs font-mono text-red-300 bg-oxblood/40 border border-oxblood px-3 py-1.5 rounded-md">
+              <svg class="w-4 h-4 text-red-400 fill-current" viewBox="0 0 20 20" aria-hidden="true">
+                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+              </svg>
+              <span x-text="identity.message"></span>
+            </div>
+          </template>
+        </div>
+
+        <button
+          type="submit"
+          id="save-identity-btn"
+          class="btn-primary self-end sm:self-auto min-w-[140px]"
+          :disabled="identity.saving || !(identity.username || '').trim() || (identity.bio || '').length > 100"
+        >
+          <template x-if="identity.saving">
+            <span class="inline-flex items-center gap-2">
+              <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-base-900" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              Saving...
+            </span>
+          </template>
+          <template x-if="!identity.saving">
+            <span>Save Profile</span>
+          </template>
+        </button>
+      </div>
+    </form>
+  </section>
+
+  <!-- Section 2: Top 5 Films -->
+  <section class="space-y-4" aria-labelledby="top-films-heading">
+    <div class="border-b border-[#3d352e]/60 pb-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+      <div>
+        <div class="flex items-center gap-2.5">
+          <h2 id="top-films-heading" class="font-display font-semibold text-xl text-cream-100">
+            Top 5 Films
+          </h2>
+          <span class="badge badge-amber text-[10px]">SIGNATURE LIST</span>
+        </div>
+        <p class="font-sans text-xs text-cream-muted mt-0.5">
+          Your five favorite films, featured prominently on your public profile.
+        </p>
+      </div>
+      <span class="text-xs font-mono text-cream-muted" x-text="`${movies.filter(m => m !== null).length} / 5 selected`"></span>
+    </div>
+
+    <!-- 5 Film Slots -->
+    <div class="space-y-3">
+      <template x-for="(slot, index) in movies" :key="'film-slot-' + index">
+        <div class="card p-3.5 sm:p-4 transition-all duration-200">
+
+          <!-- FILLED STATE -->
+          <template x-if="slot !== null">
+            <div class="flex items-center justify-between gap-4">
+              <div class="flex items-center gap-3.5 min-w-0">
+                <!-- Rank Badge -->
+                <div class="w-8 h-8 rounded bg-amber/15 border border-amber/40 text-amber font-mono font-bold text-xs flex items-center justify-center shrink-0">
+                  <span x-text="'#' + (index + 1)"></span>
+                </div>
+
+                <!-- Thumbnail -->
+                <div class="w-12 h-16 rounded bg-base-900 border border-[#3d352e] overflow-hidden shrink-0 relative flex items-center justify-center">
+                  <template x-if="slot.poster_url">
+                    <img
+                      :src="slot.poster_url"
+                      :alt="slot.title"
+                      class="w-full h-full object-cover"
+                      @error="$el.style.display='none'; $el.nextElementSibling.classList.remove('hidden')"
+                    />
+                  </template>
+                  <div :class="{'hidden': slot.poster_url}" class="w-full h-full flex items-center justify-center bg-base-900 text-amber/40">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 4v16M17 4v16M3 8h4m10 0h4M3 12h18M3 16h4m10 0h4M4 20h16a1 1 0 001-1V5a1 1 0 00-1-1H4a1 1 0 00-1 1v14a1 1 0 001 1z" />
+                    </svg>
+                  </div>
+                </div>
+
+                <!-- Title & Meta -->
+                <div class="min-w-0">
+                  <h3 class="font-display font-medium text-sm sm:text-base text-cream-100 truncate" x-text="slot.title"></h3>
+                  <div class="flex items-center gap-2 text-xs font-mono text-cream-muted mt-0.5">
+                    <span>Film</span>
+                    <span class="text-[#3d352e]">•</span>
+                    <span x-text="'ID: ' + slot.id"></span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Remove Button -->
+              <button
+                type="button"
+                @click="removeMovie(index + 1)"
+                class="btn-ghost text-xs text-cream-muted hover:text-red-400 hover:bg-oxblood/20 shrink-0"
+                :title="'Remove #' + (index + 1)"
+              >
+                <svg class="w-4 h-4 mr-1 text-red-400/80" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+                <span>Remove</span>
+              </button>
+            </div>
+          </template>
+
+          <!-- EMPTY STATE: Search card -->
+          <template x-if="slot === null">
+            <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 relative" @click.outside="movieSearchStates[index].open = false">
+              <!-- Rank Badge -->
+              <div class="w-8 h-8 rounded border border-dashed border-[#3d352e] text-cream-muted font-mono font-bold text-xs flex items-center justify-center shrink-0">
+                <span x-text="'#' + (index + 1)"></span>
+              </div>
+
+              <!-- Autocomplete Search Input -->
+              <div class="relative flex-1">
+                <div class="relative">
+                  <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-cream-muted">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                    </svg>
+                  </span>
+                  <input
+                    type="text"
+                    class="input pl-9 text-xs sm:text-sm"
+                    :placeholder="`Search TMDB to select film #${index + 1}...`"
+                    x-model="movieSearchStates[index].query"
+                    @input.debounce.300ms="searchMovie(index)"
+                    @focus="if(movieSearchStates[index].results.length) movieSearchStates[index].open = true"
+                    @keydown.escape="movieSearchStates[index].open = false"
+                  />
+                  <template x-if="movieSearchStates[index].loading">
+                    <span class="absolute inset-y-0 right-0 pr-3 flex items-center text-amber">
+                      <svg class="animate-spin h-3.5 w-3.5" viewBox="0 0 24 24" fill="none">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                    </span>
+                  </template>
+                </div>
+
+                <!-- Autocomplete Dropdown -->
+                <div
+                  x-show="movieSearchStates[index].open && movieSearchStates[index].results.length > 0"
+                  x-transition:enter="transition ease-out duration-100"
+                  x-transition:enter-start="opacity-0 scale-95"
+                  x-transition:enter-end="opacity-100 scale-100"
+                  class="absolute left-0 right-0 top-full mt-1.5 z-40 card bg-base-900 border border-[#3d352e] shadow-warm-lg overflow-hidden divide-y divide-[#3d352e]/50 max-h-60 overflow-y-auto"
+                  role="listbox"
+                  :aria-label="`Film suggestions for slot ${index + 1}`"
+                >
+                  <template x-for="item in movieSearchStates[index].results" :key="item.id">
+                    <button
+                      type="button"
+                      @click="setMovie(index + 1, item.id, item.name)"
+                      class="w-full text-left px-3.5 py-2.5 text-xs sm:text-sm hover:bg-base-100 hover:text-amber transition-colors flex items-center justify-between gap-2 group cursor-pointer"
+                      role="option"
+                    >
+                      <span class="truncate font-sans text-cream-100 group-hover:text-amber" x-text="item.name"></span>
+                      <span class="badge badge-muted text-[10px] shrink-0 font-mono">Select</span>
+                    </button>
+                  </template>
+                </div>
+              </div>
+            </div>
+          </template>
+
+        </div>
+      </template>
+    </div>
+  </section>
+
+  <!-- Section 3: Top 5 Series -->
+  <section class="space-y-4" aria-labelledby="top-shows-heading">
+    <div class="border-b border-[#3d352e]/60 pb-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+      <div>
+        <div class="flex items-center gap-2.5">
+          <h2 id="top-shows-heading" class="font-display font-semibold text-xl text-cream-100">
+            Top 5 Series
+          </h2>
+          <span class="badge badge-amber text-[10px]">SIGNATURE LIST</span>
+        </div>
+        <p class="font-sans text-xs text-cream-muted mt-0.5">
+          Your five favorite TV series and limited series displayed on your profile.
+        </p>
+      </div>
+      <span class="text-xs font-mono text-cream-muted" x-text="`${shows.filter(s => s !== null).length} / 5 selected`"></span>
+    </div>
+
+    <!-- 5 Show Slots -->
+    <div class="space-y-3">
+      <template x-for="(slot, index) in shows" :key="'show-slot-' + index">
+        <div class="card p-3.5 sm:p-4 transition-all duration-200">
+
+          <!-- FILLED STATE -->
+          <template x-if="slot !== null">
+            <div class="flex items-center justify-between gap-4">
+              <div class="flex items-center gap-3.5 min-w-0">
+                <!-- Rank Badge -->
+                <div class="w-8 h-8 rounded bg-amber/15 border border-amber/40 text-amber font-mono font-bold text-xs flex items-center justify-center shrink-0">
+                  <span x-text="'#' + (index + 1)"></span>
+                </div>
+
+                <!-- Thumbnail -->
+                <div class="w-12 h-16 rounded bg-base-900 border border-[#3d352e] overflow-hidden shrink-0 relative flex items-center justify-center">
+                  <template x-if="slot.poster_url">
+                    <img
+                      :src="slot.poster_url"
+                      :alt="slot.name"
+                      class="w-full h-full object-cover"
+                      @error="$el.style.display='none'; $el.nextElementSibling.classList.remove('hidden')"
+                    />
+                  </template>
+                  <div :class="{'hidden': slot.poster_url}" class="w-full h-full flex items-center justify-center bg-base-900 text-amber/40">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                    </svg>
+                  </div>
+                </div>
+
+                <!-- Title & Meta -->
+                <div class="min-w-0">
+                  <h3 class="font-display font-medium text-sm sm:text-base text-cream-100 truncate" x-text="slot.name"></h3>
+                  <div class="flex items-center gap-2 text-xs font-mono text-cream-muted mt-0.5">
+                    <span>Series</span>
+                    <span class="text-[#3d352e]">•</span>
+                    <span x-text="'ID: ' + slot.id"></span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Remove Button -->
+              <button
+                type="button"
+                @click="removeShow(index + 1)"
+                class="btn-ghost text-xs text-cream-muted hover:text-red-400 hover:bg-oxblood/20 shrink-0"
+                :title="'Remove #' + (index + 1)"
+              >
+                <svg class="w-4 h-4 mr-1 text-red-400/80" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+                <span>Remove</span>
+              </button>
+            </div>
+          </template>
+
+          <!-- EMPTY STATE: Search card -->
+          <template x-if="slot === null">
+            <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 relative" @click.outside="showSearchStates[index].open = false">
+              <!-- Rank Badge -->
+              <div class="w-8 h-8 rounded border border-dashed border-[#3d352e] text-cream-muted font-mono font-bold text-xs flex items-center justify-center shrink-0">
+                <span x-text="'#' + (index + 1)"></span>
+              </div>
+
+              <!-- Autocomplete Search Input -->
+              <div class="relative flex-1">
+                <div class="relative">
+                  <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-cream-muted">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                    </svg>
+                  </span>
+                  <input
+                    type="text"
+                    class="input pl-9 text-xs sm:text-sm"
+                    :placeholder="`Search TMDB to select series #${index + 1}...`"
+                    x-model="showSearchStates[index].query"
+                    @input.debounce.300ms="searchShow(index)"
+                    @focus="if(showSearchStates[index].results.length) showSearchStates[index].open = true"
+                    @keydown.escape="showSearchStates[index].open = false"
+                  />
+                  <template x-if="showSearchStates[index].loading">
+                    <span class="absolute inset-y-0 right-0 pr-3 flex items-center text-amber">
+                      <svg class="animate-spin h-3.5 w-3.5" viewBox="0 0 24 24" fill="none">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                    </span>
+                  </template>
+                </div>
+
+                <!-- Autocomplete Dropdown -->
+                <div
+                  x-show="showSearchStates[index].open && showSearchStates[index].results.length > 0"
+                  x-transition:enter="transition ease-out duration-100"
+                  x-transition:enter-start="opacity-0 scale-95"
+                  x-transition:enter-end="opacity-100 scale-100"
+                  class="absolute left-0 right-0 top-full mt-1.5 z-40 card bg-base-900 border border-[#3d352e] shadow-warm-lg overflow-hidden divide-y divide-[#3d352e]/50 max-h-60 overflow-y-auto"
+                  role="listbox"
+                  :aria-label="`Series suggestions for slot ${index + 1}`"
+                >
+                  <template x-for="item in showSearchStates[index].results" :key="item.id">
+                    <button
+                      type="button"
+                      @click="setShow(index + 1, item.id, item.name)"
+                      class="w-full text-left px-3.5 py-2.5 text-xs sm:text-sm hover:bg-base-100 hover:text-amber transition-colors flex items-center justify-between gap-2 group cursor-pointer"
+                      role="option"
+                    >
+                      <span class="truncate font-sans text-cream-100 group-hover:text-amber" x-text="item.name"></span>
+                      <span class="badge badge-muted text-[10px] shrink-0 font-mono">Select</span>
+                    </button>
+                  </template>
+                </div>
+              </div>
+            </div>
+          </template>
+
+        </div>
+      </template>
+    </div>
+  </section>
+
+  <!-- Section 4: Pick of the Week -->
+  <section class="space-y-4" aria-labelledby="weekly-pick-heading">
+    <div class="border-b border-[#3d352e]/60 pb-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+      <div>
+        <div class="flex items-center gap-2.5">
+          <h2 id="weekly-pick-heading" class="font-display font-semibold text-xl text-cream-100">
+            Pick of the Week
+          </h2>
+          <span class="badge badge-amber text-[10px]">★ SPOTLIGHT</span>
+        </div>
+        <p class="font-sans text-xs text-cream-muted mt-0.5">
+          Feature a single movie or series that you're currently enjoying or recommending this week.
+        </p>
+      </div>
+    </div>
+
+    <div class="card p-4 sm:p-6 transition-all duration-200">
+      <!-- FILLED STATE -->
+      <template x-if="weeklyPick !== null">
+        <div class="flex items-center justify-between gap-4">
+          <div class="flex items-center gap-4 min-w-0">
+            <!-- Spotlight Icon / Thumbnail -->
+            <div class="w-14 h-20 rounded bg-base-900 border border-amber/40 overflow-hidden shrink-0 relative flex items-center justify-center shadow-warm">
+              <template x-if="weeklyPick.poster_url">
+                <img
+                  :src="weeklyPick.poster_url"
+                  :alt="weeklyPick.name"
+                  class="w-full h-full object-cover"
+                  @error="$el.style.display='none'; $el.nextElementSibling.classList.remove('hidden')"
+                />
+              </template>
+              <div :class="{'hidden': weeklyPick.poster_url}" class="w-full h-full flex items-center justify-center bg-base-900 text-amber">
+                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                </svg>
+              </div>
+            </div>
+
+            <!-- Title & Details -->
+            <div class="min-w-0">
+              <span class="inline-flex items-center gap-1 text-[11px] font-mono text-amber mb-0.5">
+                ★ CURRENT SPOTLIGHT
+              </span>
+              <h3 class="font-display font-bold text-base sm:text-lg text-cream-100 truncate" x-text="weeklyPick.name"></h3>
+              <p class="text-xs font-mono text-cream-muted mt-0.5" x-text="'TMDB ID: ' + weeklyPick.id"></p>
+            </div>
+          </div>
+
+          <!-- Remove Button -->
+          <button
+            type="button"
+            @click="removeWeeklyPick()"
+            class="btn-ghost text-xs text-cream-muted hover:text-red-400 hover:bg-oxblood/20 shrink-0"
+          >
+            <svg class="w-4 h-4 mr-1 text-red-400/80" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+            </svg>
+            <span>Remove</span>
+          </button>
+        </div>
+      </template>
+
+      <!-- EMPTY STATE: Search for weekly pick -->
+      <template x-if="weeklyPick === null">
+        <div class="space-y-3" @click.outside="wpSearch.open = false">
+          <div class="flex items-center justify-between text-xs font-mono text-cream-muted">
+            <span>Search title for Weekly Pick:</span>
+            <div class="inline-flex rounded-md p-0.5 bg-base-900 border border-[#3d352e]">
+              <button
+                type="button"
+                @click="wpSearch.type = 'movie'; searchWP();"
+                :class="wpSearch.type === 'movie' ? 'bg-amber text-base-900 font-semibold' : 'text-cream-muted hover:text-cream-100'"
+                class="px-2.5 py-1 text-[11px] rounded transition-colors"
+              >
+                Film
+              </button>
+              <button
+                type="button"
+                @click="wpSearch.type = 'show'; searchWP();"
+                :class="wpSearch.type === 'show' ? 'bg-amber text-base-900 font-semibold' : 'text-cream-muted hover:text-cream-100'"
+                class="px-2.5 py-1 text-[11px] rounded transition-colors"
+              >
+                Series
+              </button>
+            </div>
+          </div>
+
+          <div class="relative">
+            <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-cream-muted">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+              </svg>
+            </span>
+            <input
+              type="text"
+              class="input pl-9 text-xs sm:text-sm"
+              :placeholder="`Search ${wpSearch.type === 'movie' ? 'film' : 'series'} for your weekly pick...`"
+              x-model="wpSearch.query"
+              @input.debounce.300ms="searchWP()"
+              @focus="if(wpSearch.results.length) wpSearch.open = true"
+              @keydown.escape="wpSearch.open = false"
+            />
+            <template x-if="wpSearch.loading">
+              <span class="absolute inset-y-0 right-0 pr-3 flex items-center text-amber">
+                <svg class="animate-spin h-3.5 w-3.5" viewBox="0 0 24 24" fill="none">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+              </span>
+            </template>
+          </div>
+
+          <!-- Autocomplete Dropdown -->
+          <div
+            x-show="wpSearch.open && wpSearch.results.length > 0"
+            x-transition:enter="transition ease-out duration-100"
+            x-transition:enter-start="opacity-0 scale-95"
+            x-transition:enter-end="opacity-100 scale-100"
+            class="relative z-40 card bg-base-900 border border-[#3d352e] shadow-warm-lg overflow-hidden divide-y divide-[#3d352e]/50 max-h-60 overflow-y-auto"
+            role="listbox"
+            aria-label="Weekly pick suggestions"
+          >
+            <template x-for="item in wpSearch.results" :key="item.id">
+              <button
+                type="button"
+                @click="setWeeklyPick(item.id, item.name)"
+                class="w-full text-left px-3.5 py-2.5 text-xs sm:text-sm hover:bg-base-100 hover:text-amber transition-colors flex items-center justify-between gap-2 group cursor-pointer"
+                role="option"
+              >
+                <span class="truncate font-sans text-cream-100 group-hover:text-amber" x-text="item.name"></span>
+                <span class="badge badge-amber text-[10px] shrink-0 font-mono">Set Pick</span>
+              </button>
+            </template>
+          </div>
+        </div>
+      </template>
+    </div>
+  </section>
+
+</div>
+
+{{ top_5_movies|json_script:"initial-top-5-movies" }}
+{{ top_5_shows|json_script:"initial-top-5-shows" }}
+{{ weekly_pick|json_script:"initial-weekly-pick" }}
+
+<script>
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+      const cookies = document.cookie.split(';');
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    if (!cookieValue) {
+      const input = document.querySelector('input[name="csrfmiddlewaretoken"]');
+      if (input) cookieValue = input.value;
+    }
+    return cookieValue;
+  }
+
+  function editProfileApp() {
+    // Read raw initial data injected safely via json_script
+    let rawMovies = [];
+    let rawShows = [];
+    let rawWP = null;
+
+    try {
+      rawMovies = JSON.parse(document.getElementById('initial-top-5-movies')?.textContent || '[]');
+    } catch (e) { rawMovies = []; }
+
+    try {
+      rawShows = JSON.parse(document.getElementById('initial-top-5-shows')?.textContent || '[]');
+    } catch (e) { rawShows = []; }
+
+    try {
+      rawWP = JSON.parse(document.getElementById('initial-weekly-pick')?.textContent || 'null');
+    } catch (e) { rawWP = null; }
+
+    // Normalize 5 slots for movies
+    const initialMovies = [null, null, null, null, null];
+    if (Array.isArray(rawMovies)) {
+      for (let i = 0; i < 5; i++) {
+        const m = rawMovies[i];
+        if (m && (m.tmdb_id || m.id) && (m.title || m.name) && (m.tmdb_id !== 0 && m.id !== 0)) {
+          initialMovies[i] = {
+            id: m.tmdb_id || m.id,
+            title: m.title || m.name,
+            poster_url: m.poster_url || (m.poster_path ? `https://image.tmdb.org/t/p/w200${m.poster_path}` : null)
+          };
+        }
+      }
+    }
+
+    // Normalize 5 slots for shows
+    const initialShows = [null, null, null, null, null];
+    if (Array.isArray(rawShows)) {
+      for (let i = 0; i < 5; i++) {
+        const s = rawShows[i];
+        if (s && (s.tmdb_id || s.id) && (s.name || s.title) && (s.tmdb_id !== 0 && s.id !== 0)) {
+          initialShows[i] = {
+            id: s.tmdb_id || s.id,
+            name: s.name || s.title,
+            poster_url: s.poster_url || (s.poster_path ? `https://image.tmdb.org/t/p/w200${s.poster_path}` : null)
+          };
+        }
+      }
+    }
+
+    // Normalize weekly pick
+    let initialWP = null;
+    if (rawWP && (rawWP.id || rawWP.tmdb_id) && (rawWP.name || rawWP.title) && (rawWP.id !== 0 && rawWP.tmdb_id !== 0)) {
+      initialWP = {
+        id: rawWP.id || rawWP.tmdb_id,
+        name: rawWP.name || rawWP.title,
+        poster_url: rawWP.poster_url || (rawWP.poster_path ? `https://image.tmdb.org/t/p/w200${rawWP.poster_path}` : null)
+      };
+    }
+
+    return {
+      identity: {
+        username: "{{ username|escapejs }}",
+        bio: "{{ bio|escapejs }}",
+        saving: false,
+        status: null, // 'success' | 'error' | null
+        message: ''
+      },
+
+      movies: initialMovies,
+      shows: initialShows,
+      weeklyPick: initialWP,
+
+      // Search state arrays per slot (5 slots each)
+      movieSearchStates: [
+        { query: '', results: [], open: false, loading: false },
+        { query: '', results: [], open: false, loading: false },
+        { query: '', results: [], open: false, loading: false },
+        { query: '', results: [], open: false, loading: false },
+        { query: '', results: [], open: false, loading: false }
+      ],
+
+      showSearchStates: [
+        { query: '', results: [], open: false, loading: false },
+        { query: '', results: [], open: false, loading: false },
+        { query: '', results: [], open: false, loading: false },
+        { query: '', results: [], open: false, loading: false },
+        { query: '', results: [], open: false, loading: false }
+      ],
+
+      wpSearch: {
+        type: 'movie',
+        query: '',
+        results: [],
+        open: false,
+        loading: false
+      },
+
+      // Section 1: Save identity
+      async saveIdentity() {
+        if (!(this.identity.username || '').trim()) return;
+        this.identity.saving = true;
+        this.identity.status = null;
+        this.identity.message = '';
+
+        try {
+          const res = await fetch('/changeprofile/', {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: JSON.stringify({
+              username: (this.identity.username || '').trim(),
+              bio: (this.identity.bio || '').trim()
+            })
+          });
+
+          const data = await res.json();
+          if (res.ok) {
+            this.identity.status = 'success';
+            this.identity.message = data.message || 'Profile updated successfully.';
+            setTimeout(() => {
+              if (this.identity.status === 'success') {
+                this.identity.status = null;
+              }
+            }, 4000);
+          } else {
+            this.identity.status = 'error';
+            if (data.errors) {
+              const errs = Object.values(data.errors).flat().join(' ');
+              this.identity.message = errs || 'Validation error.';
+            } else {
+              this.identity.message = data.error || 'Failed to update profile.';
+            }
+          }
+        } catch (err) {
+          this.identity.status = 'error';
+          this.identity.message = 'Network error while updating profile.';
+        } finally {
+          this.identity.saving = false;
+        }
+      },
+
+      // Section 2: Movie search & selection
+      async searchMovie(index) {
+        const state = this.movieSearchStates[index];
+        const q = state.query.trim();
+        if (!q) {
+          state.results = [];
+          state.open = false;
+          return;
+        }
+
+        state.loading = true;
+        try {
+          const res = await fetch(`/searchMovie/${encodeURIComponent(q)}`);
+          if (res.status === 404) {
+            state.results = [];
+            state.open = false;
+          } else if (res.ok) {
+            const data = await res.json();
+            const items = [];
+            for (let id in data) {
+              items.push({ id: id, name: data[id] });
+            }
+            state.results = items.slice(0, 5);
+            state.open = items.length > 0;
+          } else {
+            state.results = [];
+            state.open = false;
+          }
+        } catch (err) {
+          state.results = [];
+          state.open = false;
+        } finally {
+          state.loading = false;
+        }
+      },
+
+      async setMovie(rank, id, name) {
+        const slotIdx = rank - 1;
+        try {
+          const res = await fetch('/updateTop5/', {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: JSON.stringify({
+              type: 'movie',
+              result: {
+                rank: rank,
+                id: parseInt(id),
+                name: name
+              }
+            })
+          });
+
+          if (res.ok) {
+            this.movies[slotIdx] = {
+              id: parseInt(id),
+              title: name,
+              poster_url: null
+            };
+            this.movieSearchStates[slotIdx].query = '';
+            this.movieSearchStates[slotIdx].results = [];
+            this.movieSearchStates[slotIdx].open = false;
+          } else {
+            const data = await res.json();
+            alert(data.error || 'Failed to update top 5 film.');
+          }
+        } catch (err) {
+          alert('Network error updating top 5 film.');
+        }
+      },
+
+      async removeMovie(rank) {
+        const slotIdx = rank - 1;
+        try {
+          const res = await fetch('/updateTop5/', {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: JSON.stringify({
+              type: 'movie',
+              result: {
+                rank: rank,
+                id: 0,
+                name: ''
+              }
+            })
+          });
+
+          if (res.ok) {
+            this.movies[slotIdx] = null;
+          }
+        } catch (err) {
+          alert('Network error removing top film.');
+        }
+      },
+
+      // Section 3: Show search & selection
+      async searchShow(index) {
+        const state = this.showSearchStates[index];
+        const q = state.query.trim();
+        if (!q) {
+          state.results = [];
+          state.open = false;
+          return;
+        }
+
+        state.loading = true;
+        try {
+          const res = await fetch(`/searchShow/${encodeURIComponent(q)}`);
+          if (res.status === 404) {
+            state.results = [];
+            state.open = false;
+          } else if (res.ok) {
+            const data = await res.json();
+            const items = [];
+            for (let id in data) {
+              items.push({ id: id, name: data[id] });
+            }
+            state.results = items.slice(0, 5);
+            state.open = items.length > 0;
+          } else {
+            state.results = [];
+            state.open = false;
+          }
+        } catch (err) {
+          state.results = [];
+          state.open = false;
+        } finally {
+          state.loading = false;
+        }
+      },
+
+      async setShow(rank, id, name) {
+        const slotIdx = rank - 1;
+        try {
+          const res = await fetch('/updateTop5/', {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: JSON.stringify({
+              type: 'show',
+              result: {
+                rank: rank,
+                id: parseInt(id),
+                name: name
+              }
+            })
+          });
+
+          if (res.ok) {
+            this.shows[slotIdx] = {
+              id: parseInt(id),
+              name: name,
+              poster_url: null
+            };
+            this.showSearchStates[slotIdx].query = '';
+            this.showSearchStates[slotIdx].results = [];
+            this.showSearchStates[slotIdx].open = false;
+          } else {
+            const data = await res.json();
+            alert(data.error || 'Failed to update top 5 series.');
+          }
+        } catch (err) {
+          alert('Network error updating top 5 series.');
+        }
+      },
+
+      async removeShow(rank) {
+        const slotIdx = rank - 1;
+        try {
+          const res = await fetch('/updateTop5/', {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: JSON.stringify({
+              type: 'show',
+              result: {
+                rank: rank,
+                id: 0,
+                name: ''
+              }
+            })
+          });
+
+          if (res.ok) {
+            this.shows[slotIdx] = null;
+          }
+        } catch (err) {
+          alert('Network error removing top series.');
+        }
+      },
+
+      // Section 4: Pick of the Week
+      async searchWP() {
+        const q = this.wpSearch.query.trim();
+        if (!q) {
+          this.wpSearch.results = [];
+          this.wpSearch.open = false;
+          return;
+        }
+
+        this.wpSearch.loading = true;
+        const endpoint = this.wpSearch.type === 'show' ? `/searchShow/${encodeURIComponent(q)}` : `/searchMovie/${encodeURIComponent(q)}`;
+
+        try {
+          const res = await fetch(endpoint);
+          if (res.status === 404) {
+            this.wpSearch.results = [];
+            this.wpSearch.open = false;
+          } else if (res.ok) {
+            const data = await res.json();
+            const items = [];
+            for (let id in data) {
+              items.push({ id: id, name: data[id] });
+            }
+            this.wpSearch.results = items.slice(0, 5);
+            this.wpSearch.open = items.length > 0;
+          } else {
+            this.wpSearch.results = [];
+            this.wpSearch.open = false;
+          }
+        } catch (err) {
+          this.wpSearch.results = [];
+          this.wpSearch.open = false;
+        } finally {
+          this.wpSearch.loading = false;
+        }
+      },
+
+      async setWeeklyPick(id, name) {
+        try {
+          const res = await fetch('/updateWP/', {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: JSON.stringify({
+              result: {
+                id: parseInt(id),
+                name: name
+              }
+            })
+          });
+
+          if (res.ok) {
+            this.weeklyPick = {
+              id: parseInt(id),
+              name: name,
+              poster_url: null
+            };
+            this.wpSearch.query = '';
+            this.wpSearch.results = [];
+            this.wpSearch.open = false;
+          } else {
+            const data = await res.json();
+            alert(data.error || 'Failed to update weekly pick.');
+          }
+        } catch (err) {
+          alert('Network error updating weekly pick.');
+        }
+      },
+
+      async removeWeeklyPick() {
+        try {
+          const res = await fetch('/updateWP/', {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: JSON.stringify({
+              result: {
+                id: 0,
+                name: ''
+              }
+            })
+          });
+
+          if (res.ok) {
+            this.weeklyPick = null;
+          }
+        } catch (err) {
+          alert('Network error removing weekly pick.');
+        }
+      }
+    };
+  }
+</script>
+{% endblock %}

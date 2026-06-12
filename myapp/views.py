@@ -2,10 +2,9 @@ import json
 
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
-from django.core.exceptions import ValidationError
+from django.core.exceptions import PermissionDenied, ValidationError
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
-from django.urls import reverse
 from django.views.decorators.http import require_POST
 
 from .Forms import LoginForm, SignUpForm
@@ -17,6 +16,7 @@ from .models import (
     fetch_show_by_name,
     fetch_show_data,
 )
+from .serializers import detect_media_type, normalize_media_item
 
 
 def login_view(request):
@@ -52,7 +52,9 @@ def logout_view(request):
 @login_required
 def home_view(request):
     current_user = request.user
-    communities = current_user.communities.all()
+    communities = (
+        list(current_user.communities.all()) if hasattr(current_user, "communities") else []
+    )
     return render(request, "myapp/home.html", {"communities": communities})
 
 
@@ -71,20 +73,40 @@ def get_community(request, communityId):
 
 
 @login_required
+@require_POST
 def compose_post(request):
-    if request.method != "POST":
-        return JsonResponse({"error": "POST request required."}, status=400)
     try:
         data = json.loads(request.body)
+    except (json.JSONDecodeError, UnicodeDecodeError, ValueError):
+        return JsonResponse({"error": "Invalid JSON body"}, status=400)
+
+    if not isinstance(data, dict):
+        return JsonResponse({"error": "Invalid JSON body"}, status=400)
+
+    content = data.get("content")
+    community_id = data.get("communityId")
+    if not content or str(content).strip() == "" or community_id is None:
+        return JsonResponse(
+            {"error": "Missing required fields: content and communityId"},
+            status=400,
+        )
+
+    try:
+        community = Community.objects.get(pk=community_id)
+    except (Community.DoesNotExist, ValueError, TypeError):
+        return JsonResponse({"error": "Community not found."}, status=404)
+
+    try:
         current_user = request.user
-        community = Community.objects.get(pk=data.get("communityId"))
         CommunityPost.objects.create(
             poster=current_user,
-            content=data.get("content"),
+            content=content,
             community=community,
             spoiler=bool(data.get("spoiler")),
         )
         return JsonResponse({"message": f"You posted on {community.name}"}, status=201)
+    except PermissionDenied as e:
+        return JsonResponse({"error": str(e)}, status=403)
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
 
@@ -94,8 +116,8 @@ def profile_view(request):
     current_user = request.user
     bio = "no bio yet." if current_user.bio is None else current_user.bio
 
-    top_5_movies = [_normalize_top5_item(i, "movie") for i in (current_user.top_5_movies or [])]
-    top_5_shows = [_normalize_top5_item(i, "show") for i in (current_user.top_5_shows or [])]
+    top_5_movies = [normalize_media_item(i, "movie") for i in (current_user.top_5_movies or [])]
+    top_5_shows = [normalize_media_item(i, "show") for i in (current_user.top_5_shows or [])]
 
     raw_wp = current_user.weekly_pick
     raw_weekly_pick = None
@@ -103,8 +125,8 @@ def profile_view(request):
         raw_weekly_pick = raw_wp.get("result") if "result" in raw_wp else raw_wp
 
     if raw_weekly_pick and isinstance(raw_weekly_pick, dict):
-        item_type = _detect_media_type(raw_weekly_pick)
-        weekly_pick = _normalize_top5_item(raw_weekly_pick, item_type)
+        item_type = detect_media_type(raw_weekly_pick)
+        weekly_pick = normalize_media_item(raw_weekly_pick, item_type)
     else:
         weekly_pick = None
 
@@ -253,122 +275,6 @@ def show_description(request, showId):
     )
 
 
-def _normalize_watchlist_item(item, item_type):
-    """Normalize a raw watchlist JSON item into consistent display attributes."""
-    if not isinstance(item, dict):
-        return None
-
-    tmdb_id = item.get("id")
-    if tmdb_id is None:
-        return None
-
-    if item_type == "movie":
-        title = item.get("title") or item.get("name") or "Untitled Movie"
-        date_str = item.get("release_date") or ""
-        href = f"/moviedescription/{tmdb_id}"
-    else:
-        title = item.get("name") or item.get("title") or "Untitled Show"
-        date_str = item.get("first_air_date") or item.get("release_date") or ""
-        href = f"/showdescription/{tmdb_id}"
-
-    year = str(date_str)[:4] if date_str and len(str(date_str)) >= 4 else ""
-
-    poster_path = item.get("poster_path")
-    if poster_path:
-        if poster_path.startswith("http://") or poster_path.startswith("https://"):
-            poster_url = poster_path
-        else:
-            poster_url = f"https://image.tmdb.org/t/p/w500{poster_path}"
-    else:
-        poster_url = item.get("poster_url")
-
-    vote_avg = item.get("vote_average")
-    try:
-        rating = round(float(vote_avg), 1) if vote_avg is not None else None
-    except (ValueError, TypeError):
-        rating = None
-
-    return {
-        "title": title,
-        "year": year,
-        "poster_url": poster_url,
-        "rating": rating,
-        "tmdb_id": tmdb_id,
-        "item_type": item_type,
-        "href": href,
-    }
-
-
-def _detect_media_type(item):
-    """Detect whether a media dict represents a movie or a TV show."""
-    if not isinstance(item, dict):
-        return "movie"
-    media_type = item.get("media_type")
-    if media_type in ("show", "tv"):
-        return "show"
-    if media_type == "movie":
-        return "movie"
-    if "first_air_date" in item or ("name" in item and "title" not in item):
-        return "show"
-    return "movie"
-
-
-def _normalize_top5_item(item, item_type):
-    """Normalize a Top 5 / weekly-pick JSON item into display attributes."""
-    if not isinstance(item, dict):
-        return None
-
-    raw_id = item.get("tmdb_id") if item.get("tmdb_id") is not None else item.get("id")
-    if raw_id is None:
-        return None
-
-    try:
-        clean_id = int(raw_id)
-    except (ValueError, TypeError):
-        return None
-
-    if item_type == "movie":
-        title = item.get("title") or item.get("name") or "Untitled Movie"
-        date_str = item.get("release_date") or item.get("first_air_date") or ""
-        href = reverse("myapp:moviedescription", args=[clean_id])
-    else:
-        title = item.get("name") or item.get("title") or "Untitled Show"
-        date_str = item.get("first_air_date") or item.get("release_date") or ""
-        href = reverse("myapp:showdescription", args=[clean_id])
-
-    year = str(date_str)[:4] if date_str and len(str(date_str)) >= 4 else item.get("year", "")
-
-    poster_path = item.get("poster_path")
-    if poster_path:
-        if str(poster_path).startswith("http://") or str(poster_path).startswith("https://"):
-            poster_url = poster_path
-        else:
-            poster_url = f"https://image.tmdb.org/t/p/w500{poster_path}"
-    else:
-        poster_url = item.get("poster_url")
-
-    vote_avg = (
-        item.get("vote_average") if item.get("vote_average") is not None else item.get("rating")
-    )
-    try:
-        rating = round(float(vote_avg), 1) if vote_avg is not None else None
-    except (ValueError, TypeError):
-        rating = None
-
-    return {
-        "title": title,
-        "name": title,
-        "year": year,
-        "poster_url": poster_url,
-        "rating": rating,
-        "tmdb_id": clean_id,
-        "id": clean_id,
-        "item_type": item_type,
-        "href": href,
-        "overview": item.get("overview", ""),
-    }
-
-
 @login_required
 @require_POST
 def join_community(request):
@@ -464,12 +370,8 @@ def watchlist(request):
     raw_movies = getattr(request.user, "movie_watchlists", None) or []
     raw_shows = getattr(request.user, "show_watchlists", None) or []
 
-    movie_watchlist = [
-        norm for item in raw_movies if (norm := _normalize_watchlist_item(item, "movie"))
-    ]
-    show_watchlist = [
-        norm for item in raw_shows if (norm := _normalize_watchlist_item(item, "show"))
-    ]
+    movie_watchlist = [norm for item in raw_movies if (norm := normalize_media_item(item, "movie"))]
+    show_watchlist = [norm for item in raw_shows if (norm := normalize_media_item(item, "show"))]
 
     return render(
         request,
@@ -522,17 +424,69 @@ def update_top_5(request):
     try:
         current_user = request.user
         data = json.loads(request.body)
-        result = data.get("result")
-        if data.get("type") == "show":
+        result = data.get("result") or {}
+        item_type = data.get("type")
+        if item_type == "show":
             response = current_user.add_top_5_shows(
                 result.get("rank"), result.get("id"), result.get("name")
             )
-            return JsonResponse({"message": response}, status=200)
-        elif data.get("type") == "movie":
+        elif item_type == "movie":
             response = current_user.add_top_5_movies(
                 result.get("rank"), result.get("id"), result.get("name")
             )
-            return JsonResponse({"message": response}, status=200)
+        else:
+            return JsonResponse({"error": "Unknown type"}, status=400)
+
+        normalized = normalize_media_item(result, item_type)
+        poster_url = normalized["poster_url"] if normalized else None
+        year = normalized["year"] if normalized else ""
+
+        # If poster wasn't in the request payload, fetch it from TMDB
+        media_id = result.get("id") or result.get("tmdb_id")
+        if not poster_url and media_id:
+            try:
+                if item_type == "movie":
+                    tmdb_data = fetch_movie_data(media_id)
+                else:
+                    tmdb_data = fetch_show_data(media_id)
+                if isinstance(tmdb_data, dict) and not tmdb_data.get("error"):
+                    enriched = normalize_media_item(tmdb_data, item_type)
+                    if enriched:
+                        poster_url = enriched.get("poster_url")
+                        if not year:
+                            year = enriched.get("year", "")
+            except Exception:
+                poster_url = None  # don't fail the whole request on TMDB hiccup
+
+        if poster_url and isinstance(result.get("rank"), int) and 1 <= result["rank"] <= 5:
+            rank_idx = result["rank"] - 1
+            if item_type == "movie" and current_user.top_5_movies:
+                if isinstance(current_user.top_5_movies[rank_idx], dict):
+                    current_user.top_5_movies[rank_idx]["poster_url"] = poster_url
+                else:
+                    current_user.top_5_movies[rank_idx] = {
+                        "rank": result["rank"],
+                        "tmdb_id": result.get("id"),
+                        "title": result.get("name") or result.get("title", ""),
+                        "poster_url": poster_url,
+                    }
+                current_user.save()
+            elif item_type == "show" and current_user.top_5_shows:
+                if isinstance(current_user.top_5_shows[rank_idx], dict):
+                    current_user.top_5_shows[rank_idx]["poster_url"] = poster_url
+                else:
+                    current_user.top_5_shows[rank_idx] = {
+                        "rank": result["rank"],
+                        "tmdb_id": result.get("id"),
+                        "name": result.get("name") or result.get("title", ""),
+                        "poster_url": poster_url,
+                    }
+                current_user.save()
+
+        return JsonResponse(
+            {"message": response, "poster_url": poster_url, "year": year},
+            status=200,
+        )
 
     except ValueError as e:
         return JsonResponse({"error": str(e)}, status=400)
@@ -552,7 +506,73 @@ def update_wp(request):
         result = data.get("result")
         current_user.weekly_pick["result"] = result
         current_user.save()
-        return JsonResponse({"message": "weely pick updated successfully"}, status=200)
+
+        item_type = (
+            data.get("type")
+            or (
+                result.get("type") or result.get("media_type") or result.get("item_type")
+                if isinstance(result, dict)
+                else None
+            )
+            or (detect_media_type(result) if isinstance(result, dict) else "movie")
+        )
+        normalized = normalize_media_item(result, item_type) if isinstance(result, dict) else None
+        poster_url = normalized["poster_url"] if normalized else None
+        year = normalized["year"] if normalized else ""
+
+        media_id = result.get("id") or result.get("tmdb_id") if isinstance(result, dict) else None
+        if not poster_url and media_id:
+            try:
+                tmdb_data = (
+                    fetch_movie_data(media_id)
+                    if item_type == "movie"
+                    else fetch_show_data(media_id)
+                )
+                enriched = (
+                    normalize_media_item(tmdb_data, item_type)
+                    if isinstance(tmdb_data, dict) and not tmdb_data.get("error")
+                    else None
+                )
+                if enriched and enriched.get("poster_url"):
+                    poster_url = enriched.get("poster_url")
+                    if not year:
+                        year = enriched.get("year", "")
+                else:
+                    # If guessed type did not produce a poster, try the alternative type
+                    alt_type = "show" if item_type == "movie" else "movie"
+                    alt_data = (
+                        fetch_show_data(media_id)
+                        if alt_type == "show"
+                        else fetch_movie_data(media_id)
+                    )
+                    alt_enriched = (
+                        normalize_media_item(alt_data, alt_type)
+                        if isinstance(alt_data, dict) and not alt_data.get("error")
+                        else None
+                    )
+                    if alt_enriched and alt_enriched.get("poster_url"):
+                        poster_url = alt_enriched.get("poster_url")
+                        if not year:
+                            year = alt_enriched.get("year", "")
+            except Exception:
+                poster_url = None
+
+        if (
+            poster_url
+            and isinstance(current_user.weekly_pick, dict)
+            and isinstance(current_user.weekly_pick.get("result"), dict)
+        ):
+            current_user.weekly_pick["result"]["poster_url"] = poster_url
+            current_user.save()
+
+        return JsonResponse(
+            {
+                "message": "weekly pick updated successfully",
+                "poster_url": poster_url,
+                "year": year,
+            },
+            status=200,
+        )
     except ValidationError as e:
         return JsonResponse({"errors": e.message_dict}, status=200)
     except Exception as e:
@@ -571,6 +591,8 @@ def update_watchlist(request):
         if action == "remove":
             if data.get("type") == "movie":
                 movie_id = data.get("movie_id")
+                if movie_id is None:
+                    return JsonResponse({"error": "movie_id is required"}, status=400)
                 # remove movie objects with matching id
                 before = len(current_user.movie_watchlists or [])
                 current_user.movie_watchlists = [
@@ -586,6 +608,8 @@ def update_watchlist(request):
                 )
             elif data.get("type") == "show":
                 show_id = data.get("show_id")
+                if show_id is None:
+                    return JsonResponse({"error": "show_id is required"}, status=400)
                 before = len(current_user.show_watchlists or [])
                 current_user.show_watchlists = [
                     s for s in (current_user.show_watchlists or []) if s.get("id") != show_id
@@ -602,11 +626,19 @@ def update_watchlist(request):
                 return JsonResponse({"error": "Unknown type for removal"}, status=400)
         # default: add behavior (backwards-compatible)
         if data.get("type") == "movie":
-            result = current_user.add_movie_watchlist(data.get("movie_id"))
+            movie_id = data.get("movie_id")
+            if movie_id is None:
+                return JsonResponse({"error": "movie_id is required"}, status=400)
+            result = current_user.add_movie_watchlist(movie_id)
             return JsonResponse({"message": result}, status=200)
         elif data.get("type") == "show":
-            result = current_user.add_show_watchlist(data.get("show_id"))
+            show_id = data.get("show_id")
+            if show_id is None:
+                return JsonResponse({"error": "show_id is required"}, status=400)
+            result = current_user.add_show_watchlist(show_id)
             return JsonResponse({"message": result}, status=200)
+        else:
+            return JsonResponse({"error": "Unknown type"}, status=400)
     except ValueError as e:
         return JsonResponse({"error": str(e)}, status=400)
     except Exception as e:

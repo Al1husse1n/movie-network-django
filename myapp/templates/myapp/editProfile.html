@@ -781,10 +781,11 @@
           });
 
           if (res.ok) {
+            const data = await res.json();
             this.movies[slotIdx] = {
               id: parseInt(id),
               title: name,
-              poster_url: null
+              poster_url: data.poster_url || null
             };
             this.movieSearchStates[slotIdx].query = '';
             this.movieSearchStates[slotIdx].results = [];
@@ -881,10 +882,11 @@
           });
 
           if (res.ok) {
+            const data = await res.json();
             this.shows[slotIdx] = {
               id: parseInt(id),
               name: name,
-              poster_url: null
+              poster_url: data.poster_url || null
             };
             this.showSearchStates[slotIdx].query = '';
             this.showSearchStates[slotIdx].results = [];
@@ -979,10 +981,11 @@
           });
 
           if (res.ok) {
+            const data = await res.json();
             this.weeklyPick = {
               id: parseInt(id),
               name: name,
-              poster_url: null
+              poster_url: data.poster_url || null
             };
             this.wpSearch.query = '';
             this.wpSearch.results = [];

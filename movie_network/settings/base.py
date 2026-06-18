@@ -87,8 +87,25 @@ if DATABASE_URL:
 else:
     DATABASES = {}
 
+# Cache configuration
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": env("REDIS_URL", default="redis://127.0.0.1:6379/1"),
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+            "IGNORE_EXCEPTIONS": True,
+            "SOCKET_CONNECT_TIMEOUT": 2,
+            "SOCKET_TIMEOUT": 2,
+        },
+        "KEY_PREFIX": "movie_network",
+        "TIMEOUT": 300,
+    }
+}
+
 # External Services
 TMDB_API_KEY = env("TMDB_API_KEY", default=None)
+TMDB_CACHE_TTL = env.int("TMDB_CACHE_TTL", default=86400)
 
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [

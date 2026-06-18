@@ -2,9 +2,24 @@ import re
 
 import pytest
 import requests_mock as rm_module
+from django.core.cache import cache
 from django.test import Client
 
 from .factories import CommunityFactory, UserFactory
+
+
+@pytest.fixture(autouse=True)
+def _clear_cache_between_tests():
+    """Ensure Django cache is empty before every test to prevent cross-test bleed."""
+    try:
+        cache.clear()
+    except Exception:
+        pass
+    yield
+    try:
+        cache.clear()
+    except Exception:
+        pass
 
 
 @pytest.fixture

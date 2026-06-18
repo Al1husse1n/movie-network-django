@@ -1,11 +1,15 @@
+import logging
 from datetime import datetime, timedelta
 
 import requests
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
+from django.core.cache import cache
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.db import models, transaction
 from django.utils import timezone
+
+logger = logging.getLogger(__name__)
 
 
 class TMDBError(Exception):
@@ -24,6 +28,15 @@ def list_for_watchlist():
 
 
 def fetch_movie_data(movie_id):
+    cache_key = f"tmdb:movie:{movie_id}"
+    try:
+        cached = cache.get(cache_key)
+        if cached is not None:
+            logger.debug("Cache hit: %s", cache_key)
+            return cached
+    except Exception as e:
+        logger.warning("Cache get failed for %s: %s", cache_key, e)
+
     try:
         api_key = settings.TMDB_API_KEY
         url = f"https://api.themoviedb.org/3/movie/{movie_id}"
@@ -33,12 +46,26 @@ def fetch_movie_data(movie_id):
         response.raise_for_status()
 
         data = response.json()
+        if isinstance(data, dict) and not data.get("error"):
+            try:
+                cache.set(cache_key, data, timeout=settings.TMDB_CACHE_TTL)
+            except Exception as e:
+                logger.warning("Cache set failed for %s: %s", cache_key, e)
         return data
     except requests.exceptions.RequestException as e:
         return {"error": str(e)}
 
 
 def fetch_show_data(show_id):
+    cache_key = f"tmdb:show:{show_id}"
+    try:
+        cached = cache.get(cache_key)
+        if cached is not None:
+            logger.debug("Cache hit: %s", cache_key)
+            return cached
+    except Exception as e:
+        logger.warning("Cache get failed for %s: %s", cache_key, e)
+
     try:
         url = f"https://api.themoviedb.org/3/tv/{show_id}"
         api_key = settings.TMDB_API_KEY
@@ -47,6 +74,11 @@ def fetch_show_data(show_id):
         response = requests.get(url, params=params)
         response.raise_for_status()
         data = response.json()
+        if isinstance(data, dict) and not data.get("error"):
+            try:
+                cache.set(cache_key, data, timeout=settings.TMDB_CACHE_TTL)
+            except Exception as e:
+                logger.warning("Cache set failed for %s: %s", cache_key, e)
         return data
     except requests.exceptions.RequestException as e:
         return {"error": str(e)}

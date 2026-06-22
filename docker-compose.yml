@@ -29,5 +29,31 @@ services:
       timeout: 3s
       retries: 5
 
+  worker:
+    build: .
+    command: celery -A movie_network worker -l info
+    volumes:
+      - .:/app
+    environment:
+      DJANGO_SETTINGS_MODULE: movie_network.settings.dev
+    depends_on:
+      - db
+      - redis
+    profiles:
+      - worker
+
+  beat:
+    build: .
+    command: celery -A movie_network beat -l info
+    volumes:
+      - .:/app
+    environment:
+      DJANGO_SETTINGS_MODULE: movie_network.settings.dev
+    depends_on:
+      - db
+      - redis
+    profiles:
+      - worker
+
 volumes:
   movie_network_pgdata:

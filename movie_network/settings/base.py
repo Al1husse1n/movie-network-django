@@ -7,6 +7,7 @@ from pathlib import Path
 
 import dj_database_url
 import environ
+from celery.schedules import crontab
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 # BASE_DIR points to the repository root where manage.py, .env, etc. reside.
@@ -40,6 +41,8 @@ INSTALLED_APPS = [
     "rest_framework.authtoken",
     "drf_spectacular",
     "django_filters",
+    "django_celery_beat",
+    "django_celery_results",
     "myapp",
 ]
 
@@ -173,4 +176,24 @@ SPECTACULAR_SETTINGS = {
     "DESCRIPTION": "A social platform for film lovers. REST API.",
     "VERSION": "1.0.0",
     "SERVE_INCLUDE_SCHEMA": False,
+}
+
+# Celery Configuration
+CELERY_BROKER_URL = env("CELERY_BROKER_URL", default="redis://127.0.0.1:6379/0")
+CELERY_RESULT_BACKEND = "django-db"
+CELERY_ACCEPT_CONTENT = ["json"]
+CELERY_TASK_SERIALIZER = "json"
+CELERY_RESULT_SERIALIZER = "json"
+CELERY_TIMEZONE = "UTC"
+CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
+
+CELERY_BEAT_SCHEDULE = {
+    "refresh-stale-movies-nightly": {
+        "task": "myapp.tasks.refresh_stale_movies",
+        "schedule": crontab(hour=3, minute=0),
+    },
+    "send-weekly-digests": {
+        "task": "myapp.tasks.send_weekly_digests",
+        "schedule": crontab(day_of_week=0, hour=9, minute=0),  # Sunday 9am UTC
+    },
 }

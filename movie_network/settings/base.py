@@ -31,12 +31,14 @@ CSRF_TRUSTED_ORIGINS = env.list("CSRF_TRUSTED_ORIGINS", default=[])
 AUTH_USER_MODEL = "myapp.User"
 
 INSTALLED_APPS = [
+    "daphne",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "channels",
     "rest_framework",
     "rest_framework.authtoken",
     "drf_spectacular",
@@ -76,6 +78,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = "movie_network.wsgi.application"
+ASGI_APPLICATION = "movie_network.asgi.application"
 
 # Database configuration
 DATABASE_URL = env("DATABASE_URL", default=None)
@@ -195,5 +198,16 @@ CELERY_BEAT_SCHEDULE = {
     "send-weekly-digests": {
         "task": "myapp.tasks.send_weekly_digests",
         "schedule": crontab(day_of_week=0, hour=9, minute=0),  # Sunday 9am UTC
+    },
+}
+
+# Channels / WebSocket Configuration
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [env("CHANNEL_LAYERS_URL", default="redis://127.0.0.1:6379/2")],
+            "symmetric_encryption_keys": [SECRET_KEY],
+        },
     },
 }

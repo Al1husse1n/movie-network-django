@@ -1,5 +1,6 @@
 import json
 import re
+from unittest.mock import patch
 
 import pytest
 from django.test import Client
@@ -52,6 +53,64 @@ class TestComposePost:
         assert post.poster == author
         assert post.content == "A thoughtful review of Vertigo."
         assert post.spoiler is True
+
+    def test_compose_post_broadcasts_to_channel_group(self, client):
+        """Successful post creation broadcasts post_created event to community group."""
+        author = UserFactory()
+        community = CommunityFactory(admin=author)
+        client.force_login(author)
+
+        payload = {
+            "content": "Broadcast test content",
+            "communityId": community.id,
+            "spoiler": False,
+        }
+
+        with patch("myapp.views.broadcast_to_group") as mock_broadcast:
+            response = client.post(
+                self.url,
+                data=json.dumps(payload),
+                content_type="application/json",
+            )
+            assert response.status_code == 201
+            assert mock_broadcast.call_count == 1
+            post = community.posts.first()
+            mock_broadcast.assert_called_once_with(
+                f"community_{community.id}",
+                {
+                    "type": "feed_event",
+                    "event_type": "post_created",
+                    "payload": {
+                        "post_id": post.id,
+                        "poster_username": author.username,
+                        "content": "Broadcast test content",
+                        "spoiler": False,
+                        "post_time": post.timestamp.strftime("%b %d, %Y • %I:%M %p"),
+                        "community_id": community.id,
+                        "community_name": community.name,
+                    },
+                },
+            )
+
+    def test_compose_post_succeeds_even_if_broadcast_raises(self, client):
+        """HTTP response succeeds with 201 even if broadcast raises an exception."""
+        author = UserFactory()
+        community = CommunityFactory(admin=author)
+        client.force_login(author)
+
+        payload = {
+            "content": "Fault tolerance test content",
+            "communityId": community.id,
+            "spoiler": False,
+        }
+
+        with patch("myapp.views.broadcast_to_group", side_effect=RuntimeError("Broadcast down")):
+            response = client.post(
+                self.url,
+                data=json.dumps(payload),
+                content_type="application/json",
+            )
+            assert response.status_code == 201
 
     def test_compose_post_malformed_json(self, client, user, community):
         """Malformed JSON payload returns 400."""
@@ -461,6 +520,48 @@ class TestJoinCommunity:
         community.refresh_from_db()
         assert community.members.filter(id=user.id).exists()
 
+    def test_join_community_broadcasts_to_channel_group(self, client, user):
+        """Joining community broadcasts member_count_changed event."""
+        creator = UserFactory()
+        community = CommunityFactory(admin=creator, visibility="public")
+        client.force_login(user)
+
+        payload = {"community_id": community.id}
+        with patch("myapp.views.broadcast_to_group") as mock_broadcast:
+            response = client.post(
+                self.url,
+                data=json.dumps(payload),
+                content_type="application/json",
+            )
+            assert response.status_code == 200
+            community.refresh_from_db()
+            mock_broadcast.assert_called_once_with(
+                f"community_{community.id}",
+                {
+                    "type": "feed_event",
+                    "event_type": "member_count_changed",
+                    "payload": {
+                        "community_id": community.id,
+                        "member_count": community.member_amount,
+                    },
+                },
+            )
+
+    def test_join_community_succeeds_even_if_broadcast_raises(self, client, user):
+        """Joining community still returns 200 even if broadcast raises."""
+        creator = UserFactory()
+        community = CommunityFactory(admin=creator, visibility="public")
+        client.force_login(user)
+
+        payload = {"community_id": community.id}
+        with patch("myapp.views.broadcast_to_group", side_effect=RuntimeError("Broadcast down")):
+            response = client.post(
+                self.url,
+                data=json.dumps(payload),
+                content_type="application/json",
+            )
+            assert response.status_code == 200
+
     def test_join_community_already_member(self, client, user):
         """POST when already a member returns 400."""
         creator = UserFactory()
@@ -602,6 +703,52 @@ class TestLeaveCommunity:
 
         community.refresh_from_db()
         assert not community.members.filter(id=user.id).exists()
+
+    def test_leave_community_broadcasts_to_channel_group(self, client, user):
+        """Leaving community broadcasts member_count_changed event."""
+        community = CommunityFactory()
+        community.members.add(user)
+        community.member_amount = community.members.count()
+        community.save()
+
+        client.force_login(user)
+        payload = {"community_id": community.id}
+        with patch("myapp.views.broadcast_to_group") as mock_broadcast:
+            response = client.post(
+                self.url,
+                data=json.dumps(payload),
+                content_type="application/json",
+            )
+            assert response.status_code == 200
+            community.refresh_from_db()
+            mock_broadcast.assert_called_once_with(
+                f"community_{community.id}",
+                {
+                    "type": "feed_event",
+                    "event_type": "member_count_changed",
+                    "payload": {
+                        "community_id": community.id,
+                        "member_count": community.member_amount,
+                    },
+                },
+            )
+
+    def test_leave_community_succeeds_even_if_broadcast_raises(self, client, user):
+        """Leaving community returns 200 even if broadcast raises."""
+        community = CommunityFactory()
+        community.members.add(user)
+        community.member_amount = community.members.count()
+        community.save()
+
+        client.force_login(user)
+        payload = {"community_id": community.id}
+        with patch("myapp.views.broadcast_to_group", side_effect=RuntimeError("Broadcast down")):
+            response = client.post(
+                self.url,
+                data=json.dumps(payload),
+                content_type="application/json",
+            )
+            assert response.status_code == 200
 
     def test_leave_community_admin_forbidden(self, client):
         """POST as admin returns 403 (cannot leave own community)."""

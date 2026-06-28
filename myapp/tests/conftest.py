@@ -22,6 +22,28 @@ def _clear_cache_between_tests():
         pass
 
 
+@pytest.fixture(autouse=True)
+def _noop_broadcast(request, monkeypatch):
+    """Default: disable broadcasts in tests. Tests that assert broadcasts
+    will patch this again or spy on it."""
+    nodeid = getattr(request.node, "nodeid", "")
+    cls_name = getattr(request.cls, "__name__", "")
+    if (
+        "TestEndToEndBroadcast" in nodeid
+        or "TestBroadcastHelper" in nodeid
+        or cls_name in ("TestEndToEndBroadcast", "TestBroadcastHelper")
+    ):
+        return
+
+    from myapp import signals, utils_broadcast, views
+
+    monkeypatch.setattr(utils_broadcast, "broadcast_to_group", lambda *a, **kw: None)
+    if hasattr(signals, "broadcast_to_group"):
+        monkeypatch.setattr(signals, "broadcast_to_group", lambda *a, **kw: None)
+    if hasattr(views, "broadcast_to_group"):
+        monkeypatch.setattr(views, "broadcast_to_group", lambda *a, **kw: None)
+
+
 @pytest.fixture
 def user(db):
     """Fixture providing a test user with a hashed password."""

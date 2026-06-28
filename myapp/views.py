@@ -1,4 +1,5 @@
 import json
+import logging
 
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
@@ -17,6 +18,9 @@ from .models import (
     fetch_show_data,
 )
 from .serializers import detect_media_type, normalize_media_item
+from .utils_broadcast import broadcast_to_group
+
+logger = logging.getLogger(__name__)
 
 
 def login_view(request):
@@ -98,12 +102,31 @@ def compose_post(request):
 
     try:
         current_user = request.user
-        CommunityPost.objects.create(
+        post = CommunityPost.objects.create(
             poster=current_user,
             content=content,
             community=community,
             spoiler=bool(data.get("spoiler")),
         )
+        try:
+            broadcast_to_group(
+                f"community_{community.id}",
+                {
+                    "type": "feed_event",
+                    "event_type": "post_created",
+                    "payload": {
+                        "post_id": post.id,
+                        "poster_username": request.user.username,
+                        "content": post.content,
+                        "spoiler": post.spoiler,
+                        "post_time": post.timestamp.strftime("%b %d, %Y • %I:%M %p"),
+                        "community_id": community.id,
+                        "community_name": community.name,
+                    },
+                },
+            )
+        except Exception as exc:
+            logger.warning("Broadcast post_created failed: %s", exc)
         return JsonResponse({"message": f"You posted on {community.name}"}, status=201)
     except PermissionDenied as e:
         return JsonResponse({"error": str(e)}, status=403)
@@ -308,6 +331,17 @@ def join_community(request):
     community.members.add(request.user)
     community.member_amount = community.members.count()
     community.save()
+    try:
+        broadcast_to_group(
+            f"community_{community.id}",
+            {
+                "type": "feed_event",
+                "event_type": "member_count_changed",
+                "payload": {"community_id": community.id, "member_count": community.member_amount},
+            },
+        )
+    except Exception as exc:
+        logger.warning("Broadcast join_community failed: %s", exc)
     return JsonResponse(
         {
             "ok": True,
@@ -355,6 +389,17 @@ def leave_community(request):
     community.members.remove(request.user)
     community.member_amount = community.members.count()
     community.save()
+    try:
+        broadcast_to_group(
+            f"community_{community.id}",
+            {
+                "type": "feed_event",
+                "event_type": "member_count_changed",
+                "payload": {"community_id": community.id, "member_count": community.member_amount},
+            },
+        )
+    except Exception as exc:
+        logger.warning("Broadcast leave_community failed: %s", exc)
     return JsonResponse(
         {
             "ok": True,

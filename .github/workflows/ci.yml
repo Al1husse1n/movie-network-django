@@ -36,7 +36,6 @@ jobs:
           --health-timeout 5s
           --health-retries 10
     env:
-      DJANGO_SETTINGS_MODULE: movie_network.settings.dev
       SECRET_KEY: "ci-test-secret-key-not-used-in-production"
       DATABASE_URL: "postgresql://movie_network:movie_network_dev_password@localhost:5432/movie_network_test"
       TMDB_API_KEY: "ci-test-tmdb-key"

@@ -99,13 +99,13 @@ class ReviewSerializer(serializers.ModelSerializer):
         data = data.copy() if hasattr(data, "copy") else dict(data)
         if "movie" in data and "movie_id" not in data and not isinstance(data["movie"], dict):
             val = data.get("movie")
-            if isinstance(val, (list, tuple)) and val:
+            if isinstance(val, list | tuple) and val:
                 val = val[0]
             data["movie_id"] = val
             data.pop("movie", None)
         if "show" in data and "show_id" not in data and not isinstance(data["show"], dict):
             val = data.get("show")
-            if isinstance(val, (list, tuple)) and val:
+            if isinstance(val, list | tuple) and val:
                 val = val[0]
             data["show_id"] = val
             data.pop("show", None)

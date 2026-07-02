@@ -102,5 +102,91 @@
 
     {% include "components/footer.html" %}
     {% block extra_scripts %}{% endblock %}
+
+    <!-- Real-time WebSocket Helper (Fault-tolerant with exponential backoff) -->
+    <script>
+      (function() {
+        window.MovieNetworkWS = {
+          connect: function(url, handlers, options) {
+            handlers = handlers || {};
+            options = options || {};
+            let ws = null;
+            let closedExplicitly = false;
+            let attempts = 0;
+            let reconnectTimer = null;
+            const maxAttempts = options.maxAttempts || 10;
+
+            function resolveUrl(u) {
+              if (u.startsWith('ws://') || u.startsWith('wss://')) return u;
+              const proto = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+              const path = u.startsWith('/') ? u : '/' + u;
+              return proto + '//' + window.location.host + path;
+            }
+
+            const fullUrl = resolveUrl(url);
+
+            function establish() {
+              if (closedExplicitly) return;
+              try {
+                ws = new WebSocket(fullUrl);
+              } catch (err) {
+                if (handlers.onError) handlers.onError(err);
+                scheduleReconnect();
+                return;
+              }
+
+              ws.onopen = function(event) {
+                attempts = 0;
+                if (handlers.onOpen) handlers.onOpen(event);
+              };
+
+              ws.onmessage = function(event) {
+                try {
+                  const data = JSON.parse(event.data);
+                  if (handlers.onMessage) handlers.onMessage(data);
+                } catch (e) {
+                  console.warn('[MovieNetworkWS] Failed to parse message', e);
+                }
+              };
+
+              ws.onerror = function(event) {
+                if (handlers.onError) handlers.onError(event);
+              };
+
+              ws.onclose = function(event) {
+                if (handlers.onClose) handlers.onClose(event);
+                if (!closedExplicitly) {
+                  scheduleReconnect();
+                }
+              };
+            }
+
+            function scheduleReconnect() {
+              if (closedExplicitly || attempts >= maxAttempts) return;
+              const delay = Math.min(1000 * Math.pow(2, attempts), 30000);
+              attempts++;
+              clearTimeout(reconnectTimer);
+              reconnectTimer = setTimeout(establish, delay);
+            }
+
+            establish();
+
+            return {
+              url: fullUrl,
+              close: function() {
+                closedExplicitly = true;
+                clearTimeout(reconnectTimer);
+                if (ws) {
+                  try { ws.close(); } catch (_) {}
+                }
+              },
+              isOpen: function() {
+                return ws !== null && ws.readyState === WebSocket.OPEN;
+              }
+            };
+          }
+        };
+      })();
+    </script>
   </body>
 </html>

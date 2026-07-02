@@ -144,6 +144,10 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
               </svg>
               <span>Posting to Circle:</span>
+              <span class="inline-flex items-center gap-1.5 text-[10px] font-mono ml-2">
+                <span :class="wsConnected ? 'bg-emerald-400' : 'bg-cream-muted'" class="w-1.5 h-1.5 rounded-full"></span>
+                <span x-text="wsConnected ? 'LIVE' : 'OFFLINE'"></span>
+              </span>
             </label>
 
             <!-- Community Select -->
@@ -515,6 +519,8 @@
       successMessage: '',
       posts: [],
       revealedSpoilers: {},
+      ws: null,
+      wsConnected: false,
 
       init() {
         if (this.selectedCommunityId) {
@@ -522,17 +528,85 @@
         }
       },
 
+      connectCommunitySocket(communityId) {
+        if (this.ws) {
+          this.ws.close();
+          this.ws = null;
+          this.wsConnected = false;
+        }
+
+        if (!communityId || !window.MovieNetworkWS) return;
+
+        this.ws = window.MovieNetworkWS.connect(`/ws/community/${communityId}/`, {
+          onOpen: () => {
+            this.wsConnected = true;
+          },
+          onClose: () => {
+            this.wsConnected = false;
+          },
+          onError: () => {
+            this.wsConnected = false;
+          },
+          onMessage: (data) => {
+            const type = data.type || data.event_type;
+            if (type === 'post_created' && data.payload) {
+              const postId = data.payload.post_id;
+              // Deduplicate by post_id
+              if (this.posts.some(p => String(p.id) === String(postId))) {
+                return;
+              }
+              const newPost = {
+                id: postId,
+                poster_username: data.payload.poster_username,
+                content: data.payload.content,
+                spoiler: Boolean(data.payload.spoiler),
+                post_time: data.payload.post_time,
+                community_id: data.payload.community_id,
+                community_name: data.payload.community_name,
+              };
+              this.posts.unshift(newPost);
+            } else if (type === 'member_count_changed' && data.payload) {
+              const commId = data.payload.community_id;
+              const newCount = data.payload.member_count;
+              const comm = this.userCommunities.find(c => String(c.id) === String(commId));
+              if (comm && typeof newCount === 'number') {
+                comm.member_amount = newCount;
+              }
+            }
+          }
+        });
+      },
+
       toggleSpoilerReveal(postId) {
         this.revealedSpoilers[postId] = !this.revealedSpoilers[postId];
+      },
+
+      destroy() {
+        if (this.ws) {
+          this.ws.close();
+          this.ws = null;
+          this.wsConnected = false;
+        }
       },
 
       async loadPosts(communityId) {
         if (!communityId) {
           this.posts = [];
+          if (this.ws) {
+            this.ws.close();
+            this.ws = null;
+            this.wsConnected = false;
+          }
           return;
         }
 
+        const prevCommunityId = this.selectedCommunityId;
         this.selectedCommunityId = String(communityId);
+
+        if (String(prevCommunityId) !== String(communityId) || !this.ws) {
+          this.connectCommunitySocket(communityId);
+        }
+
         this.loading = true;
         this.errorMessage = '';
 

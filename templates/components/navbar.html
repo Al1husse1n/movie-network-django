@@ -47,6 +47,29 @@
                 {{ request.user.username }}
               </span>
             </a>
+
+            <!-- Notification Bell -->
+            <div x-data="notificationBell()" x-init="init()" class="relative flex items-center">
+              <button
+                type="button"
+                @click="markAllRead()"
+                class="relative p-1.5 rounded-full text-cream-muted hover:text-amber focus-ring transition-colors duration-150"
+                :class="pulsing ? 'text-amber animate-pulse' : ''"
+                aria-label="Notifications"
+                :title="count > 0 ? count + ' unread notifications' : 'Notifications'"
+              >
+                <svg class="w-5 h-5 fill-none stroke-current" viewBox="0 0 24 24" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                </svg>
+                <span
+                  x-show="count > 0"
+                  x-cloak
+                  x-text="count > 99 ? '99+' : count"
+                  class="absolute -top-1 -right-1 min-w-[16px] h-4 px-1 rounded-full bg-amber text-base-900 font-mono text-[10px] font-bold flex items-center justify-center leading-none ring-2 ring-base"
+                ></span>
+              </button>
+            </div>
+
             <span class="text-cream-muted/40" aria-hidden="true">|</span>
             <a href="{% url 'myapp:logout' %}" class="btn-ghost text-xs px-2.5 py-1">
               Sign out
@@ -121,3 +144,50 @@
     {% endif %}
   </div>
 </header>
+
+{% if request.user.is_authenticated %}
+<script>
+  function notificationBell() {
+    return {
+      count: 0,
+      pulsing: false,
+      ws: null,
+
+      init() {
+        if (!window.MovieNetworkWS) return;
+        this.ws = window.MovieNetworkWS.connect('/ws/notifications/', {
+          onMessage: (data) => {
+            if (data.type === 'notification' || data.type === 'notify') {
+              if (data.payload && typeof data.payload.unread_count === 'number') {
+                this.count = data.payload.unread_count;
+              } else {
+                this.count++;
+              }
+              this.pulse();
+            }
+          },
+          onClose: () => {
+            // Helper automatically handles reconnect with exponential backoff
+          }
+        });
+      },
+
+      pulse() {
+        this.pulsing = true;
+        setTimeout(() => { this.pulsing = false; }, 1200);
+      },
+
+      markAllRead() {
+        this.count = 0;
+      },
+
+      destroy() {
+        if (this.ws) {
+          this.ws.close();
+          this.ws = null;
+        }
+      }
+    };
+  }
+</script>
+{% endif %}

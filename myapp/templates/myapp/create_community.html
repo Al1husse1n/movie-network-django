@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+
+{% block title %}Create a Community — Movie Network{% endblock %}
+{% block meta_description %}Found a new cinema discussion circle or film salon on Movie Network.{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-10 md:py-16 space-y-6">
+
+  <!-- Breadcrumb / Back Link -->
+  <nav aria-label="Breadcrumb">
+    <a href="{% url 'myapp:communities' %}"
+       class="inline-flex items-center gap-2 text-xs font-mono text-cream-muted hover:text-amber transition-colors duration-150 focus-ring rounded py-1">
+      <svg class="w-3.5 h-3.5 text-amber" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+      </svg>
+      <span>Back to Communities</span>
+    </a>
+  </nav>
+
+  <!-- Page Header -->
+  <header class="space-y-2">
+    <span class="text-xs font-mono uppercase tracking-widest text-amber block">
+      New Circle
+    </span>
+    <h1 class="font-display font-bold text-3xl sm:text-4xl text-cream-100 tracking-tight">
+      Create a Community
+    </h1>
+    <p class="font-sans text-sm text-cream-muted leading-relaxed">
+      Found a salon for dedicated film discussions, director retrospectives, or genre debates. As the curator, you'll manage circle members and moderation.
+    </p>
+  </header>
+
+  <!-- Card with Form -->
+  <div class="card p-6 sm:p-10 bg-base-200 border border-[#3d352e]/80 shadow-warm-lg">
+
+    <!-- Oxblood Error Callout Box -->
+    {% if form.errors %}
+      <div role="alert"
+           aria-live="assertive"
+           class="bg-oxblood/25 border border-oxblood-500 text-cream-100 rounded-md p-4 mb-6 text-sm flex items-start gap-3 shadow-warm">
+        <svg class="w-5 h-5 text-red-400 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+        </svg>
+        <div class="space-y-1">
+          <span class="font-medium text-cream-100 block">Unable to create community</span>
+          {% for field in form %}
+            {% for error in field.errors %}
+              <p class="text-xs text-red-200"><strong>{{ field.label }}:</strong> {{ error }}</p>
+            {% endfor %}
+          {% endfor %}
+          {% for error in form.non_field_errors %}
+            <p class="text-xs text-red-200">{{ error }}</p>
+          {% endfor %}
+        </div>
+      </div>
+    {% endif %}
+
+    <!-- Creation Form -->
+    <form action="{% url 'myapp:createCommunity' %}" method="post" class="space-y-6" novalidate>
+      {% csrf_token %}
+
+      <!-- Circle Name Field -->
+      <div class="space-y-2">
+        <label for="id_name" class="block text-xs font-mono uppercase tracking-wider text-cream-300">
+          Circle Name <span class="text-amber">*</span>
+        </label>
+        <input type="text"
+               name="name"
+               id="id_name"
+               maxlength="50"
+               required
+               autofocus
+               value="{{ form.name.value|default:'' }}"
+               class="input focus-ring w-full font-sans text-sm {% if form.name.errors %}border-oxblood-500 ring-1 ring-oxblood-500{% endif %}"
+               placeholder="e.g. Film Noir Society, Tarkovsky Salon, 70s Giallo" />
+        <p class="text-xs text-cream-muted font-sans">
+          Must be at least 3 characters and unique.
+        </p>
+        {% if form.name.errors %}
+          <p class="text-xs text-red-300 font-sans mt-1">{{ form.name.errors.0 }}</p>
+        {% endif %}
+      </div>
+
+      <!-- Visibility Selection -->
+      <div class="space-y-2">
+        <label for="id_visibility" class="block text-xs font-mono uppercase tracking-wider text-cream-300">
+          Privacy & Visibility
+        </label>
+        <div class="relative">
+          <select name="visibility"
+                  id="id_visibility"
+                  class="input focus-ring w-full font-sans text-sm text-cream-100 bg-base-900 border-[#3d352e] focus:border-amber cursor-pointer appearance-none pr-10">
+            <option value="public" {% if form.visibility.value == 'public' or not form.visibility.value %}selected{% endif %}>
+              Public — Anyone can discover and join
+            </option>
+            <option value="private" {% if form.visibility.value == 'private' %}selected{% endif %}>
+              Private — Membership curated by admins
+            </option>
+          </select>
+          <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-cream-muted">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+            </svg>
+          </div>
+        </div>
+        <p class="text-xs text-cream-muted font-sans">
+          Public circles appear in discovery and anyone can join. Private circles require admin invitations.
+        </p>
+        {% if form.visibility.errors %}
+          <p class="text-xs text-red-300 font-sans mt-1">{{ form.visibility.errors.0 }}</p>
+        {% endif %}
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="pt-4 border-t border-[#3d352e]/50 flex flex-col-reverse sm:flex-row items-center justify-between gap-3">
+        <a href="{% url 'myapp:communities' %}"
+           class="btn-secondary w-full sm:w-auto text-xs px-5 py-2.5 text-center focus-ring">
+          Cancel
+        </a>
+        <button type="submit"
+                class="btn-primary w-full sm:w-auto text-xs px-6 py-2.5 font-semibold text-center focus-ring shadow-warm">
+          Create Community
+        </button>
+      </div>
+
+    </form>
+  </div>
+
+</div>
+{% endblock %}

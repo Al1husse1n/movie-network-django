@@ -1,6 +1,7 @@
 import json
 import logging
 
+from django.contrib import messages
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied, ValidationError
@@ -8,7 +9,7 @@ from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
 
-from .Forms import LoginForm, SignUpForm
+from .Forms import CommunityForm, LoginForm, SignUpForm
 from .models import (
     Community,
     CommunityPost,
@@ -688,6 +689,21 @@ def update_watchlist(request):
         return JsonResponse({"error": str(e)}, status=400)
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
+
+
+@login_required
+def create_community(request):
+    if request.method == "POST":
+        form = CommunityForm(request.POST)
+        if form.is_valid():
+            community = form.save(commit=False)
+            community.admin = request.user
+            community.save()  # Model.save() auto-adds admin to members
+            messages.success(request, f"Community '{community.name}' created successfully.")
+            return redirect("myapp:communities")
+    else:
+        form = CommunityForm()
+    return render(request, "myapp/create_community.html", {"form": form})
 
 
 def communities(request):

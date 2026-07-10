@@ -25,14 +25,13 @@
 
     <!-- Quick stats / Create community hint -->
     <div class="flex items-center gap-3 self-start md:self-end">
-      <a href="{% url 'myapp:home' %}"
-         class="btn-secondary text-xs inline-flex items-center gap-2 focus-ring"
-         title="Community creation is coming soon in the foyer">
-        <svg class="w-4 h-4 text-amber" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+      <a href="{% url 'myapp:createCommunity' %}"
+         class="btn-primary text-xs inline-flex items-center gap-2 focus-ring shadow-warm"
+         title="Create a new cinema circle">
+        <svg class="w-4 h-4 text-base-900" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
         </svg>
         <span>Create Community</span>
-        <span class="badge-muted text-[10px] py-0 px-1.5 ml-1 font-mono">Soon</span>
       </a>
     </div>
   </header>

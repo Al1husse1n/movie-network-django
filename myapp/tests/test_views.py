@@ -6,6 +6,8 @@ import pytest
 from django.test import Client
 from django.urls import reverse
 
+from myapp.models import Community
+
 from .factories import CommunityFactory, UserFactory
 
 
@@ -1376,3 +1378,86 @@ class TestChangeProfileView:
         user.refresh_from_db()
         assert user.username == "newcinephile"
         assert user.bio == "Film critic and cinephile."
+
+
+@pytest.mark.django_db
+class TestCreateCommunity:
+    """Test suite for create_community view endpoint (/communities/create/)."""
+
+    url = reverse("myapp:createCommunity")
+
+    def test_get_unauthenticated(self, client):
+        """GET /communities/create/ unauthenticated -> 302 to login."""
+        response = client.get(self.url)
+        assert response.status_code == 302
+        assert reverse("myapp:login") in response.url
+
+    def test_get_authenticated(self, client, user):
+        """GET authenticated -> 200, contains form."""
+        client.force_login(user)
+        response = client.get(self.url)
+        assert response.status_code == 200
+        assert "form" in response.context
+        assert "Create a Community" in response.content.decode("utf-8")
+
+    def test_post_authenticated_valid_data(self, client, user):
+        """POST authenticated with valid data -> 302 to /communities/, community created."""
+        client.force_login(user)
+        payload = {"name": "Film Noir Society", "visibility": "public"}
+        response = client.post(self.url, data=payload)
+        assert response.status_code == 302
+        assert response.url == reverse("myapp:communities")
+
+        community = Community.objects.get(name="Film Noir Society")
+        assert community.admin == user
+        assert community.visibility == "public"
+        assert community.members.count() == 1
+        assert community.members.filter(id=user.id).exists()
+
+    def test_post_authenticated_empty_name(self, client, user):
+        """POST authenticated with empty name -> 200 (form re-renders with errors)."""
+        client.force_login(user)
+        payload = {"name": "", "visibility": "public"}
+        response = client.post(self.url, data=payload)
+        assert response.status_code == 200
+        form = response.context["form"]
+        assert not form.is_valid()
+        assert "name" in form.errors
+
+    def test_post_authenticated_duplicate_name(self, client, user):
+        """POST authenticated with duplicate name (case-insensitive) -> 200 with error."""
+        CommunityFactory(name="Cahiers du Cinema")
+        client.force_login(user)
+        payload = {"name": "cahiers du cinema", "visibility": "public"}
+        response = client.post(self.url, data=payload)
+        assert response.status_code == 200
+        form = response.context["form"]
+        assert not form.is_valid()
+        assert "name" in form.errors
+        assert "already exists" in form.errors["name"][0]
+
+    def test_post_authenticated_short_name(self, client, user):
+        """POST authenticated with name shorter than 3 chars -> 200 with error."""
+        client.force_login(user)
+        payload = {"name": "ab", "visibility": "public"}
+        response = client.post(self.url, data=payload)
+        assert response.status_code == 200
+        form = response.context["form"]
+        assert not form.is_valid()
+        assert "name" in form.errors
+        assert "at least 3 characters" in form.errors["name"][0]
+
+    def test_post_unauthenticated(self, client):
+        """POST unauthenticated -> 302 redirect to login."""
+        payload = {"name": "Cinema Paradiso", "visibility": "public"}
+        response = client.post(self.url, data=payload)
+        assert response.status_code == 302
+        assert reverse("myapp:login") in response.url
+
+    def test_post_csrf_missing(self, user):
+        """POST with CSRF missing (enforce_csrf_checks=True client) -> 403."""
+        csrf_client = Client(enforce_csrf_checks=True)
+        csrf_client.force_login(user)
+        payload = {"name": "Secret Salon", "visibility": "private"}
+        response = csrf_client.post(self.url, data=payload)
+        assert response.status_code == 403

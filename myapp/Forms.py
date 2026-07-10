@@ -1,7 +1,32 @@
 from django import forms
 from django.contrib.auth.forms import AuthenticationForm
 
-from .models import CommunityPost, Message, User
+from .models import Community, CommunityPost, Message, User
+
+
+class CommunityForm(forms.ModelForm):
+    class Meta:
+        model = Community
+        fields = ["name", "visibility"]
+        widgets = {
+            "name": forms.TextInput(
+                attrs={
+                    "class": "input",
+                    "placeholder": "e.g. Film Noir Society",
+                    "maxlength": 50,
+                    "required": True,
+                }
+            ),
+            "visibility": forms.Select(attrs={"class": "input"}),
+        }
+
+    def clean_name(self):
+        name = self.cleaned_data["name"].strip()
+        if len(name) < 3:
+            raise forms.ValidationError("Community name must be at least 3 characters.")
+        if Community.objects.filter(name__iexact=name).exists():
+            raise forms.ValidationError("A community with that name already exists.")
+        return name
 
 
 class SignUpForm(forms.ModelForm):

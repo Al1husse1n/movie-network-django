@@ -1,0 +1,38 @@
+services:
+  - type: web
+    name: movie-network-django
+    runtime: python
+    region: virginia
+    plan: free
+    branch: main
+    buildCommand: "./build.sh"
+    startCommand: "daphne -b 0.0.0.0 -p $PORT movie_network.asgi:application"
+    healthCheckPath: /
+    autoDeploy: true
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.12.0"
+      - key: DJANGO_SETTINGS_MODULE
+        value: "movie_network.settings.prod"
+      - key: DEBUG
+        value: "False"
+      - key: SECRET_KEY
+        sync: false
+      - key: DATABASE_URL
+        sync: false
+      - key: TMDB_API_KEY
+        sync: false
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+      - key: REDIS_URL
+        sync: false
+      - key: CHANNEL_LAYERS_URL
+        sync: false
+      - key: CELERY_BROKER_URL
+        sync: false
+      - key: ALLOWED_HOSTS
+        sync: false
+      - key: CSRF_TRUSTED_ORIGINS
+        sync: false

@@ -150,3 +150,67 @@ If credentials changed after the container volume was initialized, PostgreSQL wi
   .\scripts\db-reset.ps1
   ```
 - Re-run migrations: `python manage.py migrate`
+
+---
+
+## 6. Deployment (Render)
+
+The project is configured for deployment to [Render](https://render.com) as a Python web service running Daphne (ASGI) to support both HTTP traffic and WebSockets (Django Channels).
+
+### Infrastructure Architecture
+- **Web Service / ASGI Host:** Render (`daphne -b 0.0.0.0 -p $PORT movie_network.asgi:application`)
+- **Database:** Neon Cloud PostgreSQL (configured via `DATABASE_URL`)
+- **Cache & Channel Layer:** Upstash Redis (configured via `REDIS_URL`, `CHANNEL_LAYERS_URL`, `CELERY_BROKER_URL`)
+- **Static Assets:** WhiteNoise / `manage.py collectstatic`
+
+### Declarative Service Configuration (`render.yaml`)
+Deployment is managed via the blueprint defined in `render.yaml`:
+- **Build Command:** `./build.sh` (upgrades pip, installs dependencies, runs `collectstatic`, and runs `migrate`)
+- **Start Command:** `daphne -b 0.0.0.0 -p $PORT movie_network.asgi:application`
+- **Health Check Path:** `/`
+- **Auto Deploy:** Enabled on pushes to `main`
+
+### Required Environment Variables
+Set these secret variables in the **Render Dashboard → Environment** tab (defined with `sync: false` in `render.yaml`):
+
+| Variable | Description / Example |
+|---|---|
+| `DJANGO_SETTINGS_MODULE` | `movie_network.settings.prod` (defined in `render.yaml`) |
+| `DEBUG` | `False` (defined in `render.yaml`) |
+| `PYTHON_VERSION` | `3.12.0` (defined in `render.yaml`) |
+| `SECRET_KEY` | Strong random key (`python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"`) |
+| `ALLOWED_HOSTS` | `movie-network-django.onrender.com` (or your custom domain) |
+| `CSRF_TRUSTED_ORIGINS` | `https://movie-network-django.onrender.com` |
+| `DATABASE_URL` | Neon PostgreSQL pooled connection string (with `?sslmode=require`) |
+| `REDIS_URL` | Upstash Redis connection string (`rediss://...`) |
+| `CHANNEL_LAYERS_URL` | Upstash Redis connection string (`rediss://...`) |
+| `CELERY_BROKER_URL` | Upstash Redis connection string (`rediss://...`) |
+| `TMDB_API_KEY` | TMDB API v3 key |
+| `GOOGLE_CLIENT_ID` | Google OAuth Client ID |
+| `GOOGLE_CLIENT_SECRET` | Google OAuth Client Secret |
+
+### Upstash Redis Configuration
+Create a free database on [Upstash Redis](https://upstash.com):
+- Use the rediss URL format with SSL certificate verification disabled for cloud compatibility:
+  ```env
+  rediss://default:<password>@<region>.upstash.io:6379?ssl_cert_reqs=none
+  ```
+- Use the same URL for `REDIS_URL`, `CHANNEL_LAYERS_URL`, and `CELERY_BROKER_URL` (or assign separate database indices if preferred, e.g. `/0`, `/2`).
+
+### Google OAuth Production Setup
+1. In the [Google Cloud Console](https://console.cloud.google.com/apis/credentials), select your OAuth 2.0 Client ID.
+2. Under **Authorized redirect URIs**, add your production callback URL:
+   ```
+   https://<your-app>.onrender.com/accounts/google/login/callback/
+   ```
+3. Under **Authorized JavaScript origins**, add:
+   ```
+   https://<your-app>.onrender.com
+   ```
+
+### Triggering Deployments
+- **Automatic Deployment:** Pushing commits to the `main` branch triggers an automated build and deploy via Render's GitHub integration.
+- **Manual Deployment:** Navigate to the service in the Render Dashboard and click **Manual Deploy** → **Deploy latest commit** (or **Clear build cache & deploy** if requirements changed).
+
+### Cold Start Behavior (Free Tier)
+Render's free tier spins down the web service after 15 minutes of inactivity. When a new request arrives, a cold start occurs, which may take 30–60 seconds for Daphne and Django to initialize. Subsequent requests will respond immediately.

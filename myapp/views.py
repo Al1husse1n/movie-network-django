@@ -54,13 +54,112 @@ def logout_view(request):
     return redirect("myapp:login")
 
 
+FEATURED_MOVIES = [
+    {
+        "tmdb_id": 550,
+        "title": "Fight Club",
+        "poster_url": None,
+        "year": "1999",
+        "href": "/moviedescription/550",
+    },
+    {
+        "tmdb_id": 27205,
+        "title": "Inception",
+        "poster_url": None,
+        "year": "2010",
+        "href": "/moviedescription/27205",
+    },
+    {
+        "tmdb_id": 155,
+        "title": "The Dark Knight",
+        "poster_url": None,
+        "year": "2008",
+        "href": "/moviedescription/155",
+    },
+    {
+        "tmdb_id": 680,
+        "title": "Pulp Fiction",
+        "poster_url": None,
+        "year": "1994",
+        "href": "/moviedescription/680",
+    },
+    {
+        "tmdb_id": 13,
+        "title": "Forrest Gump",
+        "poster_url": None,
+        "year": "1994",
+        "href": "/moviedescription/13",
+    },
+    {
+        "tmdb_id": 122,
+        "title": "The Lord of the Rings: The Return of the King",
+        "poster_url": None,
+        "year": "2003",
+        "href": "/moviedescription/122",
+    },
+]
+
+FEATURED_SHOWS = [
+    {
+        "tmdb_id": 1396,
+        "title": "Breaking Bad",
+        "poster_url": None,
+        "year": "2008",
+        "href": "/showdescription/1396",
+    },
+    {
+        "tmdb_id": 1399,
+        "title": "Game of Thrones",
+        "poster_url": None,
+        "year": "2011",
+        "href": "/showdescription/1399",
+    },
+    {
+        "tmdb_id": 66732,
+        "title": "Stranger Things",
+        "poster_url": None,
+        "year": "2016",
+        "href": "/showdescription/66732",
+    },
+    {
+        "tmdb_id": 2316,
+        "title": "The Office",
+        "poster_url": None,
+        "year": "2005",
+        "href": "/showdescription/2316",
+    },
+    {
+        "tmdb_id": 1668,
+        "title": "Friends",
+        "poster_url": None,
+        "year": "1994",
+        "href": "/showdescription/1668",
+    },
+    {
+        "tmdb_id": 60625,
+        "title": "Rick and Morty",
+        "poster_url": None,
+        "year": "2013",
+        "href": "/showdescription/60625",
+    },
+]
+
+
 @login_required
 def home_view(request):
     current_user = request.user
     communities = (
         list(current_user.communities.all()) if hasattr(current_user, "communities") else []
     )
-    return render(request, "myapp/home.html", {"communities": communities})
+    return render(
+        request,
+        "myapp/home.html",
+        {
+            "communities": communities,
+            "featured_movies": FEATURED_MOVIES,
+            "featured_shows": FEATURED_SHOWS,
+        },
+    )
 
 
 @login_required

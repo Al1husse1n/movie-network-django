@@ -244,42 +244,6 @@
       </section>
 
 
-      <!-- ========================================== -->
-      <!-- NOW SHOWING: Featured Movies & Shows       -->
-      <!-- ========================================== -->
-      <section class="space-y-4" aria-label="Featured Films">
-        <header class="flex items-center justify-between">
-          <div>
-            <span class="text-xs font-mono uppercase tracking-widest text-amber block">Now Showing</span>
-            <h2 class="font-display font-semibold text-xl text-cream-100">Featured Films</h2>
-          </div>
-          <a href="{% url 'myapp:watchlist' %}" class="text-xs font-mono text-cream-muted hover:text-amber transition-colors">
-            View Watchlist →
-          </a>
-        </header>
-        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3 sm:gap-4">
-          {% for movie in featured_movies %}
-            {% include "components/poster_card.html" with title=movie.title poster_url=movie.poster_url year=movie.year href=movie.href item_type="movie" %}
-          {% endfor %}
-        </div>
-      </section>
-
-      <section class="space-y-4" aria-label="Featured Shows">
-        <header class="flex items-center justify-between">
-          <div>
-            <span class="text-xs font-mono uppercase tracking-widest text-amber block">Now Showing</span>
-            <h2 class="font-display font-semibold text-xl text-cream-100">Featured Shows</h2>
-          </div>
-          <a href="{% url 'myapp:watchlist' %}" class="text-xs font-mono text-cream-muted hover:text-amber transition-colors">
-            View Watchlist →
-          </a>
-        </header>
-        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3 sm:gap-4">
-          {% for show in featured_shows %}
-            {% include "components/poster_card.html" with title=show.title poster_url=show.poster_url year=show.year href=show.href item_type="show" %}
-          {% endfor %}
-        </div>
-      </section>
 
 
       <!-- ========================================== -->
@@ -377,7 +341,7 @@
                   <!-- Case A: Spoiler active and hidden -->
                   <template x-if="post.spoiler && !revealedSpoilers[post.id]">
                     <div class="relative p-4 rounded-lg bg-base-900 border border-oxblood/40 space-y-2">
-                      <p class="filter blur-sm select-none opacity-40 text-cream-muted text-sm" x-text="post.content"></p>
+                      <p class="filter blur-sm select-none opacity-40 text-cream-100 text-sm" x-text="post.content"></p>
 
                       <div class="absolute inset-0 flex items-center justify-center p-2">
                         <button
@@ -398,7 +362,7 @@
                   <!-- Case B: Regular post or revealed spoiler -->
                   <template x-if="!post.spoiler || revealedSpoilers[post.id]">
                     <div>
-                      <p class="whitespace-pre-wrap" x-text="post.content"></p>
+                      <p class="whitespace-pre-wrap text-cream-100" x-text="post.content"></p>
 
                       <!-- Hide spoiler again button -->
                       <template x-if="post.spoiler && revealedSpoilers[post.id]">

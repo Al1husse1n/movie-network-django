@@ -128,5 +128,36 @@
 
   {% endif %}
 
+  <!-- ========================================== -->
+  <!-- NOW SHOWING: Discovery                     -->
+  <!-- ========================================== -->
+  <section class="space-y-4 pt-6 border-t border-[#3d352e]/60" aria-label="Featured Films">
+    <header class="flex items-center justify-between">
+      <div>
+        <span class="text-xs font-mono uppercase tracking-widest text-amber block">Now Showing</span>
+        <h2 class="font-display font-semibold text-xl sm:text-2xl text-cream-100">Featured Films</h2>
+      </div>
+    </header>
+    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 sm:gap-4">
+      {% for movie in featured_movies %}
+        {% include "components/poster_card.html" with title=movie.title poster_url=movie.poster_url year=movie.year href=movie.href item_type="movie" %}
+      {% endfor %}
+    </div>
+  </section>
+
+  <section class="space-y-4 pt-6" aria-label="Featured Shows">
+    <header class="flex items-center justify-between">
+      <div>
+        <span class="text-xs font-mono uppercase tracking-widest text-amber block">Now Showing</span>
+        <h2 class="font-display font-semibold text-xl sm:text-2xl text-cream-100">Featured Shows</h2>
+      </div>
+    </header>
+    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 sm:gap-4">
+      {% for show in featured_shows %}
+        {% include "components/poster_card.html" with title=show.title poster_url=show.poster_url year=show.year href=show.href item_type="show" %}
+      {% endfor %}
+    </div>
+  </section>
+
 </div>
 {% endblock %}

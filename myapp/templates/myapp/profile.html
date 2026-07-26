@@ -80,6 +80,73 @@
     </div>
   </section>
 
+  <!-- Skills & Progression Section -->
+  <section class="space-y-6" aria-label="Skills and Progression">
+    <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-2 border-b border-[#3d352e]/50 pb-3">
+      <div>
+        <span class="text-xs font-mono uppercase tracking-widest text-amber block">Progression</span>
+        <h2 class="font-display font-semibold text-xl sm:text-2xl text-cream-100">Skills & Tiers</h2>
+      </div>
+      <p class="text-xs font-sans text-cream-muted max-w-md sm:text-right">
+        Earn XP by rating films, writing reviews, exploring genres, and engaging with the community.
+      </p>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+      {% for skill_name, skill in user_skills.items %}
+        <div class="card p-6 space-y-4 flex flex-col justify-between hover:border-amber/40 transition-colors duration-200">
+          <div class="flex items-center gap-2">
+            <span class="text-xl" aria-hidden="true">
+              {% if skill_name == "cinephile" %}🎬{% elif skill_name == "critic" %}✍️{% elif skill_name == "explorer" %}🧭{% else %}👥{% endif %}
+            </span>
+            <span class="text-xs font-mono uppercase tracking-widest text-amber">
+              {{ skill_name }}
+            </span>
+          </div>
+
+          <div class="flex justify-center py-1">
+            <svg viewBox="0 0 100 100" class="w-28 h-28" aria-label="{{ skill_name|title }} progress: {{ skill.progress_pct }}%">
+              <!-- Track circle -->
+              <circle cx="50" cy="50" r="42" stroke="#3d352e" stroke-width="6" fill="none" />
+              <!-- Progress circle -->
+              <circle
+                cx="50"
+                cy="50"
+                r="42"
+                stroke-width="6"
+                fill="none"
+                stroke-linecap="round"
+                stroke-dasharray="264"
+                stroke-dashoffset="{{ skill.stroke_dashoffset }}"
+                transform="rotate(-90 50 50)"
+                class="transition-all duration-700 ease-out"
+                {% if skill.tier_color == "cream" %}style="stroke: #f5f0e6;"
+                {% elif skill.tier_color == "amber-muted" %}style="stroke: #b8863f;"
+                {% elif skill.tier_color == "amber" %}style="stroke: #d4a259;"
+                {% elif skill.tier_color == "amber-bright" %}style="stroke: #edd09e;"
+                {% elif skill.tier_color == "platinum" %}style="stroke: #e5e7eb; filter: drop-shadow(0 0 6px rgba(229, 231, 235, 0.45));"
+                {% else %}style="stroke: #d4a259;"{% endif %}
+              />
+              <text x="50" y="55" text-anchor="middle" fill="#faf6ee" class="font-mono text-sm font-semibold">
+                {{ skill.progress_pct }}%
+              </text>
+            </svg>
+          </div>
+
+          <div class="text-center space-y-1">
+            <div class="font-display font-semibold text-lg text-cream-100">{{ skill.tier }}</div>
+            <div class="text-xs font-mono text-cream-muted">{{ skill.xp }} XP</div>
+            {% if skill.next_tier %}
+              <div class="text-xs text-cream-muted">{{ skill.xp_to_next }} XP to {{ skill.next_tier }}</div>
+            {% else %}
+              <div class="text-xs font-mono text-amber">Max tier achieved</div>
+            {% endif %}
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </section>
+
   <!-- Pick of the Week Section (If set) -->
   {% if weekly_pick %}
     <section class="card p-6 sm:p-8 border border-amber/30 bg-gradient-to-br from-base-200 to-base-900 shadow-warm relative overflow-hidden">

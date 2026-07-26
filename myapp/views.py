@@ -19,6 +19,7 @@ from .models import (
     fetch_show_data,
 )
 from .serializers import detect_media_type, normalize_media_item
+from .skills import get_all_skills
 from .utils_broadcast import broadcast_to_group
 
 logger = logging.getLogger(__name__)
@@ -154,6 +155,10 @@ def profile_view(request):
     else:
         weekly_pick = None
 
+    user_skills = get_all_skills(current_user)
+    for s in user_skills.values():
+        s["stroke_dashoffset"] = round(264 - (264 * s["progress_pct"] / 100), 1)
+
     return render(
         request,
         "myapp/profile.html",
@@ -166,6 +171,7 @@ def profile_view(request):
             "top_5_shows": top_5_shows,
             "weekly_pick": weekly_pick,
             "posts": current_user.community_posts.all(),
+            "user_skills": user_skills,
         },
     )
 

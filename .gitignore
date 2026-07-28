@@ -33,6 +33,8 @@ pgdata/
 
 # Screenshots & Local media
 screenshots/
+!screenshots/
+!screenshots/*.png
 
 # IDEs and OS
 .vscode/
